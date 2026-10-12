@@ -7,51 +7,62 @@ const db = require('./db-adapter'); // CHANGED to adapter
 
 const app = express();
 
-const allowedOrigins = [
-  'http://localhost:5173',
-  'http://localhost:3000',
-  process.env.FRONTEND_URL
-].filter(Boolean);
+const getAllowedOrigins = () => {
+  const defaults = [
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'http://127.0.0.1:5173'
+  ];
+  const envOrigins = (process.env.FRONTEND_URL || '')
+    .split(',')
+    .map(o => o.trim().replace(/\/$/, ''))
+    .filter(Boolean);
+  return [...defaults, ...envOrigins];
+};
 
 app.use(cors({
   origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (!origin) return callback(null, true);
+    const origins = getAllowedOrigins();
+    const cleanOrigin = origin.replace(/\/$/, '');
+    if (origins.includes(cleanOrigin) || origins.includes('*')) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      callback(new Error(`Not allowed by CORS: Origin "${origin}" is not in allowed origins list.`));
     }
-  }
+  },
+  credentials: true
 }));
 app.use(express.json());
 
+const storageService = require('./storage');
+
 const uploadsDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir);
+  fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, uploadsDir)
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
-    cb(null, uniqueSuffix + path.extname(file.originalname))
-  }
-});
-
+// Memory storage so file buffer is available for magic-byte verification and cloud upload
 const upload = multer({ 
-  storage: storage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 15 * 1024 * 1024 }, // 15MB limit
   fileFilter: (req, file, cb) => {
-    if (file.mimetype === 'application/pdf' || file.mimetype.startsWith('image/')) {
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (ext === '.pdf' || file.mimetype === 'application/pdf') {
       cb(null, true);
     } else {
-      cb(new Error('Invalid file type. Only PDF and images are allowed.'));
+      cb(new Error('Invalid file type: Only PDF documents (.pdf) are allowed.'));
     }
   }
 });
 
 app.use('/uploads', express.static(uploadsDir));
+
+// Serve bundled static resources from public/resources if present
+const publicResourcesDir = path.join(__dirname, '..', 'public', 'resources');
+if (fs.existsSync(publicResourcesDir)) {
+  app.use('/resources', express.static(publicResourcesDir));
+}
 
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -257,7 +268,19 @@ app.delete('/api/topics/:id', async (req, res) => {
 // --- MATERIALS API ---
 app.post('/api/materials', upload.single('file'), async (req, res) => {
   const { title, type, description, reference_url, subject_id, chapter_id, topic_id, published } = req.body;
-  const file_path = req.file ? `/uploads/${req.file.filename}` : null;
+  let file_path = null;
+  if (req.file) {
+    try {
+      const uploaded = await storageService.uploadResourceFile({
+        buffer: req.file.buffer,
+        originalname: req.file.originalname,
+        category: 'materials'
+      });
+      file_path = uploaded.fileUrl;
+    } catch (uploadErr) {
+      return res.status(400).json({ error: uploadErr.message });
+    }
+  }
   const newMaterial = await db.insert('materials', {
     title, type, description, file_path, reference_url,
     subject_id: subject_id ? parseInt(subject_id) : null,
@@ -281,46 +304,356 @@ app.get('/api/materials', async (req, res) => {
 });
 
 app.delete('/api/materials/:id', async (req, res) => {
-  await db.remove('materials', parseInt(req.params.id));
+  const id = parseInt(req.params.id);
+  const material = await db.findOne('materials', { id });
+  if (material && material.file_path) {
+    await storageService.deleteResourceFile(material.file_path);
+  }
+  await db.remove('materials', id);
   res.json({ success: true });
 });
+
+// --- URL Safety Validator ---
+const validateWebUrl = (urlStr) => {
+  if (!urlStr || typeof urlStr !== 'string') {
+    throw new Error('Destination URL is required and must be a string.');
+  }
+  const trimmed = urlStr.trim();
+  let parsed;
+  try {
+    parsed = new URL(trimmed);
+  } catch (e) {
+    throw new Error('Invalid URL format. Please provide a well-formed web address.');
+  }
+
+  // Strictly enforce approved web protocols (reject javascript:, data:, file:, etc.)
+  if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
+    throw new Error(`Insecure protocol "${parsed.protocol}". Only HTTPS and HTTP web links are permitted.`);
+  }
+
+  if (!parsed.hostname || parsed.hostname.toLowerCase() === 'javascript') {
+    throw new Error('Invalid destination host in URL.');
+  }
+
+  return parsed.toString();
+};
 
 // --- RESOURCES API ---
 app.get('/api/resources', async (req, res) => {
-  const { type, publishedOnly } = req.query;
+  const { type, publishedOnly, subject_id, chapter_id, exam_year, externalOnly, search, page, limit } = req.query;
+  
+  // Extract user authorization to determine if request is from an admin
+  let isUserAdmin = false;
+  const authHeader = req.headers['authorization'];
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    try {
+      const decoded = jwt.verify(authHeader.split(' ')[1], JWT_SECRET);
+      if (decoded && decoded.role === 'admin') {
+        isUserAdmin = true;
+      }
+    } catch (_err) {
+      // Invalid token or expired, treated as non-admin
+    }
+  }
+
   const criteria = {};
   if (type) criteria.type = type;
-  if (publishedOnly === 'true') criteria.published = true;
-  
+  if (subject_id) criteria.subject_id = parseInt(subject_id);
+  if (chapter_id) criteria.chapter_id = parseInt(chapter_id);
+  if (exam_year) criteria.exam_year = parseInt(exam_year);
+
+  // CRITICAL SECURITY ENFORCEMENT:
+  // If requester is not an authorized administrator, ONLY published resources are accessible.
+  if (!isUserAdmin || publishedOnly === 'true') {
+    criteria.published = true;
+  }
+
   let resources = await db.find('resources', criteria);
-  resources.sort((a, b) => (b.exam_year || 0) - (a.exam_year || 0));
+
+  if (externalOnly === 'true') {
+    resources = resources.filter(r => r.external_url);
+  }
+
+  if (search && search.trim()) {
+    const q = search.trim().toLowerCase();
+    resources = resources.filter(r => 
+      (r.title && r.title.toLowerCase().includes(q)) || 
+      (r.description && r.description.toLowerCase().includes(q))
+    );
+  }
+
+  resources.sort((a, b) => {
+    if ((a.display_order || 0) !== (b.display_order || 0)) {
+      return (a.display_order || 0) - (b.display_order || 0);
+    }
+    return (b.exam_year || 0) - (a.exam_year || 0);
+  });
+
+  // Server-side pagination support for large collections
+  if (page && limit) {
+    const pageNum = Math.max(1, parseInt(page) || 1);
+    const limitNum = Math.max(1, parseInt(limit) || 10);
+    const total = resources.length;
+    const startIndex = (pageNum - 1) * limitNum;
+    const paginated = resources.slice(startIndex, startIndex + limitNum);
+    return res.json({
+      data: paginated,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total,
+        totalPages: Math.ceil(total / limitNum)
+      }
+    });
+  }
+
   res.json(resources);
 });
 
+// Access / Signed URL resolution for a specific resource
+app.get('/api/resources/:id/access', async (req, res) => {
+  const id = parseInt(req.params.id);
+  const resource = await db.findOne('resources', { id });
+  if (!resource) return res.status(404).json({ error: 'Resource not found' });
+
+  let isUserAdmin = false;
+  const authHeader = req.headers['authorization'];
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    try {
+      const decoded = jwt.verify(authHeader.split(' ')[1], JWT_SECRET);
+      if (decoded && decoded.role === 'admin') isUserAdmin = true;
+    } catch (_err) {}
+  }
+
+  // Non-admins cannot access unpublished resources
+  if (!resource.published && !isUserAdmin) {
+    return res.status(403).json({ error: 'Forbidden: You do not have permission to access this resource.' });
+  }
+
+  // External web link
+  if (resource.external_url) {
+    return res.json({
+      type: 'external',
+      url: resource.external_url,
+      title: resource.title
+    });
+  }
+
+  if (!resource.file_path) {
+    return res.status(404).json({ error: 'No file attached to this resource.' });
+  }
+
+  let accessUrl = resource.file_path;
+  if (storageService.isSupabaseConfigured() && resource.file_path.includes(process.env.SUPABASE_STORAGE_BUCKET || 'ddcet-resources')) {
+    const signed = await storageService.getSignedUrl(resource.file_path, 3600);
+    if (signed) accessUrl = signed;
+  }
+
+  res.json({
+    type: 'file',
+    url: accessUrl,
+    title: resource.title,
+    file_size: resource.file_size || null
+  });
+});
+
+// Direct safe download endpoint with Content-Disposition
+app.get('/api/resources/:id/download', async (req, res) => {
+  const id = parseInt(req.params.id);
+  const resource = await db.findOne('resources', { id });
+  if (!resource) return res.status(404).json({ error: 'Resource not found' });
+
+  let isUserAdmin = false;
+  const authHeader = req.headers['authorization'];
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    try {
+      const decoded = jwt.verify(authHeader.split(' ')[1], JWT_SECRET);
+      if (decoded && decoded.role === 'admin') isUserAdmin = true;
+    } catch (_err) {}
+  }
+
+  if (!resource.published && !isUserAdmin) {
+    return res.status(403).json({ error: 'Forbidden: You do not have permission to download this resource.' });
+  }
+
+  if (resource.external_url) {
+    return res.redirect(resource.external_url);
+  }
+
+  if (!resource.file_path) {
+    return res.status(404).json({ error: 'No file attached to this resource.' });
+  }
+
+  // Local disk file
+  if (resource.file_path.startsWith('/uploads/')) {
+    const filename = path.basename(resource.file_path);
+    const localPath = path.join(__dirname, 'uploads', filename);
+    if (fs.existsSync(localPath)) {
+      const safeTitle = (resource.title || 'document').replace(/[^a-zA-Z0-9_-]/g, '_');
+      return res.download(localPath, `${safeTitle}.pdf`);
+    }
+  }
+
+  // Supabase file
+  if (storageService.isSupabaseConfigured() && resource.file_path.includes(process.env.SUPABASE_STORAGE_BUCKET || 'ddcet-resources')) {
+    const signed = await storageService.getSignedUrl(resource.file_path, 300);
+    if (signed) return res.redirect(signed);
+  }
+
+  return res.redirect(resource.file_path);
+});
+
 app.post('/api/resources', upload.single('file'), async (req, res) => {
-  const { title, description, type, exam_year, paper_id, published } = req.body;
-  if (!req.file) return res.status(400).json({ error: 'PDF file is required' });
+  const { title, description, type, exam_year, paper_id, published, external_url, subject_id, chapter_id, topic_id, display_order } = req.body;
+  if (!title || !title.trim()) {
+    return res.status(400).json({ error: 'Title is required' });
+  }
+
+  let file_path = null;
+  let file_size = null;
+  let validatedExternalUrl = null;
+
+  if (req.file) {
+    try {
+      const uploaded = await storageService.uploadResourceFile({
+        buffer: req.file.buffer,
+        originalname: req.file.originalname,
+        category: type || 'resources'
+      });
+      file_path = uploaded.fileUrl;
+      file_size = uploaded.fileSize || req.file.size;
+    } catch (uploadErr) {
+      return res.status(400).json({ error: uploadErr.message });
+    }
+  } else if (external_url && external_url.trim()) {
+    try {
+      validatedExternalUrl = validateWebUrl(external_url);
+    } catch (urlErr) {
+      return res.status(400).json({ error: urlErr.message });
+    }
+  } else {
+    return res.status(400).json({ error: 'Either a PDF file or an external URL is required' });
+  }
   
-  const file_path = `/uploads/${req.file.filename}`;
   const newResource = await db.insert('resources', {
-    title, 
-    description, 
-    type, 
+    title: title.trim(), 
+    description: description ? description.trim() : '', 
+    type: type || 'general', 
     exam_year: exam_year ? parseInt(exam_year) : null,
     paper_id: paper_id ? parseInt(paper_id) : null,
     file_path,
+    file_size,
+    external_url: validatedExternalUrl,
+    subject_id: subject_id ? parseInt(subject_id) : null,
+    chapter_id: chapter_id ? parseInt(chapter_id) : null,
+    topic_id: topic_id ? parseInt(topic_id) : null,
+    display_order: display_order ? parseInt(display_order) : 0,
     published: published === 'true' || published === true ? true : false
   });
-  res.json(newResource);
+  res.status(201).json(newResource);
 });
 
+// Update resource metadata (without replacing file)
+app.put('/api/resources/:id', async (req, res) => {
+  const id = parseInt(req.params.id);
+  const resource = await db.findOne('resources', { id });
+  if (!resource) return res.status(404).json({ error: 'Resource not found' });
+
+  const { title, description, type, exam_year, paper_id, published, external_url, subject_id, chapter_id, topic_id, display_order } = req.body;
+  const updates = {};
+  if (title !== undefined) updates.title = title.trim();
+  if (description !== undefined) updates.description = description.trim();
+  if (type !== undefined) updates.type = type;
+  if (exam_year !== undefined) updates.exam_year = exam_year ? parseInt(exam_year) : null;
+  if (paper_id !== undefined) updates.paper_id = paper_id ? parseInt(paper_id) : null;
+  if (subject_id !== undefined) updates.subject_id = subject_id ? parseInt(subject_id) : null;
+  if (chapter_id !== undefined) updates.chapter_id = chapter_id ? parseInt(chapter_id) : null;
+  if (topic_id !== undefined) updates.topic_id = topic_id ? parseInt(topic_id) : null;
+  if (display_order !== undefined) updates.display_order = parseInt(display_order) || 0;
+  if (published !== undefined) updates.published = published === 'true' || published === true;
+
+  if (external_url !== undefined) {
+    if (external_url === null || external_url === '') {
+      updates.external_url = null;
+    } else {
+      try {
+        updates.external_url = validateWebUrl(external_url);
+      } catch (urlErr) {
+        return res.status(400).json({ error: urlErr.message });
+      }
+    }
+  }
+
+  const updated = await db.update('resources', id, updates);
+  res.json(updated);
+});
+
+// Quick toggle publish/unpublish
+app.put('/api/resources/:id/publish', async (req, res) => {
+  const id = parseInt(req.params.id);
+  const resource = await db.findOne('resources', { id });
+  if (!resource) return res.status(404).json({ error: 'Resource not found' });
+
+  const newStatus = !resource.published;
+  const updated = await db.update('resources', id, { published: newStatus });
+  res.json(updated);
+});
+
+// Replace existing file without altering resource metadata or ID
+app.put('/api/resources/:id/replace-file', upload.single('file'), async (req, res) => {
+  const id = parseInt(req.params.id);
+  const resource = await db.findOne('resources', { id });
+  if (!resource) return res.status(404).json({ error: 'Resource not found' });
+  if (!req.file) return res.status(400).json({ error: 'New PDF file is required' });
+
+  try {
+    const uploaded = await storageService.uploadResourceFile({
+      buffer: req.file.buffer,
+      originalname: req.file.originalname,
+      category: resource.type || 'resources'
+    });
+
+    const oldFilePath = resource.file_path;
+    const updated = await db.update('resources', id, { 
+      file_path: uploaded.fileUrl, 
+      file_size: uploaded.fileSize || req.file.size,
+      external_url: null 
+    });
+
+    // Clean up old file after successful database update
+    if (oldFilePath && oldFilePath !== uploaded.fileUrl) {
+      await storageService.deleteResourceFile(oldFilePath);
+    }
+
+    res.json(updated);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// Coordinated resource deletion
 app.delete('/api/resources/:id', async (req, res) => {
   const id = parseInt(req.params.id);
+  const resource = await db.findOne('resources', { id });
+  if (!resource) return res.status(404).json({ error: 'Resource not found' });
+
+  // Safety check: ensure answer keys are not orphaned
   const keys = await db.find('resources', { type: 'answer_key', paper_id: id });
-  if (keys.length > 0) return res.status(400).json({ error: "Cannot delete this paper because answer keys are linked to it." });
+  if (keys.length > 0) {
+    return res.status(400).json({ 
+      error: "Cannot delete this question paper because answer keys are linked to it. Please delete or re-link the answer keys first." 
+    });
+  }
   
+  // 1. Remove record from database first
   await db.remove('resources', id);
-  res.json({ success: true });
+
+  // 2. Safely remove file from storage
+  if (resource.file_path) {
+    await storageService.deleteResourceFile(resource.file_path);
+  }
+
+  res.json({ success: true, message: 'Resource deleted successfully' });
 });
 
 // --- QUESTIONS API ---
@@ -419,6 +752,26 @@ app.get('/api/student/syllabus', async (req, res) => {
   });
   
   res.json(tree);
+});
+
+// Health check endpoint (safe for public monitoring, zero secrets exposed)
+app.get('/api/health', async (req, res) => {
+  try {
+    await db.testConnection();
+    res.json({
+      status: 'ok',
+      database: USE_PG ? 'postgresql' : 'json',
+      uptime: Math.floor(process.uptime()),
+      timestamp: new Date().toISOString()
+    });
+  } catch (err) {
+    res.status(503).json({
+      status: 'error',
+      database: USE_PG ? 'postgresql' : 'json',
+      message: 'Database check failed',
+      timestamp: new Date().toISOString()
+    });
+  }
 });
 
 // Centralized Error Handling

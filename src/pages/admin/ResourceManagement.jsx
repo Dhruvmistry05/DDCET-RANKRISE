@@ -1,68 +1,261 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../store/AuthContext';
-import { UploadCloud, FileText, Trash2, ExternalLink, Filter } from 'lucide-react';
+import { 
+  UploadCloud, FileText, Trash2, Search, 
+  Edit3, RefreshCw, CheckCircle2, XCircle, Link as LinkIcon, Eye, X, AlertCircle
+} from 'lucide-react';
 
 export default function ResourceManagement() {
   const [resources, setResources] = useState([]);
-  const [papers, setPapers] = useState([]);
-  const { token } = useAuth();
+  const [subjects, setSubjects] = useState([]);
+  const [chapters, setChapters] = useState([]);
+  const [topics, setTopics] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
 
+  const { token } = useAuth();
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+
+  // Filters and search state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterType, setFilterType] = useState('all');
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [filterYear, setFilterYear] = useState('all');
+
+  // Creation form state
+  const [resourceSource, setResourceSource] = useState('file'); // 'file' | 'url'
   const [formData, setFormData] = useState({
-    title: '', description: '', type: 'question_paper', exam_year: '', paper_id: '', published: true
+    title: '',
+    description: '',
+    type: 'question_paper',
+    exam_year: '',
+    paper_id: '',
+    external_url: '',
+    subject_id: '',
+    chapter_id: '',
+    topic_id: '',
+    display_order: 0,
+    published: true
   });
   const [file, setFile] = useState(null);
+
+  // Edit Modal state
+  const [editingItem, setEditingItem] = useState(null);
+  const [editFormData, setEditFormData] = useState({});
+
+  // Replace File Modal state
+  const [replacingItem, setReplacingItem] = useState(null);
+  const [replaceFile, setReplaceFile] = useState(null);
 
   useEffect(() => {
     fetchData();
   }, []);
 
   const fetchData = async () => {
+    setLoading(true);
+    setError(null);
     try {
-      const res = await fetch((import.meta.env.VITE_API_URL || 'http://localhost:3001') + '/api/resources', { headers: { 'Authorization': `Bearer ${token}` } });
-      const data = await res.json();
-      setResources(data);
-      setPapers(data.filter(r => r.type === 'question_paper'));
+      const [resData, subs, chaps, tops] = await Promise.all([
+        fetch(`${API_URL}/api/resources`, { headers: { 'Authorization': `Bearer ${token}` } }).then(r => r.json()),
+        fetch(`${API_URL}/api/subjects`).then(r => r.json()).catch(() => []),
+        fetch(`${API_URL}/api/chapters`).then(r => r.json()).catch(() => []),
+        fetch(`${API_URL}/api/topics`).then(r => r.json()).catch(() => [])
+      ]);
+
+      if (Array.isArray(resData)) setResources(resData);
+      if (Array.isArray(subs)) setSubjects(subs);
+      if (Array.isArray(chaps)) setChapters(chaps);
+      if (Array.isArray(tops)) setTopics(tops);
     } catch (e) {
-      console.error(e);
+      setError('Failed to load resources: ' + e.message);
+    } finally {
+      setLoading(false);
     }
   };
 
+  const questionPapers = useMemo(() => {
+    return resources.filter(r => r.type === 'question_paper');
+  }, [resources]);
+
+  const uniqueYears = useMemo(() => {
+    const years = new Set(resources.map(r => r.exam_year).filter(Boolean));
+    return Array.from(years).sort((a, b) => b - a);
+  }, [resources]);
+
+  // Filtered resources
+  const filteredResources = useMemo(() => {
+    return resources.filter(item => {
+      const matchesSearch = 
+        !searchQuery.trim() ||
+        item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (item.description && item.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (item.exam_year && String(item.exam_year).includes(searchQuery));
+
+      const matchesType = filterType === 'all' || item.type === filterType;
+      const matchesStatus = filterStatus === 'all' || 
+        (filterStatus === 'published' && item.published) || 
+        (filterStatus === 'draft' && !item.published);
+      const matchesYear = filterYear === 'all' || String(item.exam_year) === filterYear;
+
+      return matchesSearch && matchesType && matchesStatus && matchesYear;
+    });
+  }, [resources, searchQuery, filterType, filterStatus, filterYear]);
+
+  // Handle Form Submission (Create Resource)
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!file) return alert("Please select a PDF file to upload.");
+    setError(null);
+    setSuccess(null);
 
+    if (resourceSource === 'file' && !file) {
+      setError("Please select a PDF file to upload.");
+      return;
+    }
+    if (resourceSource === 'url' && !formData.external_url.trim()) {
+      setError("Please provide a valid external URL.");
+      return;
+    }
+
+    setActionLoading(true);
     const data = new FormData();
-    Object.keys(formData).forEach(key => data.append(key, formData[key]));
-    data.append('file', file);
+    data.append('title', formData.title);
+    data.append('description', formData.description || '');
+    data.append('type', formData.type);
+    if (formData.exam_year) data.append('exam_year', formData.exam_year);
+    if (formData.paper_id) data.append('paper_id', formData.paper_id);
+    if (formData.subject_id) data.append('subject_id', formData.subject_id);
+    if (formData.chapter_id) data.append('chapter_id', formData.chapter_id);
+    if (formData.topic_id) data.append('topic_id', formData.topic_id);
+    data.append('display_order', formData.display_order || 0);
+    data.append('published', formData.published);
+
+    if (resourceSource === 'file' && file) {
+      data.append('file', file);
+    } else if (resourceSource === 'url') {
+      data.append('external_url', formData.external_url.trim());
+    }
 
     try {
-      await fetch((import.meta.env.VITE_API_URL || 'http://localhost:3001') + '/api/resources', {
+      const res = await fetch(`${API_URL}/api/resources`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
         body: data
       });
-      setFormData({ title: '', description: '', type: 'question_paper', exam_year: '', paper_id: '', published: true });
+      const result = await res.json();
+      if (!res.ok) {
+        throw new Error(result.error || 'Failed to create resource');
+      }
+
+      setSuccess(`Resource "${formData.title}" created successfully!`);
+      setFormData({
+        title: '', description: '', type: 'question_paper',
+        exam_year: '', paper_id: '', external_url: '',
+        subject_id: '', chapter_id: '', topic_id: '', display_order: 0, published: true
+      });
       setFile(null);
-      // reset file input
-      document.getElementById('file-upload').value = '';
+      const fileInput = document.getElementById('file-upload');
+      if (fileInput) fileInput.value = '';
       fetchData();
-    } catch (e) {
-      console.error(e);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setActionLoading(false);
     }
   };
 
-  const handleDelete = async (id) => {
-    if(!window.confirm("Are you sure you want to delete this resource?")) return;
+  // Toggle Publication status
+  const handleTogglePublish = async (id, currentStatus) => {
+    setError(null);
     try {
-      const res = await fetch((import.meta.env.VITE_API_URL || 'http://localhost:3001') + `/api/resources/${id}`, {
+      const res = await fetch(`${API_URL}/api/resources/${id}/publish`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to toggle publication');
+      setResources(prev => prev.map(r => r.id === id ? { ...r, published: !currentStatus } : r));
+      setSuccess(`Publication status updated.`);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  // Handle Edit Metadata Submit
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    if (!editingItem) return;
+    setError(null);
+    setActionLoading(true);
+
+    try {
+      const res = await fetch(`${API_URL}/api/resources/${editingItem.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(editFormData)
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to update metadata');
+
+      setSuccess(`Resource metadata updated successfully!`);
+      setEditingItem(null);
+      fetchData();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Handle Replace File Submit
+  const handleReplaceSubmit = async (e) => {
+    e.preventDefault();
+    if (!replacingItem || !replaceFile) return;
+    setError(null);
+    setActionLoading(true);
+
+    const data = new FormData();
+    data.append('file', replaceFile);
+
+    try {
+      const res = await fetch(`${API_URL}/api/resources/${replacingItem.id}/replace-file`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: data
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || 'Failed to replace file');
+
+      setSuccess(`File for "${replacingItem.title}" replaced successfully!`);
+      setReplacingItem(null);
+      setReplaceFile(null);
+      fetchData();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Delete Resource
+  const handleDelete = async (id, title) => {
+    if (!window.confirm(`Are you sure you want to permanently delete "${title}"?`)) return;
+    setError(null);
+    try {
+      const res = await fetch(`${API_URL}/api/resources/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
-      if (data.error) alert(data.error);
+      if (!res.ok) throw new Error(data.error || 'Failed to delete resource');
+      setSuccess(`Resource "${title}" deleted successfully.`);
       fetchData();
-    } catch (e) {
-      console.error(e);
+    } catch (err) {
+      setError(err.message);
     }
   };
 
@@ -70,128 +263,641 @@ export default function ResourceManagement() {
     switch (type) {
       case 'question_paper': return 'Question Paper';
       case 'answer_key': return 'Answer Key';
-      case 'syllabus': return 'Syllabus';
+      case 'syllabus': return 'Official Syllabus';
+      case 'general': return 'Study Resource';
       default: return type;
     }
   };
 
+  const resolveResourceLink = (item) => {
+    if (item.external_url) return item.external_url;
+    if (!item.file_path) return '#';
+    if (item.file_path.startsWith('http://') || item.file_path.startsWith('https://')) {
+      return item.file_path; // Supabase public URL
+    }
+    return `${API_URL}${item.file_path}`; // Local server path
+  };
+
   return (
-    <div className="p-8 max-w-7xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6 text-slate-800 dark:text-white">Official Resources Management</h1>
-      
+    <div className="p-6 lg:p-10 max-w-7xl mx-auto space-y-8">
+      {/* Top Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-black text-slate-900 dark:text-white">Official Resources Management</h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-1">
+            Upload, verify, publish, and manage past papers, answer keys, and study materials.
+          </p>
+        </div>
+        <button
+          onClick={fetchData}
+          disabled={loading}
+          className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-semibold transition"
+        >
+          <RefreshCw size={16} className={loading ? "animate-spin" : ""} /> Refresh
+        </button>
+      </div>
+
+      {/* Notifications */}
+      {error && (
+        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 rounded-xl text-red-700 dark:text-red-300 text-sm">
+          <div className="flex items-center gap-2">
+            <AlertCircle size={18} className="shrink-0" />
+            <span>{error}</span>
+          </div>
+          <button onClick={() => setError(null)} className="text-red-500 hover:text-red-700"><X size={18} /></button>
+        </div>
+      )}
+
+      {success && (
+        <div className="flex items-center justify-between p-4 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-xl text-emerald-700 dark:text-emerald-300 text-sm">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 size={18} className="shrink-0" />
+            <span>{success}</span>
+          </div>
+          <button onClick={() => setSuccess(null)} className="text-emerald-500 hover:text-emerald-700"><X size={18} /></button>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 h-fit">
-          <h2 className="text-xl font-bold mb-4 text-slate-800 dark:text-white flex items-center gap-2">
-            <UploadCloud size={24} className="text-indigo-500" /> Upload Resource
-          </h2>
+        {/* Left Column: Create Resource Form */}
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 h-fit space-y-6">
+          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-700/60 pb-4">
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <UploadCloud size={22} className="text-indigo-600 dark:text-indigo-400" /> New Resource
+            </h2>
+            <div className="flex bg-slate-100 dark:bg-slate-700 p-1 rounded-lg text-xs font-semibold">
+              <button
+                type="button"
+                onClick={() => setResourceSource('file')}
+                className={`px-3 py-1 rounded-md transition ${resourceSource === 'file' ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500 dark:text-slate-400'}`}
+              >
+                PDF File
+              </button>
+              <button
+                type="button"
+                onClick={() => setResourceSource('url')}
+                className={`px-3 py-1 rounded-md transition ${resourceSource === 'url' ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500 dark:text-slate-400'}`}
+              >
+                External URL
+              </button>
+            </div>
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-4">
-            
             <div>
-              <label className="block text-sm font-medium mb-1">Title</label>
-              <input required type="text" className="w-full p-2 border rounded-lg dark:bg-slate-900 dark:border-slate-700" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} placeholder="e.g. DDCET 2025 Syllabus" />
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Title *</label>
+              <input
+                required
+                type="text"
+                className="w-full px-3 py-2 border rounded-xl dark:bg-slate-900 dark:border-slate-700 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                value={formData.title}
+                onChange={e => setFormData({ ...formData, title: e.target.value })}
+                placeholder="e.g. DDCET 2024 Question Paper"
+              />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-1">Resource Type</label>
-              <select className="w-full p-2 border rounded-lg dark:bg-slate-900 dark:border-slate-700" value={formData.type} onChange={e => setFormData({...formData, type: e.target.value, paper_id: ''})}>
-                <option value="question_paper">Question Paper</option>
-                <option value="answer_key">Answer Key</option>
-                <option value="syllabus">Syllabus</option>
-              </select>
-            </div>
-
-            {(formData.type === 'question_paper' || formData.type === 'answer_key') && (
+            <div className="grid grid-cols-3 gap-3">
               <div>
-                <label className="block text-sm font-medium mb-1">Examination Year</label>
-                <input type="number" min="2000" max="2099" className="w-full p-2 border rounded-lg dark:bg-slate-900 dark:border-slate-700" value={formData.exam_year} onChange={e => setFormData({...formData, exam_year: e.target.value})} placeholder="e.g. 2024" />
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Type *</label>
+                <select
+                  className="w-full px-3 py-2 border rounded-xl dark:bg-slate-900 dark:border-slate-700 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                  value={formData.type}
+                  onChange={e => setFormData({ ...formData, type: e.target.value, paper_id: '' })}
+                >
+                  <option value="question_paper">Question Paper</option>
+                  <option value="answer_key">Answer Key</option>
+                  <option value="syllabus">Syllabus</option>
+                  <option value="general">General Material</option>
+                </select>
               </div>
-            )}
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Exam Year</label>
+                <input
+                  type="number"
+                  min="2000"
+                  max="2099"
+                  className="w-full px-3 py-2 border rounded-xl dark:bg-slate-900 dark:border-slate-700 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                  value={formData.exam_year}
+                  onChange={e => setFormData({ ...formData, exam_year: e.target.value })}
+                  placeholder="e.g. 2024"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Display Order</label>
+                <input
+                  type="number"
+                  min="0"
+                  className="w-full px-3 py-2 border rounded-xl dark:bg-slate-900 dark:border-slate-700 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                  value={formData.display_order}
+                  onChange={e => setFormData({ ...formData, display_order: e.target.value })}
+                  placeholder="0"
+                />
+              </div>
+            </div>
 
             {formData.type === 'answer_key' && (
               <div>
-                <label className="block text-sm font-medium mb-1">Link to Question Paper</label>
-                <select required className="w-full p-2 border rounded-lg dark:bg-slate-900 dark:border-slate-700" value={formData.paper_id} onChange={e => setFormData({...formData, paper_id: e.target.value})}>
-                  <option value="">-- Select Question Paper --</option>
-                  {papers.map(p => <option key={p.id} value={p.id}>{p.title} {p.exam_year ? `(${p.exam_year})` : ''}</option>)}
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Linked Question Paper</label>
+                <select
+                  className="w-full px-3 py-2 border rounded-xl dark:bg-slate-900 dark:border-slate-700 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                  value={formData.paper_id}
+                  onChange={e => setFormData({ ...formData, paper_id: e.target.value })}
+                >
+                  <option value="">-- Independent / None --</option>
+                  {questionPapers.map(p => (
+                    <option key={p.id} value={p.id}>{p.title} {p.exam_year ? `(${p.exam_year})` : ''}</option>
+                  ))}
                 </select>
               </div>
             )}
 
-            <div>
-              <label className="block text-sm font-medium mb-1">Description (Optional)</label>
-              <textarea className="w-full p-2 border rounded-lg dark:bg-slate-900 dark:border-slate-700" rows="2" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})}></textarea>
+            {/* Optional Syllabus Node linkage */}
+            <div className="grid grid-cols-3 gap-2">
+              <div>
+                <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Subject</label>
+                <select
+                  className="w-full p-1.5 text-xs border rounded-lg dark:bg-slate-900 dark:border-slate-700"
+                  value={formData.subject_id}
+                  onChange={e => setFormData({ ...formData, subject_id: e.target.value, chapter_id: '', topic_id: '' })}
+                >
+                  <option value="">None</option>
+                  {subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Chapter</label>
+                <select
+                  className="w-full p-1.5 text-xs border rounded-lg dark:bg-slate-900 dark:border-slate-700"
+                  value={formData.chapter_id}
+                  onChange={e => setFormData({ ...formData, chapter_id: e.target.value, topic_id: '' })}
+                >
+                  <option value="">None</option>
+                  {chapters.filter(c => !formData.subject_id || String(c.subject_id) === String(formData.subject_id)).map(c => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Topic</label>
+                <select
+                  className="w-full p-1.5 text-xs border rounded-lg dark:bg-slate-900 dark:border-slate-700"
+                  value={formData.topic_id}
+                  onChange={e => setFormData({ ...formData, topic_id: e.target.value })}
+                >
+                  <option value="">None</option>
+                  {topics.filter(t => !formData.chapter_id || String(t.chapter_id) === String(formData.chapter_id)).map(t => (
+                    <option key={t.id} value={t.id}>{t.name}</option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Upload PDF</label>
-              <input id="file-upload" required type="file" accept=".pdf" className="w-full p-2 border rounded-lg dark:bg-slate-900 dark:border-slate-700" onChange={e => setFile(e.target.files[0])} />
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Description (Optional)</label>
+              <textarea
+                className="w-full px-3 py-2 border rounded-xl dark:bg-slate-900 dark:border-slate-700 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                rows="2"
+                value={formData.description}
+                onChange={e => setFormData({ ...formData, description: e.target.value })}
+                placeholder="Brief summary or details about this document..."
+              />
             </div>
+
+            {resourceSource === 'file' ? (
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">PDF File (Max 15MB) *</label>
+                <input
+                  id="file-upload"
+                  required
+                  type="file"
+                  accept=".pdf,application/pdf"
+                  className="w-full p-2 border border-dashed rounded-xl dark:bg-slate-900 dark:border-slate-700 text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 dark:file:bg-indigo-900/30 dark:file:text-indigo-400"
+                  onChange={e => setFile(e.target.files[0])}
+                />
+              </div>
+            ) : (
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">External Web URL *</label>
+                <input
+                  required
+                  type="url"
+                  className="w-full px-3 py-2 border rounded-xl dark:bg-slate-900 dark:border-slate-700 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                  value={formData.external_url}
+                  onChange={e => setFormData({ ...formData, external_url: e.target.value })}
+                  placeholder="https://drive.google.com/... or https://..."
+                />
+              </div>
+            )}
 
             <label className="flex items-center gap-2 cursor-pointer pt-2">
-              <input type="checkbox" className="w-5 h-5" checked={formData.published} onChange={e => setFormData({...formData, published: e.target.checked})} />
-              <span className="font-medium text-slate-800 dark:text-white">Publish Immediately</span>
+              <input
+                type="checkbox"
+                className="w-4 h-4 text-indigo-600 rounded"
+                checked={formData.published}
+                onChange={e => setFormData({ ...formData, published: e.target.checked })}
+              />
+              <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">Publish Immediately</span>
             </label>
 
-            <button type="submit" className="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-colors">
-              Save Resource
+            <button
+              type="submit"
+              disabled={actionLoading}
+              className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
+            >
+              {actionLoading ? (
+                <>
+                  <RefreshCw size={18} className="animate-spin" /> Uploading & Processing...
+                </>
+              ) : (
+                'Create Resource'
+              )}
             </button>
           </form>
         </div>
 
-        <div className="xl:col-span-2">
+        {/* Right Column: Search, Filters, and Resources Table */}
+        <div className="xl:col-span-2 space-y-4">
+          {/* Search and Filters Bar */}
+          <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-wrap gap-3 items-center justify-between">
+            <div className="relative flex-1 min-w-[200px]">
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                className="w-full pl-9 pr-3 py-2 border rounded-xl dark:bg-slate-900 dark:border-slate-700 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder="Search resources by title, description, or year..."
+              />
+            </div>
+
+            <div className="flex flex-wrap gap-2 text-xs">
+              <select
+                className="px-3 py-2 border rounded-xl dark:bg-slate-900 dark:border-slate-700 font-medium"
+                value={filterType}
+                onChange={e => setFilterType(e.target.value)}
+              >
+                <option value="all">All Types</option>
+                <option value="question_paper">Question Papers</option>
+                <option value="answer_key">Answer Keys</option>
+                <option value="syllabus">Syllabus</option>
+                <option value="general">General</option>
+              </select>
+
+              <select
+                className="px-3 py-2 border rounded-xl dark:bg-slate-900 dark:border-slate-700 font-medium"
+                value={filterStatus}
+                onChange={e => setFilterStatus(e.target.value)}
+              >
+                <option value="all">All Status</option>
+                <option value="published">Published</option>
+                <option value="draft">Drafts</option>
+              </select>
+
+              {uniqueYears.length > 0 && (
+                <select
+                  className="px-3 py-2 border rounded-xl dark:bg-slate-900 dark:border-slate-700 font-medium"
+                  value={filterYear}
+                  onChange={e => setFilterYear(e.target.value)}
+                >
+                  <option value="all">All Years</option>
+                  {uniqueYears.map(yr => (
+                    <option key={yr} value={String(yr)}>{yr}</option>
+                  ))}
+                </select>
+              )}
+            </div>
+          </div>
+
+          {/* Resources Table */}
           <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-slate-50 dark:bg-slate-900/50 uppercase text-xs text-slate-500">
-                <tr>
-                  <th className="px-6 py-4">Title & Details</th>
-                  <th className="px-6 py-4">Type</th>
-                  <th className="px-6 py-4">Year</th>
-                  <th className="px-6 py-4 text-center">Status</th>
-                  <th className="px-6 py-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="text-slate-700 dark:text-slate-300">
-                {resources.map(item => (
-                  <tr key={item.id} className="border-t border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-900/20">
-                    <td className="px-6 py-4">
-                      <div className="font-bold text-slate-900 dark:text-white">{item.title}</div>
-                      {item.type === 'answer_key' && item.paper_id && (
-                        <div className="text-xs text-indigo-500 mt-1 flex items-center gap-1">
-                          Linked to: {papers.find(p => p.id === item.paper_id)?.title || 'Unknown Paper'}
-                        </div>
-                      )}
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded text-xs font-medium">
-                        {getTypeName(item.type)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">{item.exam_year || '-'}</td>
-                    <td className="px-6 py-4 text-center">
-                      {item.published ? <span className="text-green-600 font-bold">Pub</span> : <span className="text-orange-500 font-bold">Draft</span>}
-                    </td>
-                    <td className="px-6 py-4 text-right flex justify-end gap-3">
-                      <a href={item.file_path ? (import.meta.env.VITE_API_URL || 'http://localhost:3001') + item.file_path : ''} target="_blank" rel="noreferrer" className="text-blue-500 hover:text-blue-600" title="View PDF">
-                        <FileText size={18} />
-                      </a>
-                      <button onClick={() => handleDelete(item.id)} className="text-red-500 hover:text-red-600" title="Delete">
-                        <Trash2 size={18}/>
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-                {resources.length === 0 && (
+            <div className="px-6 py-3 border-b border-slate-100 dark:border-slate-700/60 flex items-center justify-between text-xs text-slate-500">
+              <span>Showing {filteredResources.length} of {resources.length} resources</span>
+              {(searchQuery || filterType !== 'all' || filterStatus !== 'all' || filterYear !== 'all') && (
+                <button
+                  onClick={() => { setSearchQuery(''); setFilterType('all'); setFilterStatus('all'); setFilterYear('all'); }}
+                  className="text-indigo-600 dark:text-indigo-400 font-bold hover:underline"
+                >
+                  Clear Filters
+                </button>
+              )}
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-slate-50 dark:bg-slate-900/50 uppercase text-[11px] font-bold tracking-wider text-slate-400">
                   <tr>
-                    <td colSpan="5" className="px-6 py-8 text-center text-slate-500">No resources uploaded yet.</td>
+                    <th className="px-6 py-4">Resource</th>
+                    <th className="px-6 py-4">Type & Year</th>
+                    <th className="px-6 py-4 text-center">Status</th>
+                    <th className="px-6 py-4 text-right">Actions</th>
                   </tr>
-                )}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-700/60">
+                  {filteredResources.map(item => {
+                    const link = resolveResourceLink(item);
+                    return (
+                      <tr key={item.id} className="hover:bg-slate-50/70 dark:hover:bg-slate-900/30 transition">
+                        <td className="px-6 py-4">
+                          <div className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                            {item.external_url ? (
+                              <LinkIcon size={16} className="text-amber-500 shrink-0" title="External URL Resource" />
+                            ) : (
+                              <FileText size={16} className="text-indigo-500 shrink-0" title="Hosted PDF Resource" />
+                            )}
+                            <span>{item.title}</span>
+                          </div>
+                          {item.type === 'answer_key' && item.paper_id && (
+                            <div className="text-xs text-indigo-500 mt-0.5">
+                              Linked Paper: {questionPapers.find(p => p.id === item.paper_id)?.title || `ID #${item.paper_id}`}
+                            </div>
+                          )}
+                          {item.description && (
+                            <div className="text-xs text-slate-400 truncate max-w-md mt-0.5">{item.description}</div>
+                          )}
+                        </td>
+
+                        <td className="px-6 py-4">
+                          <span className="bg-slate-100 dark:bg-slate-700 px-2.5 py-1 rounded-md text-xs font-semibold">
+                            {getTypeName(item.type)}
+                          </span>
+                          {item.exam_year && (
+                            <span className="ml-2 text-xs text-slate-500 font-semibold">{item.exam_year}</span>
+                          )}
+                        </td>
+
+                        <td className="px-6 py-4 text-center">
+                          <button
+                            onClick={() => handleTogglePublish(item.id, item.published)}
+                            title="Click to toggle publish status"
+                            className={`px-3 py-1 rounded-full text-xs font-bold transition flex items-center gap-1.5 mx-auto ${
+                              item.published
+                                ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 hover:bg-emerald-100'
+                                : 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 hover:bg-amber-100'
+                            }`}
+                          >
+                            {item.published ? <CheckCircle2 size={12} /> : <XCircle size={12} />}
+                            {item.published ? 'Published' : 'Draft'}
+                          </button>
+                        </td>
+
+                        <td className="px-6 py-4 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            {/* View / Download */}
+                            <a
+                              href={link}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="p-1.5 text-slate-400 hover:text-indigo-600 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-950/30 transition"
+                              title="View Document"
+                            >
+                              <Eye size={18} />
+                            </a>
+
+                            {/* Edit Metadata */}
+                            <button
+                              onClick={() => {
+                                setEditingItem(item);
+                                setEditFormData({
+                                  title: item.title,
+                                  description: item.description || '',
+                                  type: item.type,
+                                  exam_year: item.exam_year || '',
+                                  paper_id: item.paper_id || '',
+                                  external_url: item.external_url || '',
+                                  display_order: item.display_order ?? 0,
+                                  subject_id: item.subject_id || '',
+                                  chapter_id: item.chapter_id || '',
+                                  topic_id: item.topic_id || '',
+                                  published: item.published
+                                });
+                              }}
+                              className="p-1.5 text-slate-400 hover:text-blue-600 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-950/30 transition"
+                              title="Edit Metadata"
+                            >
+                              <Edit3 size={18} />
+                            </button>
+
+                            {/* Replace File */}
+                            {!item.external_url && (
+                              <button
+                                onClick={() => {
+                                  setReplacingItem(item);
+                                  setReplaceFile(null);
+                                }}
+                                className="p-1.5 text-slate-400 hover:text-amber-600 rounded-lg hover:bg-amber-50 dark:hover:bg-amber-950/30 transition"
+                                title="Replace PDF File"
+                              >
+                                <RefreshCw size={18} />
+                              </button>
+                            )}
+
+                            {/* Delete */}
+                            <button
+                              onClick={() => handleDelete(item.id, item.title)}
+                              className="p-1.5 text-slate-400 hover:text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 transition"
+                              title="Delete Resource"
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+
+                  {filteredResources.length === 0 && (
+                    <tr>
+                      <td colSpan="4" className="px-6 py-12 text-center text-slate-400">
+                        <FileText size={36} className="mx-auto mb-2 opacity-30" />
+                        <p className="font-semibold text-slate-600 dark:text-slate-300">No resources found</p>
+                        <p className="text-xs text-slate-400 mt-1">Try adjusting your search query or filters.</p>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* MODAL 1: Edit Metadata Modal */}
+      {editingItem && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-800 w-full max-w-lg rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 p-6 space-y-4">
+            <div className="flex items-center justify-between border-b pb-3 dark:border-slate-700">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <Edit3 size={18} className="text-blue-500" /> Edit Metadata
+              </h3>
+              <button onClick={() => setEditingItem(null)} className="text-slate-400 hover:text-slate-600"><X size={20} /></button>
+            </div>
+
+            <form onSubmit={handleEditSubmit} className="space-y-4 text-sm">
+              <div>
+                <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Title *</label>
+                <input
+                  required
+                  type="text"
+                  className="w-full px-3 py-2 border rounded-xl dark:bg-slate-900 dark:border-slate-700"
+                  value={editFormData.title}
+                  onChange={e => setEditFormData({ ...editFormData, title: e.target.value })}
+                />
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Type</label>
+                  <select
+                    className="w-full px-3 py-2 border rounded-xl dark:bg-slate-900 dark:border-slate-700"
+                    value={editFormData.type}
+                    onChange={e => setEditFormData({ ...editFormData, type: e.target.value })}
+                  >
+                    <option value="question_paper">Question Paper</option>
+                    <option value="answer_key">Answer Key</option>
+                    <option value="syllabus">Syllabus</option>
+                    <option value="general">General</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Exam Year</label>
+                  <input
+                    type="number"
+                    className="w-full px-3 py-2 border rounded-xl dark:bg-slate-900 dark:border-slate-700"
+                    value={editFormData.exam_year}
+                    onChange={e => setEditFormData({ ...editFormData, exam_year: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Display Order</label>
+                  <input
+                    type="number"
+                    min="0"
+                    className="w-full px-3 py-2 border rounded-xl dark:bg-slate-900 dark:border-slate-700"
+                    value={editFormData.display_order ?? 0}
+                    onChange={e => setEditFormData({ ...editFormData, display_order: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              {editFormData.type === 'answer_key' && (
+                <div>
+                  <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Linked Paper</label>
+                  <select
+                    className="w-full px-3 py-2 border rounded-xl dark:bg-slate-900 dark:border-slate-700"
+                    value={editFormData.paper_id}
+                    onChange={e => setEditFormData({ ...editFormData, paper_id: e.target.value })}
+                  >
+                    <option value="">-- Independent / None --</option>
+                    {questionPapers.filter(p => p.id !== editingItem.id).map(p => (
+                      <option key={p.id} value={p.id}>{p.title}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {editingItem.external_url !== null && (
+                <div>
+                  <label className="block text-xs font-bold uppercase text-slate-500 mb-1">External URL</label>
+                  <input
+                    type="url"
+                    className="w-full px-3 py-2 border rounded-xl dark:bg-slate-900 dark:border-slate-700"
+                    value={editFormData.external_url}
+                    onChange={e => setEditFormData({ ...editFormData, external_url: e.target.value })}
+                  />
+                </div>
+              )}
+
+              <div>
+                <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Description</label>
+                <textarea
+                  className="w-full px-3 py-2 border rounded-xl dark:bg-slate-900 dark:border-slate-700"
+                  rows="2"
+                  value={editFormData.description}
+                  onChange={e => setEditFormData({ ...editFormData, description: e.target.value })}
+                />
+              </div>
+
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="w-4 h-4 text-indigo-600 rounded"
+                  checked={editFormData.published}
+                  onChange={e => setEditFormData({ ...editFormData, published: e.target.checked })}
+                />
+                <span className="font-semibold text-slate-700 dark:text-slate-300">Published to Students</span>
+              </label>
+
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setEditingItem(null)}
+                  className="px-4 py-2 border rounded-xl font-semibold hover:bg-slate-50 dark:hover:bg-slate-700"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={actionLoading}
+                  className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold disabled:opacity-50"
+                >
+                  {actionLoading ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 2: Replace File Modal */}
+      {replacingItem && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-800 w-full max-w-md rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 p-6 space-y-4">
+            <div className="flex items-center justify-between border-b pb-3 dark:border-slate-700">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <RefreshCw size={18} className="text-amber-500" /> Replace PDF Document
+              </h3>
+              <button onClick={() => setReplacingItem(null)} className="text-slate-400 hover:text-slate-600"><X size={20} /></button>
+            </div>
+
+            <p className="text-sm text-slate-500">
+              Replacing PDF file for: <strong className="text-slate-800 dark:text-white">{replacingItem.title}</strong>.
+              All existing links and IDs will be preserved.
+            </p>
+
+            <form onSubmit={handleReplaceSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Select New PDF File (Max 15MB) *</label>
+                <input
+                  required
+                  type="file"
+                  accept=".pdf,application/pdf"
+                  className="w-full p-2 border border-dashed rounded-xl dark:bg-slate-900 dark:border-slate-700 text-xs"
+                  onChange={e => setReplaceFile(e.target.files[0])}
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setReplacingItem(null)}
+                  className="px-4 py-2 border rounded-xl text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-700"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={actionLoading || !replaceFile}
+                  className="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm rounded-xl font-bold disabled:opacity-50"
+                >
+                  {actionLoading ? 'Replacing...' : 'Replace File'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
-
-

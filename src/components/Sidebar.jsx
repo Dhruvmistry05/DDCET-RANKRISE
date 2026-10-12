@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Home, BookOpen, PenTool, ClipboardCheck, History, PieChart, AlertTriangle, Book, MessageCircle, LogOut } from 'lucide-react';
+import { Home, BookOpen, PenTool, ClipboardCheck, History, PieChart, AlertTriangle, Book, MessageCircle, LogOut, Globe } from 'lucide-react';
 import { useAuth } from '../store/AuthContext';
 
 export default function Sidebar() {
@@ -15,10 +15,12 @@ export default function Sidebar() {
 
   const studentLinks = [
     { name: 'Dashboard', path: '/student', icon: Home },
-    { name: 'Syllabus', path: '/student/syllabus', icon: BookOpen },
+    { name: 'Study Library', path: '/student/resources', icon: BookOpen },
+    { name: 'Syllabus', path: '/student/syllabus', icon: Book },
     { name: 'Past Papers', path: '/student/resources/papers', icon: History },
     { name: 'Answer Keys', path: '/student/resources/keys', icon: ClipboardCheck },
     { name: 'Official Syllabus', path: '/student/resources/official-syllabus', icon: Book },
+    { name: 'Study Links', path: '/student/resources/links', icon: Globe },
     { name: 'Practice', path: '/student/practice', icon: PenTool },
     { name: 'Mock Test', path: '/student/mock', icon: ClipboardCheck },
     { name: 'Analytics', path: '/student/analytics', icon: PieChart },

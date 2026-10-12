@@ -18,6 +18,8 @@ import StudentSyllabus from './pages/student/StudentSyllabus';
 import PreviousPapers from './pages/student/Resources/PreviousPapers';
 import AnswerKeys from './pages/student/Resources/AnswerKeys';
 import OfficialSyllabus from './pages/student/Resources/OfficialSyllabus';
+import ExternalLinks from './pages/student/Resources/ExternalLinks';
+import StudyMaterialLibrary from './pages/student/Resources/StudyMaterialLibrary';
 import { useEffect, useState } from 'react';
 
 import Placeholder from './pages/Placeholder';
@@ -68,9 +70,11 @@ function App() {
           
           <Route path="/student/syllabus" element={<ProtectedRoute allowedRole="student"><StudentSyllabus /></ProtectedRoute>} />
           
+          <Route path="/student/resources" element={<ProtectedRoute allowedRole="student"><StudyMaterialLibrary /></ProtectedRoute>} />
           <Route path="/student/resources/papers" element={<ProtectedRoute allowedRole="student"><PreviousPapers /></ProtectedRoute>} />
           <Route path="/student/resources/keys" element={<ProtectedRoute allowedRole="student"><AnswerKeys /></ProtectedRoute>} />
           <Route path="/student/resources/official-syllabus" element={<ProtectedRoute allowedRole="student"><OfficialSyllabus /></ProtectedRoute>} />
+          <Route path="/student/resources/links" element={<ProtectedRoute allowedRole="student"><ExternalLinks /></ProtectedRoute>} />
           
           <Route path="/student/practice" element={<ProtectedRoute allowedRole="student"><Placeholder title="Practice Lab" /></ProtectedRoute>} />
           <Route path="/student/mock" element={<ProtectedRoute allowedRole="student"><Placeholder title="Mock Test Center" /></ProtectedRoute>} />

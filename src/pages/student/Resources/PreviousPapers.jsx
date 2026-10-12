@@ -64,10 +64,19 @@ export default function PreviousPapers() {
             </div>
             
             <div className="flex gap-3 mt-4">
-              <a href={paper.file_path ? (import.meta.env.VITE_API_URL || 'http://localhost:3001') + paper.file_path : ''} target="_blank" rel="noreferrer" className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-indigo-50 dark:bg-indigo-900/20 hover:bg-indigo-100 text-indigo-700 dark:text-indigo-400 rounded-xl font-bold transition-colors">
+              <a 
+                href={paper.file_path ? (paper.file_path.startsWith('http') ? paper.file_path : (import.meta.env.VITE_API_URL || 'http://localhost:3001') + paper.file_path) : ''} 
+                target="_blank" 
+                rel="noreferrer" 
+                className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-indigo-50 dark:bg-indigo-900/20 hover:bg-indigo-100 text-indigo-700 dark:text-indigo-400 rounded-xl font-bold transition-colors"
+              >
                 <Eye size={18} /> View
               </a>
-              <a href={paper.file_path ? (import.meta.env.VITE_API_URL || 'http://localhost:3001') + paper.file_path : ''} download className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-xl font-bold transition-colors">
+              <a 
+                href={`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/resources/${paper.id}/download`} 
+                download 
+                className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-xl font-bold transition-colors"
+              >
                 <Download size={18} /> Download
               </a>
             </div>

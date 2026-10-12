@@ -50,10 +50,19 @@ export default function AnswerKeys() {
               </div>
               
               <div className="flex gap-3 shrink-0">
-                <a href={keyDoc.file_path ? (import.meta.env.VITE_API_URL || 'http://localhost:3001') + keyDoc.file_path : ''} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 px-6 py-2.5 bg-emerald-50 dark:bg-emerald-900/20 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-400 rounded-xl font-bold transition-colors">
+                <a 
+                  href={keyDoc.file_path ? (keyDoc.file_path.startsWith('http') ? keyDoc.file_path : (import.meta.env.VITE_API_URL || 'http://localhost:3001') + keyDoc.file_path) : (keyDoc.external_url || '')} 
+                  target="_blank" 
+                  rel="noreferrer" 
+                  className="flex items-center justify-center gap-2 px-6 py-2.5 bg-emerald-50 dark:bg-emerald-900/20 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-400 rounded-xl font-bold transition-colors"
+                >
                   <Eye size={18} /> View
                 </a>
-                <a href={keyDoc.file_path ? (import.meta.env.VITE_API_URL || 'http://localhost:3001') + keyDoc.file_path : ''} download className="flex items-center justify-center gap-2 px-6 py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-xl font-bold transition-colors">
+                <a 
+                  href={`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/resources/${keyDoc.id}/download`} 
+                  download 
+                  className="flex items-center justify-center gap-2 px-6 py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-xl font-bold transition-colors"
+                >
                   <Download size={18} /> Download
                 </a>
               </div>

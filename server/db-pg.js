@@ -1,10 +1,21 @@
 const { Pool } = require('pg');
 
+const isRemoteDb = Boolean(
+  process.env.DATABASE_URL && (
+    process.env.DATABASE_URL.includes('supabase') ||
+    process.env.DATABASE_URL.includes('render.com') ||
+    process.env.NODE_ENV === 'production'
+  )
+);
+
 let pool;
 if (process.env.DATABASE_URL) {
   pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+    ssl: isRemoteDb ? { rejectUnauthorized: false } : false,
+    max: parseInt(process.env.PG_POOL_MAX || '10', 10),
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 5000
   });
 }
 
@@ -100,8 +111,12 @@ const initSchema = async () => {
 
 const testConnection = async () => {
   const client = await pool.connect();
-  client.release();
-  return true;
+  try {
+    await client.query('SELECT 1');
+    return true;
+  } finally {
+    client.release();
+  }
 };
 
 const close = async () => {
