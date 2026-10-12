@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #2f67d8;
+  --color-navy: #102a56;
+  --color-accent: #ffd34d;
+  --color-success: #19a463;
+  --color-danger: #e55353;
+  --color-ink: #17233c;
+  --color-muted: #6c7890;
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-slate-50;
+  }
+}
