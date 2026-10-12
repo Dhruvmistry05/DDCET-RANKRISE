@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, GraduationCap, ArrowRight, ShieldCheck, User, Mail, Lock } from 'lucide-react';
+import { BookOpen, GraduationCap, ArrowRight, ShieldCheck, Mail, Lock, Sparkles } from 'lucide-react';
 import { useAuth } from '../../store/AuthContext';
+import { getApiUrl } from '../../config/api';
 
 export default function Login() {
   const [isLogin, setIsLogin] = useState(true);
@@ -21,14 +22,23 @@ export default function Login() {
     }
   }, [user, token, navigate]);
 
-  if (authLoading) return <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900">Loading...</div>;
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900 text-slate-500 font-medium">
+        <div className="flex items-center gap-2">
+          <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+          <span>Verifying credentials...</span>
+        </div>
+      </div>
+    );
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     
-    const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
+    const endpoint = getApiUrl(`/api/auth/${isLogin ? 'login' : 'register'}`);
     
     try {
       const res = await fetch(endpoint, {
@@ -37,129 +47,258 @@ export default function Login() {
         body: JSON.stringify({ email, password, role })
       });
       
-      const data = await res.json();
+      let data = null;
+      const contentType = res.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        try {
+          data = await res.json();
+        } catch {
+          data = null;
+        }
+      }
       
       if (!res.ok) {
-        setError(data.error || 'An error occurred');
+        if (data?.error) {
+          setError(data.error);
+        } else if (res.status === 400) {
+          setError('Invalid input. Please verify your email and password.');
+        } else if (res.status === 401) {
+          setError('Invalid email or password.');
+        } else if (res.status === 403) {
+          setError('Access forbidden by server security policy.');
+        } else if (res.status === 404) {
+          setError('Authentication service is currently unreachable (404). Please try again later.');
+        } else if (res.status >= 500) {
+          setError('The authentication server encountered a temporary error. Please try again shortly.');
+        } else {
+          setError(`Request failed with status ${res.status}. Please try again.`);
+        }
         setLoading(false);
         return;
       }
       
       if (isLogin) {
-        login(data.token, data.user);
-        if (data.user.role === 'admin') navigate('/admin');
-        else if (!data.user.profile_completed) navigate('/complete-profile');
-        else navigate('/student');
+        if (data?.token && data?.user) {
+          login(data.token, data.user);
+          if (data.user.role === 'admin') navigate('/admin');
+          else if (!data.user.profile_completed) navigate('/complete-profile');
+          else navigate('/student');
+        } else {
+          setError('Received invalid response from server. Please try again.');
+        }
       } else {
-        // Automatically login after registration
-        const loginRes = await fetch((import.meta.env.VITE_API_URL || 'http://localhost:3001') + '/api/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password })
-        });
-        const loginData = await loginRes.json();
-        if (loginRes.ok) {
-          login(loginData.token, loginData.user);
-          if (loginData.user.role === 'admin') navigate('/admin');
-          else navigate('/complete-profile');
+        // Automatically login after successful registration
+        try {
+          const loginRes = await fetch(getApiUrl('/api/auth/login'), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+          });
+          
+          let loginData = null;
+          const loginContentType = loginRes.headers.get('content-type') || '';
+          if (loginContentType.includes('application/json')) {
+            loginData = await loginRes.json();
+          }
+
+          if (loginRes.ok && loginData?.token) {
+            login(loginData.token, loginData.user);
+            if (loginData.user.role === 'admin') navigate('/admin');
+            else navigate('/complete-profile');
+          } else {
+            setIsLogin(true);
+            setError('Account registered successfully! Please sign in with your password.');
+          }
+        } catch {
+          setIsLogin(true);
+          setError('Account registered! Please sign in with your credentials.');
         }
       }
     } catch (err) {
-      setError('Network error. Please try again later.');
+      if (err.name === 'TypeError' || err.message?.includes('fetch') || err.message?.includes('Network')) {
+        setError('Unable to reach the authentication server. Please check your internet connection or verify the server is running.');
+      } else {
+        setError('An unexpected error occurred during authentication. Please try again.');
+      }
     }
     setLoading(false);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900 relative overflow-hidden">
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-500/20 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-500/20 rounded-full blur-[120px] pointer-events-none" />
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900 p-3 sm:p-6 lg:p-8 relative overflow-hidden">
+      {/* Subtle background glow accents */}
+      <div className="absolute -top-24 -left-24 w-72 sm:w-96 h-72 sm:h-96 bg-blue-500/15 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-24 -right-24 w-72 sm:w-96 h-72 sm:h-96 bg-indigo-500/15 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="flex w-full max-w-6xl h-auto min-h-[600px] bg-white dark:bg-slate-800 rounded-3xl shadow-2xl border border-slate-200/50 dark:border-slate-700/50 overflow-hidden z-10 m-4">
+      {/* Main Responsive Auth Card */}
+      <div className="flex w-full max-w-5xl bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-700/80 overflow-hidden z-10">
         
-        <div className="hidden lg:flex flex-col justify-between w-5/12 bg-gradient-to-br from-blue-600 to-indigo-900 p-12 text-white relative overflow-hidden">
-          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
-          <div className="relative z-10">
-            <div className="flex items-center gap-3 mb-12">
-              <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-md">
-                <BookOpen className="text-white" size={24} />
+        {/* Left Visual Column (Desktop & Tablet Wide) */}
+        <div className="hidden lg:flex flex-col justify-between w-5/12 bg-gradient-to-br from-blue-700 via-indigo-800 to-slate-900 p-10 xl:p-12 text-white relative overflow-hidden">
+          <div className="relative z-10 space-y-6">
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-md shadow-inner">
+                <BookOpen className="text-white" size={22} />
               </div>
-              <span className="text-2xl font-black tracking-tight">RANKRISE</span>
+              <div>
+                <span className="text-xs tracking-widest text-blue-200 font-extrabold uppercase">DDCET</span>
+                <span className="block text-2xl font-black tracking-tight leading-none">RANKRISE</span>
+              </div>
             </div>
-            <h1 className="text-4xl font-bold leading-tight mb-6">
-              Your Journey to DDCET Success Starts Here
-            </h1>
-            <p className="text-blue-100 text-lg opacity-90 leading-relaxed">
-              Experience the most realistic mock tests, track your progress with advanced analytics, and conquer your exams with confidence.
+
+            <div className="pt-6">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/20 text-blue-200 text-xs font-bold border border-blue-400/30 mb-4">
+                <Sparkles size={13} className="text-amber-300" /> Diploma to Degree Engineering
+              </span>
+              <h1 className="text-3xl xl:text-4xl font-extrabold leading-tight">
+                Master DDCET with Realistic Practice & Resources
+              </h1>
+            </div>
+
+            <p className="text-blue-100/90 text-sm xl:text-base leading-relaxed">
+              Complete syllabus coverage, full-length live tests, official past papers, and comprehensive analytics built specifically for diploma engineers.
             </p>
+          </div>
+
+          <div className="relative z-10 pt-8 border-t border-white/10 text-xs text-blue-200 flex items-center justify-between">
+            <span>© 2026 DDCET RankRise</span>
+            <span className="flex items-center gap-1"><ShieldCheck size={14} /> Secure Access</span>
           </div>
         </div>
 
-        <div className="w-full lg:w-7/12 p-8 sm:p-12 lg:p-16 flex flex-col justify-center bg-white dark:bg-slate-800 relative">
-          <div className="max-w-md w-full mx-auto">
-            <div className="text-center mb-10 lg:text-left flex justify-between items-end">
+        {/* Right Form Column (All Screen Sizes) */}
+        <div className="w-full lg:w-7/12 p-5 sm:p-8 md:p-10 lg:p-12 flex flex-col justify-center">
+          <div className="max-w-md w-full mx-auto space-y-6">
+            
+            {/* Mobile Brand Header */}
+            <div className="lg:hidden flex items-center justify-center gap-2.5 pb-2">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white font-black text-sm shadow-sm">
+                RR
+              </div>
               <div>
-                <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-3">
-                  {isLogin ? 'Welcome Back 👋' : 'Create an Account 🚀'}
-                </h2>
-                <p className="text-slate-500 dark:text-slate-400">
-                  {isLogin ? 'Sign in to your account to continue' : 'Join thousands of students preparing for DDCET'}
-                </p>
+                <span className="text-[10px] tracking-widest text-blue-600 dark:text-blue-400 font-black uppercase">DDCET</span>
+                <span className="block font-black text-slate-900 dark:text-white text-lg leading-none">RANKRISE</span>
               </div>
             </div>
 
+            {/* Greeting & Header */}
+            <div className="text-center sm:text-left">
+              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                {isLogin ? 'Welcome Back' : 'Create Student Account'}
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+                {isLogin 
+                  ? 'Sign in to access study materials, mock tests, and analytics.' 
+                  : 'Start your official DDCET exam preparation journey today.'}
+              </p>
+            </div>
+
+            {/* Error Banner */}
             {error && (
-              <div className="bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 p-4 rounded-xl mb-6 text-sm font-medium border border-red-200 dark:border-red-800/50">
+              <div className="bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 p-3.5 rounded-xl text-xs sm:text-sm font-medium border border-rose-200 dark:border-rose-900/60 animate-shake">
                 {error}
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Role Selector (Student vs Admin) */}
+            <div className="flex bg-slate-100 dark:bg-slate-900/80 p-1 rounded-2xl border border-slate-200/80 dark:border-slate-700/80">
+              <button
+                type="button"
+                onClick={() => setRole('student')}
+                className={`flex-1 py-2 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all duration-200 flex items-center justify-center gap-2 min-h-[40px] ${
+                  role === 'student'
+                    ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm'
+                    : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                <GraduationCap size={16} />
+                <span>Student</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setRole('admin')}
+                className={`flex-1 py-2 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all duration-200 flex items-center justify-center gap-2 min-h-[40px] ${
+                  role === 'admin'
+                    ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm'
+                    : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                <ShieldCheck size={16} />
+                <span>Admin</span>
+              </button>
+            </div>
 
-              <div className="space-y-5">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Email Address</label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Mail className="h-5 w-5 text-slate-400" />
-                    </div>
-                    <input 
-                      type="email" 
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="you@example.com"
-                      className="block w-full pl-10 pr-3 py-3.5 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-600/50 outline-none" 
-                    />
+            {/* Main Form */}
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
+                  Email Address
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <Mail size={18} />
                   </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Password</label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Lock className="h-5 w-5 text-slate-400" />
-                    </div>
-                    <input 
-                      type="password" 
-                      required
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••"
-                      className="block w-full pl-10 pr-3 py-3.5 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-600/50 outline-none" 
-                    />
-                  </div>
+                  <input 
+                    type="email" 
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="student@example.com"
+                    autoComplete="email"
+                    className="w-full pl-10 pr-3.5 py-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50/50 dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-600 focus:bg-white dark:focus:bg-slate-900 outline-none transition-all min-h-[44px]" 
+                  />
                 </div>
               </div>
 
-              <button disabled={loading} type="submit" className="w-full flex items-center justify-center gap-2 py-4 px-8 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-lg transition-all active:scale-[0.98] shadow-lg shadow-blue-600/30 disabled:opacity-70 mt-8">
-                {loading ? 'Processing...' : (isLogin ? 'Sign In' : 'Create Account')}
-                {!loading && <ArrowRight size={20} />}
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
+                  Password
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <Lock size={18} />
+                  </div>
+                  <input 
+                    type="password" 
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter your password"
+                    autoComplete={isLogin ? 'current-password' : 'new-password'}
+                    className="w-full pl-10 pr-3.5 py-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50/50 dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-600 focus:bg-white dark:focus:bg-slate-900 outline-none transition-all min-h-[44px]" 
+                  />
+                </div>
+              </div>
+
+              {/* Action Button */}
+              <button 
+                disabled={loading} 
+                type="submit" 
+                className="w-full mt-2 flex items-center justify-center gap-2 py-3.5 px-6 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl font-bold text-sm sm:text-base transition-all active:scale-[0.99] shadow-md shadow-blue-600/25 disabled:opacity-60 min-h-[48px]"
+              >
+                {loading ? (
+                  <span className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Please wait...
+                  </span>
+                ) : (
+                  <>
+                    <span>{isLogin ? 'Sign In to Portal' : 'Create Student Account'}</span>
+                    <ArrowRight size={18} />
+                  </>
+                )}
               </button>
-              
-              <div className="text-center mt-6">
-                <button type="button" onClick={() => setIsLogin(!isLogin)} className="text-blue-600 dark:text-blue-400 font-medium hover:underline text-sm">
-                  {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
+
+              {/* Mode Toggle */}
+              <div className="text-center pt-2">
+                <button 
+                  type="button" 
+                  onClick={() => { setIsLogin(!isLogin); setError(''); }}
+                  className="text-xs sm:text-sm font-semibold text-blue-600 dark:text-blue-400 hover:underline min-h-[40px] px-2"
+                >
+                  {isLogin 
+                    ? "New to DDCET RankRise? Create an account" 
+                    : "Already registered? Sign in here"}
                 </button>
               </div>
             </form>

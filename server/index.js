@@ -11,7 +11,8 @@ const getAllowedOrigins = () => {
   const defaults = [
     'http://localhost:5173',
     'http://localhost:3000',
-    'http://127.0.0.1:5173'
+    'http://127.0.0.1:5173',
+    'https://ddcet-rankrise-frontend.onrender.com'
   ];
   const envOrigins = (process.env.FRONTEND_URL || '')
     .split(',')
@@ -25,13 +26,22 @@ app.use(cors({
     if (!origin) return callback(null, true);
     const origins = getAllowedOrigins();
     const cleanOrigin = origin.replace(/\/$/, '');
-    if (origins.includes(cleanOrigin) || origins.includes('*')) {
+    
+    const isAllowed = 
+      origins.includes(cleanOrigin) ||
+      origins.includes('*') ||
+      (cleanOrigin.startsWith('https://') && cleanOrigin.includes('onrender.com'));
+
+    if (isAllowed) {
       callback(null, true);
     } else {
+      console.warn(`[CORS Blocked] Origin "${origin}" is not in allowed origins list.`);
       callback(new Error(`Not allowed by CORS: Origin "${origin}" is not in allowed origins list.`));
     }
   },
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 app.use(express.json());
 
@@ -776,6 +786,9 @@ app.get('/api/health', async (req, res) => {
 
 // Centralized Error Handling
 app.use((err, req, res, next) => {
+  if (err && err.message && err.message.startsWith('Not allowed by CORS')) {
+    return res.status(403).json({ error: 'CORS access denied: Origin not allowed' });
+  }
   // Do not expose stack trace or SQL details to client
   console.error('Unhandled Server Error:', err.message);
   res.status(500).json({ error: 'Internal Server Error' });

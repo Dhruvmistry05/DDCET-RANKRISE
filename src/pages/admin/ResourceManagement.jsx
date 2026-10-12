@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../store/AuthContext';
+import { API_BASE_URL } from '../../config/api';
 import { 
   UploadCloud, FileText, Trash2, Search, 
   Edit3, RefreshCw, CheckCircle2, XCircle, Link as LinkIcon, Eye, X, AlertCircle
@@ -16,7 +17,7 @@ export default function ResourceManagement() {
   const [success, setSuccess] = useState(null);
 
   const { token } = useAuth();
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+  const API_URL = API_BASE_URL;
 
   // Filters and search state
   const [searchQuery, setSearchQuery] = useState('');
@@ -584,7 +585,122 @@ export default function ResourceManagement() {
               )}
             </div>
 
-            <div className="overflow-x-auto">
+            {/* Mobile Cards List (< md) */}
+            <div className="block md:hidden p-3 space-y-3">
+              {filteredResources.map(item => {
+                const link = resolveResourceLink(item);
+                return (
+                  <div key={item.id} className="p-4 bg-slate-50/70 dark:bg-slate-900/50 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 space-y-2.5">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-2 min-w-0 font-bold text-slate-900 dark:text-white text-sm">
+                        {item.external_url ? (
+                          <LinkIcon size={16} className="text-amber-500 shrink-0" />
+                        ) : (
+                          <FileText size={16} className="text-indigo-500 shrink-0" />
+                        )}
+                        <span className="truncate">{item.title}</span>
+                      </div>
+                      <button
+                        onClick={() => handleTogglePublish(item.id, item.published)}
+                        className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase shrink-0 ${
+                          item.published 
+                            ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300' 
+                            : 'bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300'
+                        }`}
+                      >
+                        {item.published ? 'Published' : 'Draft'}
+                      </button>
+                    </div>
+
+                    <div className="flex flex-wrap gap-1.5 text-[11px] font-medium text-slate-500">
+                      <span className="bg-white dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700">
+                        {getTypeName(item.type)}
+                      </span>
+                      {item.exam_year && (
+                        <span className="bg-white dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700">
+                          {item.exam_year}
+                        </span>
+                      )}
+                      {item.type === 'answer_key' && item.paper_id && (
+                        <span className="text-indigo-500 truncate max-w-[180px]">
+                          Linked ID #{item.paper_id}
+                        </span>
+                      )}
+                    </div>
+
+                    {item.description && (
+                      <p className="text-xs text-slate-400 line-clamp-2">{item.description}</p>
+                    )}
+
+                    <div className="flex items-center justify-between pt-2 border-t border-slate-200/60 dark:border-slate-700/60">
+                      <a
+                        href={link}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 text-xs font-bold text-indigo-600 dark:text-indigo-400 p-1.5 hover:underline"
+                      >
+                        <Eye size={14} /> Open
+                      </a>
+
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => {
+                            setEditingItem(item);
+                            setEditFormData({
+                              title: item.title,
+                              description: item.description || '',
+                              type: item.type,
+                              exam_year: item.exam_year || '',
+                              paper_id: item.paper_id || '',
+                              external_url: item.external_url || '',
+                              display_order: item.display_order ?? 0,
+                              subject_id: item.subject_id || '',
+                              chapter_id: item.chapter_id || '',
+                              topic_id: item.topic_id || '',
+                              published: item.published
+                            });
+                          }}
+                          className="p-2 text-slate-500 hover:text-blue-600 rounded-lg hover:bg-white dark:hover:bg-slate-800"
+                          title="Edit Metadata"
+                        >
+                          <Edit3 size={15} />
+                        </button>
+
+                        {!item.external_url && (
+                          <button
+                            onClick={() => {
+                              setReplacingItem(item);
+                              setReplaceFile(null);
+                            }}
+                            className="p-2 text-slate-500 hover:text-amber-600 rounded-lg hover:bg-white dark:hover:bg-slate-800"
+                            title="Replace File"
+                          >
+                            <RefreshCw size={15} />
+                          </button>
+                        )}
+
+                        <button
+                          onClick={() => handleDelete(item.id, item.title)}
+                          className="p-2 text-slate-500 hover:text-red-600 rounded-lg hover:bg-white dark:hover:bg-slate-800"
+                          title="Delete Resource"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {filteredResources.length === 0 && (
+                <div className="py-8 text-center text-slate-400 text-xs">
+                  No resources match the selected criteria.
+                </div>
+              )}
+            </div>
+
+            {/* Desktop Table View (>= md) */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-left text-sm">
                 <thead className="bg-slate-50 dark:bg-slate-900/50 uppercase text-[11px] font-bold tracking-wider text-slate-400">
                   <tr>
@@ -725,13 +841,13 @@ export default function ResourceManagement() {
 
       {/* MODAL 1: Edit Metadata Modal */}
       {editingItem && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-800 w-full max-w-lg rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 p-6 space-y-4">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-white dark:bg-slate-800 w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 p-4 sm:p-6 space-y-4">
             <div className="flex items-center justify-between border-b pb-3 dark:border-slate-700">
               <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 <Edit3 size={18} className="text-blue-500" /> Edit Metadata
               </h3>
-              <button onClick={() => setEditingItem(null)} className="text-slate-400 hover:text-slate-600"><X size={20} /></button>
+              <button onClick={() => setEditingItem(null)} className="text-slate-400 hover:text-slate-600 p-1"><X size={20} /></button>
             </div>
 
             <form onSubmit={handleEditSubmit} className="space-y-4 text-sm">
@@ -746,7 +862,7 @@ export default function ResourceManagement() {
                 />
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
                   <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Type</label>
                   <select
@@ -852,8 +968,8 @@ export default function ResourceManagement() {
 
       {/* MODAL 2: Replace File Modal */}
       {replacingItem && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-800 w-full max-w-md rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 p-6 space-y-4">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-white dark:bg-slate-800 w-full max-w-md max-h-[90vh] overflow-y-auto rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 p-4 sm:p-6 space-y-4">
             <div className="flex items-center justify-between border-b pb-3 dark:border-slate-700">
               <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 <RefreshCw size={18} className="text-amber-500" /> Replace PDF Document

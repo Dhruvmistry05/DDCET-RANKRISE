@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../../store/AuthContext';
+import { API_BASE_URL } from '../../../config/api';
 import { 
   ExternalLink, Search, Globe, BookOpen, AlertCircle, 
   RefreshCw, Calendar, Tag, ShieldAlert
@@ -12,7 +13,7 @@ export default function ExternalLinks() {
   const [error, setError] = useState(null);
 
   const { token } = useAuth();
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+  const API_URL = API_BASE_URL;
 
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
@@ -43,7 +44,7 @@ export default function ExternalLinks() {
       if (Array.isArray(subData)) {
         setSubjects(subData);
       }
-    } catch (e) {
+    } catch {
       setError('Unable to load external study resources. Please try again later.');
     } finally {
       setLoading(false);
@@ -53,7 +54,7 @@ export default function ExternalLinks() {
   const getDomain = (urlStr) => {
     try {
       return new URL(urlStr).hostname.replace(/^www\./, '');
-    } catch (e) {
+    } catch {
       return 'external-site';
     }
   };
@@ -89,27 +90,27 @@ export default function ExternalLinks() {
   }, [links, searchQuery, selectedSubject, selectedCategory, selectedYear]);
 
   return (
-    <div className="p-6 lg:p-10 max-w-7xl mx-auto space-y-8">
+    <div className="p-4 sm:p-6 lg:p-10 max-w-7xl mx-auto space-y-6 sm:space-y-8 animate-fade-in">
       {/* Page Header */}
       <div>
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-black text-slate-900 dark:text-white">Curated External Study Links</h1>
-            <p className="text-slate-500 dark:text-slate-400 mt-1">
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">Curated External Study Links</h1>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
               Verified external references, university portals, syllabus guides, and third-party educational materials.
             </p>
           </div>
           <button
             onClick={fetchLinks}
             disabled={loading}
-            className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-semibold transition"
+            className="self-start sm:self-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs sm:text-sm font-semibold min-h-[44px] transition"
           >
             <RefreshCw size={16} className={loading ? "animate-spin" : ""} /> Refresh
           </button>
         </div>
 
         {/* Clear External Integration Disclaimer */}
-        <div className="mt-6 p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/60 rounded-2xl flex items-start gap-3 text-xs text-amber-800 dark:text-amber-300">
+        <div className="mt-5 p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/60 rounded-2xl flex items-start gap-3 text-xs text-amber-800 dark:text-amber-300">
           <ShieldAlert size={20} className="shrink-0 text-amber-600 dark:text-amber-400 mt-0.5" />
           <div className="space-y-1">
             <p className="font-bold">Third-Party Destination Notice:</p>
@@ -123,22 +124,22 @@ export default function ExternalLinks() {
       </div>
 
       {/* Search and Filters Bar */}
-      <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-wrap gap-4 items-center justify-between">
-        <div className="relative flex-1 min-w-[240px]">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+      <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 space-y-3">
+        <div className="relative w-full">
+          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
-            className="w-full pl-9 pr-3 py-2 border rounded-xl dark:bg-slate-900 dark:border-slate-700 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+            className="w-full pl-9 pr-3 py-2.5 border rounded-xl dark:bg-slate-900 dark:border-slate-700 text-sm focus:ring-2 focus:ring-indigo-500 outline-none min-h-[44px]"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Search by title, description, or domain (e.g. google.com)..."
           />
         </div>
 
-        <div className="flex flex-wrap gap-2 text-xs">
+        <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 text-xs">
           {/* Subject Filter */}
           <select
-            className="px-3 py-2 border rounded-xl dark:bg-slate-900 dark:border-slate-700 font-medium"
+            className="px-3 py-2.5 border rounded-xl dark:bg-slate-900 dark:border-slate-700 font-medium min-h-[44px]"
             value={selectedSubject}
             onChange={e => setSelectedSubject(e.target.value)}
           >
@@ -150,7 +151,7 @@ export default function ExternalLinks() {
 
           {/* Category Filter */}
           <select
-            className="px-3 py-2 border rounded-xl dark:bg-slate-900 dark:border-slate-700 font-medium"
+            className="px-3 py-2.5 border rounded-xl dark:bg-slate-900 dark:border-slate-700 font-medium min-h-[44px]"
             value={selectedCategory}
             onChange={e => setSelectedCategory(e.target.value)}
           >
@@ -164,7 +165,7 @@ export default function ExternalLinks() {
           {/* Year Filter */}
           {uniqueYears.length > 0 && (
             <select
-              className="px-3 py-2 border rounded-xl dark:bg-slate-900 dark:border-slate-700 font-medium"
+              className="px-3 py-2.5 border rounded-xl dark:bg-slate-900 dark:border-slate-700 font-medium min-h-[44px]"
               value={selectedYear}
               onChange={e => setSelectedYear(e.target.value)}
             >
@@ -183,7 +184,7 @@ export default function ExternalLinks() {
                 setSelectedCategory('all');
                 setSelectedYear('all');
               }}
-              className="px-3 py-2 text-indigo-600 dark:text-indigo-400 font-bold hover:underline"
+              className="col-span-2 sm:col-span-1 px-3 py-2.5 text-indigo-600 dark:text-indigo-400 font-bold hover:underline min-h-[44px] flex items-center justify-center"
             >
               Reset Filters
             </button>
@@ -264,10 +265,10 @@ export default function ExternalLinks() {
                     href={linkItem.external_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full py-2.5 px-4 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/40 dark:hover:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2"
+                    className="w-full py-3 px-4 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/40 dark:hover:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 rounded-xl text-xs sm:text-sm font-bold min-h-[44px] transition flex items-center justify-center gap-2"
                   >
                     <span>Visit External Resource</span>
-                    <ExternalLink size={14} />
+                    <ExternalLink size={15} />
                   </a>
                 </div>
               </div>

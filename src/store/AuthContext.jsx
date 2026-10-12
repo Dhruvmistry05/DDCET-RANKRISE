@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import { getApiUrl } from '../config/api';
 
 const AuthContext = createContext();
 
@@ -21,7 +22,7 @@ export function AuthProvider({ children }) {
 
   const fetchProfile = async (currentToken) => {
     try {
-      const res = await fetch((import.meta.env.VITE_API_URL || 'http://localhost:3001') + '/api/user/profile', {
+      const res = await fetch(getApiUrl('/api/user/profile'), {
         headers: {
           'Authorization': `Bearer ${currentToken}`
         }

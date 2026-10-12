@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, Users, FileText, BarChart, Library, FileQuestion, GraduationCap } from 'lucide-react';
+import { BookOpen, Users, FileText, BarChart, Library, FileQuestion, GraduationCap, ShieldCheck, Sparkles } from 'lucide-react';
 import { useAuth } from '../../store/AuthContext';
+import { API_BASE_URL } from '../../config/api';
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState(null);
   const { token, user } = useAuth();
+  const API_URL = API_BASE_URL;
 
   useEffect(() => {
-    fetch((import.meta.env.VITE_API_URL || 'http://localhost:3001') + '/api/admin/stats', {
+    fetch(`${API_URL}/api/admin/stats`, {
       headers: { 'Authorization': `Bearer ${token}` }
     })
       .then(res => res.json())
@@ -17,22 +19,40 @@ export default function AdminDashboard() {
   }, [token]);
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-8">
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-black text-slate-800 dark:text-white">Admin Dashboard</h1>
-          <p className="text-slate-500">Welcome back, {user?.name}</p>
+    <div className="p-3.5 sm:p-6 lg:p-10 max-w-7xl mx-auto space-y-6 sm:space-y-8 font-sans animate-fade-in">
+      
+      {/* Admin Header Banner */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950 p-5 sm:p-8 rounded-3xl text-white shadow-xl">
+        <div className="space-y-1">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-xs font-bold border border-blue-400/30">
+            <ShieldCheck size={13} /> Administrator Control Center
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
+            System Overview & Management
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-400">
+            Welcome back, {user?.name || 'Administrator'}. Monitor active tests, students, and question banks.
+          </p>
         </div>
+
+        <Link
+          to="/admin/tests/create"
+          className="self-start sm:self-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-blue-600/30 transition-all active:scale-95 min-h-[44px]"
+        >
+          <span>Create New Test</span>
+        </Link>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <DashboardCard title="Registered Students" value={stats?.students} icon={Users} color="bg-blue-600" to="#" />
-        <DashboardCard title="Live Tests" value={stats?.tests} icon={FileText} color="bg-purple-600" to="/admin/tests" />
-        <DashboardCard title="Question Bank" value={stats?.questions} icon={FileQuestion} color="bg-orange-500" to="/admin/questions" />
-        <DashboardCard title="Syllabus Subjects" value={stats?.subjects} icon={Library} color="bg-green-600" to="/admin/syllabus" />
-        <DashboardCard title="Chapters" value={stats?.chapters} icon={BookOpen} color="bg-emerald-600" to="/admin/syllabus" />
-        <DashboardCard title="Study Materials" value={stats?.materials} icon={GraduationCap} color="bg-indigo-600" to="/admin/materials" />
-        <DashboardCard title="Results & Analytics" value="View" icon={BarChart} color="bg-rose-600" to="/admin/analytics" />
+      {/* Metric Cards Grid (2-columns on mobile, 4 on desktop) */}
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-5">
+        <DashboardCard title="Students" value={stats?.students} icon={Users} color="from-blue-600 to-indigo-700" to="/admin" />
+        <DashboardCard title="Assessments" value={stats?.tests} icon={FileText} color="from-purple-600 to-indigo-700" to="/admin/tests" />
+        <DashboardCard title="Question Bank" value={stats?.questions} icon={FileQuestion} color="from-amber-600 to-orange-600" to="/admin/questions" />
+        <DashboardCard title="Subjects" value={stats?.subjects} icon={Library} color="from-emerald-600 to-teal-700" to="/admin/syllabus" />
+        <DashboardCard title="Chapters" value={stats?.chapters} icon={BookOpen} color="from-teal-600 to-cyan-700" to="/admin/syllabus" />
+        <DashboardCard title="Materials" value={stats?.materials} icon={GraduationCap} color="from-indigo-600 to-blue-800" to="/admin/materials" />
+        <DashboardCard title="Cloud PDFs" value="Manage" icon={FileText} color="from-rose-600 to-pink-700" to="/admin/resources" />
+        <DashboardCard title="Analytics" value="View" icon={BarChart} color="from-slate-700 to-slate-900" to="/admin/analytics" />
       </div>
     </div>
   );
@@ -40,14 +60,23 @@ export default function AdminDashboard() {
 
 function DashboardCard({ title, value, icon: Icon, color, to }) {
   return (
-    <Link to={to} className={`relative overflow-hidden block p-6 rounded-2xl shadow-sm text-white hover:-translate-y-1 transition-transform ${color}`}>
-      <div className="absolute right-0 top-0 opacity-10 transform translate-x-4 -translate-y-4">
-        <Icon size={120} />
+    <Link 
+      to={to} 
+      className={`group relative overflow-hidden block p-4 sm:p-6 rounded-2xl shadow-xs text-white hover:shadow-lg transition-all active:scale-[0.98] bg-gradient-to-br ${color} min-h-[110px] sm:min-h-[130px] flex flex-col justify-between`}
+    >
+      <div className="flex items-center justify-between">
+        <div className="p-2 sm:p-2.5 rounded-xl bg-white/15 backdrop-blur-xs text-white">
+          <Icon size={20} className="sm:w-6 sm:h-6" />
+        </div>
+        <span className="text-xl sm:text-3xl font-black tracking-tight">
+          {value !== undefined ? value : '...'}
+        </span>
       </div>
-      <div className="relative z-10 flex flex-col space-y-2">
-        <Icon size={32} className="mb-2 opacity-80" />
-        <h2 className="text-lg font-medium opacity-90">{title}</h2>
-        <span className="text-4xl font-black">{value !== undefined ? value : '...'}</span>
+
+      <div className="mt-2">
+        <h2 className="text-xs sm:text-sm font-bold tracking-tight opacity-90 truncate">
+          {title}
+        </h2>
       </div>
     </Link>
   );

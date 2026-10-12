@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../../store/AuthContext';
+import { API_BASE_URL } from '../../../config/api';
 import { 
   FileText, Download, Eye, Calendar, Search, 
   RefreshCw, Globe, BookOpen, AlertCircle, FileCheck, Book,
@@ -32,7 +33,7 @@ export default function StudyMaterialLibrary({ defaultCategory = 'all' }) {
   const [externalRedirectItem, setExternalRedirectItem] = useState(null);
 
   const { token } = useAuth();
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+  const API_URL = API_BASE_URL;
 
   // Fetch published resources, subjects, and chapters
   useEffect(() => {
@@ -58,7 +59,7 @@ export default function StudyMaterialLibrary({ defaultCategory = 'all' }) {
       }
       if (Array.isArray(subData)) setSubjects(subData);
       if (Array.isArray(chapData)) setChapters(chapData);
-    } catch (_err) {
+    } catch {
       setError('Unable to load study materials. Please check your connection and try again.');
     } finally {
       setLoading(false);
@@ -69,7 +70,7 @@ export default function StudyMaterialLibrary({ defaultCategory = 'all' }) {
   const getDomain = (urlStr) => {
     try {
       return new URL(urlStr).hostname.replace(/^www\./, '');
-    } catch (_err) {
+    } catch {
       return 'external-site';
     }
   };
@@ -498,7 +499,7 @@ export default function StudyMaterialLibrary({ defaultCategory = 'all' }) {
                     {isExternal ? (
                       <button
                         onClick={() => setExternalRedirectItem(item)}
-                        className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/40 text-amber-800 dark:text-amber-300 font-bold text-sm rounded-xl transition"
+                        className="w-full flex items-center justify-center gap-2 py-3 px-4 min-h-[44px] bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/40 text-amber-800 dark:text-amber-300 font-bold text-xs sm:text-sm rounded-xl transition"
                       >
                         <ExternalLink size={16} /> Open External Site
                       </button>
@@ -506,7 +507,7 @@ export default function StudyMaterialLibrary({ defaultCategory = 'all' }) {
                       <>
                         <button
                           onClick={() => setPreviewPdfItem(item)}
-                          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400 font-bold text-xs sm:text-sm rounded-xl transition"
+                          className="flex-1 flex items-center justify-center gap-1.5 py-3 px-3 min-h-[44px] bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400 font-bold text-xs sm:text-sm rounded-xl transition"
                         >
                           <Eye size={16} /> View PDF
                         </button>
@@ -516,7 +517,7 @@ export default function StudyMaterialLibrary({ defaultCategory = 'all' }) {
                           download
                           target="_blank"
                           rel="noreferrer"
-                          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold text-xs sm:text-sm rounded-xl transition"
+                          className="flex-1 flex items-center justify-center gap-1.5 py-3 px-3 min-h-[44px] bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold text-xs sm:text-sm rounded-xl transition"
                           title="Download PDF"
                         >
                           <Download size={16} /> Download

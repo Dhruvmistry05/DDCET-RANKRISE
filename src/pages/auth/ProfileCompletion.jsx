@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../store/AuthContext';
-import { User, Phone, Calendar, BookOpen, CheckCircle } from 'lucide-react';
+import { getApiUrl } from '../../config/api';
+import { User, Phone, Calendar, BookOpen, CheckCircle, GraduationCap, ArrowRight } from 'lucide-react';
 
 export default function ProfileCompletion() {
   const { user, token, fetchProfile } = useAuth();
@@ -24,12 +25,12 @@ export default function ProfileCompletion() {
     
     // Basic validations
     if (formData.mobile.length < 10) {
-      return setError('Please enter a valid mobile number');
+      return setError('Please enter a valid 10-digit mobile number');
     }
 
     setLoading(true);
     try {
-      const res = await fetch((import.meta.env.VITE_API_URL || 'http://localhost:3001') + '/api/user/profile', {
+      const res = await fetch(getApiUrl('/api/user/profile'), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -38,8 +39,12 @@ export default function ProfileCompletion() {
         body: JSON.stringify(formData)
       });
       
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to save profile');
+      let data = null;
+      const contentType = res.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        data = await res.json();
+      }
+      if (!res.ok) throw new Error(data?.error || `Failed to save profile (${res.status})`);
       
       await fetchProfile(token); // Update context
       navigate(data.role === 'admin' ? '/admin' : '/student');
@@ -51,87 +56,129 @@ export default function ProfileCompletion() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-2xl w-full space-y-8 bg-white dark:bg-slate-800 p-10 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-700">
-        <div>
-          <h2 className="text-center text-3xl font-extrabold text-slate-900 dark:text-white">
-            Complete Your Profile
-          </h2>
-          <p className="mt-2 text-center text-sm text-slate-600 dark:text-slate-400">
-            Tell us a bit about yourself before you jump in.
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900 py-6 sm:py-12 px-3 sm:px-6 lg:px-8">
+      <div className="max-w-2xl w-full space-y-6 bg-white dark:bg-slate-800 p-5 sm:p-8 md:p-10 rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-700/80">
+        
+        {/* Header */}
+        <div className="text-center space-y-2">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 mb-1">
+            <GraduationCap size={26} />
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+            Complete Your Student Profile
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-md mx-auto">
+            Please provide your details so we can tailor the DDCET syllabus, tests, and cut-off predictions to your diploma branch.
           </p>
         </div>
 
         {error && (
-          <div className="bg-red-50 text-red-600 p-4 rounded-xl text-sm font-medium border border-red-200">
+          <div className="bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 p-3.5 rounded-xl text-xs sm:text-sm font-medium border border-rose-200 dark:border-rose-900/60">
             {error}
           </div>
         )}
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <form className="space-y-6" onSubmit={handleSubmit}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
             
-            {/* Required Fields */}
-            <div className="space-y-4 md:col-span-2">
-              <h3 className="font-bold text-slate-700 dark:text-slate-300 border-b border-slate-200 dark:border-slate-700 pb-2 flex items-center gap-2">
-                <CheckCircle size={18} className="text-blue-500" /> Required Information
-              </h3>
+            {/* Required Section Header */}
+            <div className="sm:col-span-2 pt-2">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700 pb-2 flex items-center gap-2">
+                <CheckCircle size={15} className="text-blue-500" /> Mandatory Information
+              </h2>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Full Name *</label>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
+                Full Name *
+              </label>
               <div className="relative">
-                <User className="absolute left-3 top-3 h-5 w-5 text-slate-400" />
-                <input required type="text" className="w-full pl-10 pr-3 py-2.5 border rounded-xl dark:bg-slate-900 dark:border-slate-700 outline-none focus:ring-2 focus:ring-blue-500" 
-                  value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="e.g. Dhruv Mistry" />
+                <User size={18} className="absolute left-3.5 top-3.5 text-slate-400 pointer-events-none" />
+                <input 
+                  required 
+                  type="text" 
+                  className="w-full pl-10 pr-3.5 py-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50/50 dark:bg-slate-900 text-slate-900 dark:text-white text-sm outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]" 
+                  value={formData.name} 
+                  onChange={e => setFormData({...formData, name: e.target.value})} 
+                  placeholder="e.g. Dhruv Mistry" 
+                />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Mobile Number *</label>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
+                Mobile Number *
+              </label>
               <div className="relative">
-                <Phone className="absolute left-3 top-3 h-5 w-5 text-slate-400" />
-                <input required type="tel" className="w-full pl-10 pr-3 py-2.5 border rounded-xl dark:bg-slate-900 dark:border-slate-700 outline-none focus:ring-2 focus:ring-blue-500" 
-                  value={formData.mobile} onChange={e => setFormData({...formData, mobile: e.target.value})} placeholder="10-digit number" />
+                <Phone size={18} className="absolute left-3.5 top-3.5 text-slate-400 pointer-events-none" />
+                <input 
+                  required 
+                  type="tel" 
+                  className="w-full pl-10 pr-3.5 py-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50/50 dark:bg-slate-900 text-slate-900 dark:text-white text-sm outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]" 
+                  value={formData.mobile} 
+                  onChange={e => setFormData({...formData, mobile: e.target.value})} 
+                  placeholder="10-digit mobile number" 
+                />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Date of Birth *</label>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
+                Date of Birth *
+              </label>
               <div className="relative">
-                <Calendar className="absolute left-3 top-3 h-5 w-5 text-slate-400" />
-                <input required type="date" className="w-full pl-10 pr-3 py-2.5 border rounded-xl dark:bg-slate-900 dark:border-slate-700 outline-none focus:ring-2 focus:ring-blue-500" 
-                  value={formData.dob} onChange={e => setFormData({...formData, dob: e.target.value})} />
+                <Calendar size={18} className="absolute left-3.5 top-3.5 text-slate-400 pointer-events-none" />
+                <input 
+                  required 
+                  type="date" 
+                  className="w-full pl-10 pr-3.5 py-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50/50 dark:bg-slate-900 text-slate-900 dark:text-white text-sm outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]" 
+                  value={formData.dob} 
+                  onChange={e => setFormData({...formData, dob: e.target.value})} 
+                />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Diploma Branch *</label>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
+                Diploma Branch *
+              </label>
               <div className="relative">
-                <BookOpen className="absolute left-3 top-3 h-5 w-5 text-slate-400" />
-                <select required className="w-full pl-10 pr-3 py-2.5 border rounded-xl dark:bg-slate-900 dark:border-slate-700 outline-none focus:ring-2 focus:ring-blue-500"
-                  value={formData.branch} onChange={e => setFormData({...formData, branch: e.target.value})}>
+                <BookOpen size={18} className="absolute left-3.5 top-3.5 text-slate-400 pointer-events-none" />
+                <select 
+                  required 
+                  className="w-full pl-10 pr-3.5 py-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50/50 dark:bg-slate-900 text-slate-900 dark:text-white text-sm outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]"
+                  value={formData.branch} 
+                  onChange={e => setFormData({...formData, branch: e.target.value})}
+                >
                   <option value="">Select Branch</option>
                   <option value="Computer">Computer Engineering</option>
                   <option value="IT">Information Technology</option>
                   <option value="Mechanical">Mechanical Engineering</option>
                   <option value="Civil">Civil Engineering</option>
                   <option value="Electrical">Electrical Engineering</option>
+                  <option value="Chemical">Chemical Engineering</option>
+                  <option value="EC">Electronics & Communication</option>
+                  <option value="Automobile">Automobile Engineering</option>
                 </select>
               </div>
             </div>
 
-            {/* Optional Fields */}
-            <div className="space-y-4 md:col-span-2 mt-4">
-              <h3 className="font-bold text-slate-700 dark:text-slate-300 border-b border-slate-200 dark:border-slate-700 pb-2">
-                Optional Information
-              </h3>
+            {/* Optional Section */}
+            <div className="sm:col-span-2 pt-4">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700 pb-2">
+                College & Academic Details
+              </h2>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Gender</label>
-              <select className="w-full px-4 py-2.5 border rounded-xl dark:bg-slate-900 dark:border-slate-700 outline-none focus:ring-2 focus:ring-blue-500"
-                value={formData.gender} onChange={e => setFormData({...formData, gender: e.target.value})}>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
+                Gender
+              </label>
+              <select 
+                className="w-full px-3.5 py-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50/50 dark:bg-slate-900 text-slate-900 dark:text-white text-sm outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]"
+                value={formData.gender} 
+                onChange={e => setFormData({...formData, gender: e.target.value})}
+              >
                 <option value="">Select Gender</option>
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
@@ -140,28 +187,50 @@ export default function ProfileCompletion() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Current Semester</label>
-              <select className="w-full px-4 py-2.5 border rounded-xl dark:bg-slate-900 dark:border-slate-700 outline-none focus:ring-2 focus:ring-blue-500"
-                value={formData.semester} onChange={e => setFormData({...formData, semester: e.target.value})}>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
+                Current Semester
+              </label>
+              <select 
+                className="w-full px-3.5 py-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50/50 dark:bg-slate-900 text-slate-900 dark:text-white text-sm outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]"
+                value={formData.semester} 
+                onChange={e => setFormData({...formData, semester: e.target.value})}
+              >
                 <option value="">Select Semester</option>
                 {[1,2,3,4,5,6].map(s => <option key={s} value={s}>Semester {s}</option>)}
               </select>
             </div>
 
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">College Name</label>
-              <input type="text" className="w-full px-4 py-2.5 border rounded-xl dark:bg-slate-900 dark:border-slate-700 outline-none focus:ring-2 focus:ring-blue-500" 
-                value={formData.college} onChange={e => setFormData({...formData, college: e.target.value})} placeholder="e.g. Government Polytechnic" />
+            <div className="sm:col-span-2">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
+                Polytechnic / College Name
+              </label>
+              <input 
+                type="text" 
+                className="w-full px-3.5 py-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50/50 dark:bg-slate-900 text-slate-900 dark:text-white text-sm outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]" 
+                value={formData.college} 
+                onChange={e => setFormData({...formData, college: e.target.value})} 
+                placeholder="e.g. Government Polytechnic Gandhinagar" 
+              />
             </div>
             
           </div>
 
-          <button disabled={loading} type="submit" className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-md active:scale-95 disabled:opacity-70 mt-6">
-            {loading ? 'Saving...' : 'Save Profile & Continue'}
+          <button 
+            disabled={loading} 
+            type="submit" 
+            className="w-full py-3.5 px-6 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl transition-all shadow-md shadow-blue-600/20 active:scale-[0.99] disabled:opacity-70 min-h-[48px] flex items-center justify-center gap-2 text-sm sm:text-base"
+          >
+            {loading ? (
+              <span>Saving details...</span>
+            ) : (
+              <>
+                <span>Complete Profile & Go to Dashboard</span>
+                <ArrowRight size={18} />
+              </>
+            )}
           </button>
         </form>
       </div>
     </div>
   );
 }
-
