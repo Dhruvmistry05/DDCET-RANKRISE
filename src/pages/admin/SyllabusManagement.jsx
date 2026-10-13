@@ -72,11 +72,11 @@ export default function SyllabusManagement() {
   const currentList = activeTab === 'subjects' ? subjects : activeTab === 'chapters' ? chapters : topics;
 
   return (
-    <div className="p-3.5 sm:p-6 lg:p-10 max-w-7xl mx-auto space-y-6 font-sans animate-fade-in">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6 font-sans">
       
       {/* Header */}
       <div>
-        <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+        <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
           Curriculum & Syllabus Structure
         </h1>
         <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
@@ -85,7 +85,7 @@ export default function SyllabusManagement() {
       </div>
 
       {/* Segmented Tab Controls */}
-      <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl w-full sm:w-fit border border-slate-200/80 dark:border-slate-700/80">
+      <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-lg w-full sm:w-fit border border-slate-200 dark:border-slate-700">
         {[
           { key: 'subjects', label: 'Subjects', icon: BookOpen },
           { key: 'chapters', label: 'Chapters', icon: Layers },
@@ -97,35 +97,35 @@ export default function SyllabusManagement() {
             <button 
               key={tab.key} 
               onClick={() => setActiveTab(tab.key)}
-              className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all min-h-[40px] ${
+              className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-3.5 py-1.5 rounded-md font-semibold text-xs transition ${
                 isActive 
-                  ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-sm' 
-                  : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                  ? 'bg-[#1E3A8A] text-white shadow-xs' 
+                  : 'text-slate-600 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
-              <Icon size={16} />
+              <Icon size={15} />
               <span>{tab.label}</span>
             </button>
           );
         })}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* ADD FORM COLUMN */}
-        <div className="lg:col-span-1 bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-2xl shadow-xs border border-slate-200/80 dark:border-slate-700/80 h-fit space-y-4">
-          <h2 className="text-base sm:text-lg font-bold capitalize text-slate-900 dark:text-white">
+        <div className="lg:col-span-1 bg-white dark:bg-slate-900 p-5 rounded-xl shadow-xs border border-slate-200 dark:border-slate-800 h-fit space-y-4">
+          <h2 className="text-base font-bold capitalize text-slate-900 dark:text-white">
             Add New {activeTab.slice(0, -1)}
           </h2>
           
           <form onSubmit={handleSubmit} className="space-y-4">
             {activeTab === 'chapters' && (
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
                   Parent Subject *
                 </label>
                 <select 
-                  className="w-full p-2.5 border rounded-xl dark:bg-slate-900 dark:border-slate-700 text-xs sm:text-sm outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]"
+                  className="w-full p-2.5 border rounded-lg bg-white dark:bg-slate-900 dark:border-slate-700 text-xs sm:text-sm outline-none focus:border-blue-600 transition"
                   required 
                   value={formData.subject_id} 
                   onChange={e => setFormData({...formData, subject_id: e.target.value})}
@@ -138,11 +138,11 @@ export default function SyllabusManagement() {
 
             {activeTab === 'topics' && (
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
                   Parent Chapter *
                 </label>
                 <select 
-                  className="w-full p-2.5 border rounded-xl dark:bg-slate-900 dark:border-slate-700 text-xs sm:text-sm outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]"
+                  className="w-full p-2.5 border rounded-lg bg-white dark:bg-slate-900 dark:border-slate-700 text-xs sm:text-sm outline-none focus:border-blue-600 transition"
                   required 
                   value={formData.chapter_id} 
                   onChange={e => setFormData({...formData, chapter_id: e.target.value})}
@@ -154,13 +154,13 @@ export default function SyllabusManagement() {
             )}
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
                 Name / Title *
               </label>
               <input 
                 type="text" 
                 required 
-                className="w-full p-2.5 border rounded-xl dark:bg-slate-900 dark:border-slate-700 text-xs sm:text-sm outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]" 
+                className="w-full p-2.5 border rounded-lg bg-white dark:bg-slate-900 dark:border-slate-700 text-xs sm:text-sm outline-none focus:border-blue-600 transition" 
                 value={formData.name} 
                 onChange={e => setFormData({...formData, name: e.target.value})} 
                 placeholder={`Name of ${activeTab.slice(0, -1)}`}
@@ -169,11 +169,11 @@ export default function SyllabusManagement() {
 
             {activeTab === 'chapters' && (
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
                   Description (Optional)
                 </label>
                 <textarea 
-                  className="w-full p-2.5 border rounded-xl dark:bg-slate-900 dark:border-slate-700 text-xs sm:text-sm outline-none focus:ring-2 focus:ring-blue-500" 
+                  className="w-full p-2.5 border rounded-lg bg-white dark:bg-slate-900 dark:border-slate-700 text-xs sm:text-sm outline-none focus:border-blue-600 transition" 
                   rows="2"
                   value={formData.description} 
                   onChange={e => setFormData({...formData, description: e.target.value})} 
@@ -182,12 +182,12 @@ export default function SyllabusManagement() {
             )}
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
                 Display Order
               </label>
               <input 
                 type="number" 
-                className="w-full p-2.5 border rounded-xl dark:bg-slate-900 dark:border-slate-700 text-xs sm:text-sm outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]" 
+                className="w-full p-2.5 border rounded-lg bg-white dark:bg-slate-900 dark:border-slate-700 text-xs sm:text-sm outline-none focus:border-blue-600 transition" 
                 value={formData.display_order} 
                 onChange={e => setFormData({...formData, display_order: parseInt(e.target.value) || 0})} 
               />
@@ -200,14 +200,14 @@ export default function SyllabusManagement() {
                 checked={formData.published} 
                 onChange={e => setFormData({...formData, published: e.target.checked})} 
               />
-              <span className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300">Publish Immediately</span>
+              <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">Publish Immediately</span>
             </label>
 
             <button 
               type="submit" 
-              className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs sm:text-sm transition-colors flex items-center justify-center gap-2 min-h-[44px]"
+              className="w-full py-2.5 bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white rounded-lg font-semibold text-xs sm:text-sm transition flex items-center justify-center gap-1.5 shadow-xs"
             >
-              <Plus size={18} /> 
+              <Plus size={16} /> 
               <span>Save {activeTab.slice(0, -1)}</span>
             </button>
           </form>
@@ -216,15 +216,15 @@ export default function SyllabusManagement() {
         {/* LIST COLUMN */}
         <div className="lg:col-span-2 space-y-3">
           {loading ? (
-            <div className="p-8 text-center text-slate-500">Loading catalog...</div>
+            <div className="p-8 text-center text-slate-500 text-xs">Loading catalog...</div>
           ) : (
             <>
               {/* Mobile Card View (< md) */}
-              <div className="block md:hidden space-y-2.5">
+              <div className="block md:hidden space-y-2">
                 {currentList.map(item => (
                   <div 
                     key={item.id}
-                    className="p-3.5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 flex items-center justify-between gap-3 shadow-xs"
+                    className="p-3.5 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 shadow-xs"
                   >
                     <div className="min-w-0">
                       <h3 className="font-bold text-slate-900 dark:text-white text-sm truncate">
@@ -237,7 +237,7 @@ export default function SyllabusManagement() {
                         {activeTab === 'topics' && (
                           <span>{chapters.find(c => c.id == item.chapter_id)?.name}</span>
                         )}
-                        <span className={`px-1.5 py-0.2 rounded font-bold ${item.published ? 'text-emerald-600' : 'text-amber-500'}`}>
+                        <span className={`font-semibold ${item.published ? 'text-emerald-600' : 'text-amber-500'}`}>
                           {item.published ? 'Published' : 'Draft'}
                         </span>
                       </div>
@@ -245,57 +245,57 @@ export default function SyllabusManagement() {
 
                     <button 
                       onClick={() => handleDelete(item.id)} 
-                      className="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-xl shrink-0"
+                      className="p-1.5 text-slate-400 hover:text-rose-600 transition"
                       title="Delete"
                     >
-                      <Trash2 size={16} />
+                      <Trash2 size={15} />
                     </button>
                   </div>
                 ))}
 
                 {currentList.length === 0 && (
-                  <div className="p-8 text-center bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 text-slate-500 text-xs">
+                  <div className="p-8 text-center bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-500 text-xs">
                     No {activeTab} added yet. Use the form to create your first entry.
                   </div>
                 )}
               </div>
 
               {/* Desktop Table View (>= md) */}
-              <div className="hidden md:block bg-white dark:bg-slate-800 rounded-2xl shadow-xs border border-slate-200/80 dark:border-slate-700/80 overflow-hidden">
+              <div className="hidden md:block bg-white dark:bg-slate-900 rounded-xl shadow-xs border border-slate-200 dark:border-slate-800 overflow-hidden">
                 <table className="w-full text-left text-sm text-slate-600 dark:text-slate-400">
-                  <thead className="bg-slate-50 dark:bg-slate-900/60 text-slate-700 dark:text-slate-200 uppercase text-xs font-bold border-b border-slate-200 dark:border-slate-700">
+                  <thead className="bg-slate-50 dark:bg-slate-850 text-slate-700 dark:text-slate-200 uppercase text-xs font-bold border-b border-slate-200 dark:border-slate-800">
                     <tr>
-                      <th className="px-5 py-3.5">Name</th>
-                      {activeTab !== 'subjects' && <th className="px-5 py-3.5">Parent</th>}
-                      <th className="px-5 py-3.5 text-center">Status</th>
-                      <th className="px-5 py-3.5 text-center">Order</th>
-                      <th className="px-5 py-3.5 text-right">Actions</th>
+                      <th className="px-5 py-3">Name</th>
+                      {activeTab !== 'subjects' && <th className="px-5 py-3">Parent</th>}
+                      <th className="px-5 py-3 text-center">Status</th>
+                      <th className="px-5 py-3 text-center">Order</th>
+                      <th className="px-5 py-3 text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100 dark:divide-slate-750">
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                     {currentList.map(item => (
-                      <tr key={item.id} className="hover:bg-slate-50/70 dark:hover:bg-slate-750/40 transition-colors">
-                        <td className="px-5 py-3.5 font-bold text-slate-900 dark:text-white">{item.name}</td>
-                        {activeTab === 'chapters' && <td className="px-5 py-3.5 text-xs">{subjects.find(s => s.id == item.subject_id)?.name}</td>}
-                        {activeTab === 'topics' && <td className="px-5 py-3.5 text-xs">{chapters.find(c => c.id == item.chapter_id)?.name}</td>}
-                        <td className="px-5 py-3.5 text-center">
+                      <tr key={item.id} className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition">
+                        <td className="px-5 py-3 font-semibold text-slate-900 dark:text-white">{item.name}</td>
+                        {activeTab === 'chapters' && <td className="px-5 py-3 text-xs">{subjects.find(s => s.id == item.subject_id)?.name}</td>}
+                        {activeTab === 'topics' && <td className="px-5 py-3 text-xs">{chapters.find(c => c.id == item.chapter_id)?.name}</td>}
+                        <td className="px-5 py-3 text-center">
                           {item.published ? (
-                            <span className="bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 px-2.5 py-0.5 rounded-full text-xs font-bold">Published</span>
+                            <span className="bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 px-2 py-0.5 rounded text-xs font-semibold">Published</span>
                           ) : (
-                            <span className="bg-slate-100 dark:bg-slate-700 text-slate-500 px-2.5 py-0.5 rounded-full text-xs font-bold">Draft</span>
+                            <span className="bg-slate-100 dark:bg-slate-800 text-slate-500 px-2 py-0.5 rounded text-xs font-semibold">Draft</span>
                           )}
                         </td>
-                        <td className="px-5 py-3.5 text-center font-mono text-xs">{item.display_order}</td>
-                        <td className="px-5 py-3.5 text-right">
-                          <button onClick={() => handleDelete(item.id)} className="p-1.5 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition-colors">
-                            <Trash2 size={16}/>
+                        <td className="px-5 py-3 text-center font-mono text-xs">{item.display_order}</td>
+                        <td className="px-5 py-3 text-right">
+                          <button onClick={() => handleDelete(item.id)} className="p-1.5 text-slate-400 hover:text-rose-600 transition">
+                            <Trash2 size={15}/>
                           </button>
                         </td>
                       </tr>
                     ))}
                     {currentList.length === 0 && (
                       <tr>
-                        <td colSpan="5" className="px-5 py-8 text-center text-slate-500">No {activeTab} found. Add one to get started!</td>
+                        <td colSpan="5" className="px-5 py-8 text-center text-slate-500 text-xs">No {activeTab} found. Add one to get started!</td>
                       </tr>
                     )}
                   </tbody>

@@ -207,29 +207,25 @@ export default function StudyMaterialLibrary({ defaultCategory = 'all' }) {
   const hasActiveFilters = searchQuery || selectedSubject !== 'all' || selectedChapter !== 'all' || selectedYear !== 'all' || selectedFormat !== 'all' || activeCategory !== 'all';
 
   return (
-    <div className="p-4 sm:p-6 lg:p-10 max-w-7xl mx-auto space-y-6 sm:space-y-8 animate-fade-in text-slate-800 dark:text-slate-100">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6 text-slate-800 dark:text-slate-100 font-sans">
       {/* Header Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-800 text-white p-6 sm:p-10 shadow-xl shadow-indigo-500/10">
-        <div className="relative z-10 max-w-3xl space-y-3">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-bold tracking-wide">
-            <Sparkles size={14} className="text-yellow-300" />
-            <span>Official Student Resource Portal</span>
+      <div className="bg-[#1E3A8A] text-white border border-blue-900 rounded-xl p-5 sm:p-7 shadow-xs">
+        <div className="max-w-2xl space-y-2">
+          <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-white/10 text-xs font-semibold text-blue-100 border border-white/15">
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-300" />
+            <span>Official Examination Repository</span>
           </div>
-          <h1 className="text-2xl sm:text-4xl font-black tracking-tight leading-tight">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
             DDCET Study Material Library
           </h1>
-          <p className="text-sm sm:text-base text-blue-100/90 leading-relaxed max-w-2xl">
+          <p className="text-xs sm:text-sm text-blue-100/90 leading-relaxed font-medium">
             Access certified syllabus blueprints, archived previous year question papers, official answer keys, practice PDFs, and verified study portals in one place.
           </p>
         </div>
-
-        {/* Decorative background shapes */}
-        <div className="absolute -right-16 -top-24 w-80 h-80 rounded-full bg-white/5 blur-3xl pointer-events-none" />
-        <div className="absolute right-20 -bottom-24 w-60 h-60 rounded-full bg-indigo-400/10 blur-2xl pointer-events-none" />
       </div>
 
       {/* Category Tabs */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none border-b border-slate-200 dark:border-slate-800">
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
         {[
           { key: 'all', label: 'All Materials', icon: Layers, count: categoryCounts.all },
           { key: 'question_paper', label: 'Previous Papers', icon: FileText, count: categoryCounts.question_paper },
@@ -244,16 +240,16 @@ export default function StudyMaterialLibrary({ defaultCategory = 'all' }) {
             <button
               key={tab.key}
               onClick={() => setActiveCategory(tab.key)}
-              className={`flex items-center gap-2 px-4 py-3 rounded-2xl font-bold text-sm whitespace-nowrap transition-all duration-200 ${
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg font-semibold text-xs whitespace-nowrap transition-colors ${
                 isActive
-                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
-                  : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/60 border border-slate-200/80 dark:border-slate-700'
+                  ? 'bg-[#1E3A8A] text-white shadow-xs'
+                  : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-[#F8FAFC] dark:hover:bg-slate-750 border border-[#E2E8F0] dark:border-slate-700'
               }`}
             >
-              <Icon size={16} className={isActive ? 'text-white' : 'text-slate-400 dark:text-slate-500'} />
+              <Icon size={14} className={isActive ? 'text-white' : 'text-slate-400'} />
               <span>{tab.label}</span>
-              <span className={`text-xs px-2 py-0.5 rounded-full font-black ${
-                isActive ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
+              <span className={`text-[11px] px-1.5 py-0.2 rounded font-bold ${
+                isActive ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-500'
               }`}>
                 {tab.count}
               </span>
@@ -263,24 +259,24 @@ export default function StudyMaterialLibrary({ defaultCategory = 'all' }) {
       </div>
 
       {/* Search and Filters Bar */}
-      <div className="bg-white dark:bg-slate-800 p-4 sm:p-5 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm space-y-4">
+      <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-[#E2E8F0] dark:border-slate-700 shadow-xs space-y-3">
         {/* Search input + Format selector */}
-        <div className="flex flex-col sm:flex-row gap-3">
+        <div className="flex flex-col sm:flex-row gap-2.5">
           <div className="relative flex-1">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
             <input
               type="text"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               placeholder="Search by title, description or keyword..."
-              className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/60 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400"
+              className="w-full pl-9 pr-8 py-2 rounded-lg border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-900 text-xs sm:text-sm focus:outline-hidden focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
               >
-                <X size={16} />
+                <X size={15} />
               </button>
             )}
           </div>
@@ -289,7 +285,7 @@ export default function StudyMaterialLibrary({ defaultCategory = 'all' }) {
             <select
               value={selectedFormat}
               onChange={e => setSelectedFormat(e.target.value)}
-              className="px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/60 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="px-3 py-2 rounded-lg border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-900 text-xs sm:text-sm font-medium focus:outline-hidden focus:border-[#2563EB]"
             >
               <option value="all">All Formats</option>
               <option value="pdf">PDF Documents</option>
@@ -299,7 +295,7 @@ export default function StudyMaterialLibrary({ defaultCategory = 'all' }) {
             <select
               value={sortBy}
               onChange={e => setSortBy(e.target.value)}
-              className="px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/60 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm font-medium focus:outline-none focus:border-blue-600"
             >
               <option value="order">Featured Order</option>
               <option value="year_desc">Exam Year (Newest)</option>
@@ -309,16 +305,16 @@ export default function StudyMaterialLibrary({ defaultCategory = 'all' }) {
         </div>
 
         {/* Cascading metadata filters: Subject, Chapter, Year */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-3 pt-2 border-t border-slate-100 dark:border-slate-700/60">
+        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 pt-2 border-t border-slate-100 dark:border-slate-700">
           <div>
-            <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Subject</label>
+            <label className="block text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-1">Subject</label>
             <select
               value={selectedSubject}
               onChange={e => {
                 setSelectedSubject(e.target.value);
                 setSelectedChapter('all');
               }}
-              className="w-full p-2 text-xs sm:text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/60"
+              className="w-full p-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900"
             >
               <option value="all">All Subjects</option>
               {subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
@@ -326,12 +322,12 @@ export default function StudyMaterialLibrary({ defaultCategory = 'all' }) {
           </div>
 
           <div>
-            <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Chapter</label>
+            <label className="block text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-1">Chapter</label>
             <select
               value={selectedChapter}
               onChange={e => setSelectedChapter(e.target.value)}
               disabled={selectedSubject === 'all' && availableChapters.length === 0}
-              className="w-full p-2 text-xs sm:text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/60 disabled:opacity-50"
+              className="w-full p-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 disabled:opacity-50"
             >
               <option value="all">All Chapters</option>
               {availableChapters.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -339,11 +335,11 @@ export default function StudyMaterialLibrary({ defaultCategory = 'all' }) {
           </div>
 
           <div>
-            <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Exam Year</label>
+            <label className="block text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-1">Exam Year</label>
             <select
               value={selectedYear}
               onChange={e => setSelectedYear(e.target.value)}
-              className="w-full p-2 text-xs sm:text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/60"
+              className="w-full p-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900"
             >
               <option value="all">All Exam Years</option>
               {availableYears.map(y => <option key={y} value={y}>{y}</option>)}
@@ -354,9 +350,9 @@ export default function StudyMaterialLibrary({ defaultCategory = 'all' }) {
             {hasActiveFilters && (
               <button
                 onClick={resetAllFilters}
-                className="w-full py-2 px-3 text-xs font-bold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 hover:bg-red-100 rounded-lg transition-colors flex items-center justify-center gap-1.5"
+                className="w-full py-2 px-3 text-xs font-medium text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/30 hover:bg-rose-100 rounded-lg transition-colors flex items-center justify-center gap-1.5"
               >
-                <X size={14} /> Clear All Filters
+                <X size={13} /> Clear Filters
               </button>
             )}
           </div>
@@ -437,25 +433,25 @@ export default function StudyMaterialLibrary({ defaultCategory = 'all' }) {
               return (
                 <div
                   key={item.id}
-                  className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 sm:p-6 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between group"
+                  className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4 sm:p-5 shadow-xs hover:border-slate-300 dark:hover:border-slate-600 transition-colors flex flex-col justify-between group"
                 >
-                  <div className="space-y-3">
+                  <div className="space-y-2.5">
                     {/* Top Badges */}
                     <div className="flex items-center justify-between gap-2">
-                      <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold border ${badgeColor}`}>
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-600">
                         <CardIcon size={12} />
                         {typeLabel}
                       </span>
 
                       <div className="flex items-center gap-1.5">
                         {item.exam_year && (
-                          <span className="inline-flex items-center gap-1 bg-slate-100 dark:bg-slate-700/80 px-2 py-0.5 rounded text-xs font-bold text-slate-600 dark:text-slate-300">
-                            <Calendar size={12} /> {item.exam_year}
+                          <span className="inline-flex items-center gap-1 bg-slate-50 dark:bg-slate-900 px-2 py-0.5 rounded text-xs font-medium text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
+                            <Calendar size={11} /> {item.exam_year}
                           </span>
                         )}
 
                         {formatFileSize(item.file_size) && (
-                          <span className="inline-flex items-center gap-1 bg-slate-100 dark:bg-slate-700/80 px-2 py-0.5 rounded text-xs font-bold text-slate-500 dark:text-slate-400" title="File Size">
+                          <span className="inline-flex items-center gap-1 text-[11px] text-slate-400" title="File Size">
                             <HardDrive size={11} /> {formatFileSize(item.file_size)}
                           </span>
                         )}
@@ -463,13 +459,13 @@ export default function StudyMaterialLibrary({ defaultCategory = 'all' }) {
                     </div>
 
                     {/* Title */}
-                    <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-2">
+                    <h3 className="text-sm sm:text-base font-semibold text-slate-900 dark:text-white group-hover:text-blue-600 transition-colors line-clamp-2">
                       {item.title}
                     </h3>
 
                     {/* Description */}
                     {item.description && (
-                      <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 line-clamp-3">
+                      <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2">
                         {item.description}
                       </p>
                     )}
@@ -477,17 +473,17 @@ export default function StudyMaterialLibrary({ defaultCategory = 'all' }) {
                     {/* Subject / Chapter / Linked Paper tags */}
                     <div className="flex flex-wrap gap-1.5 pt-1">
                       {subjectName && (
-                        <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                        <span className="px-2 py-0.5 rounded text-[11px] font-medium bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
                           {subjectName}
                         </span>
                       )}
                       {chapterName && (
-                        <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 truncate max-w-[180px]">
+                        <span className="px-2 py-0.5 rounded text-[11px] font-medium bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 truncate max-w-[160px]">
                           {chapterName}
                         </span>
                       )}
                       {isExternal && (
-                        <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 truncate max-w-[180px]">
+                        <span className="px-2 py-0.5 rounded text-[11px] font-medium bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 truncate max-w-[160px]">
                           {getDomain(item.external_url)}
                         </span>
                       )}
@@ -495,21 +491,21 @@ export default function StudyMaterialLibrary({ defaultCategory = 'all' }) {
                   </div>
 
                   {/* Actions Bar */}
-                  <div className="mt-5 pt-4 border-t border-slate-100 dark:border-slate-700/80 flex items-center gap-2">
+                  <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-700 flex items-center gap-2">
                     {isExternal ? (
                       <button
                         onClick={() => setExternalRedirectItem(item)}
-                        className="w-full flex items-center justify-center gap-2 py-3 px-4 min-h-[44px] bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/40 text-amber-800 dark:text-amber-300 font-bold text-xs sm:text-sm rounded-xl transition"
+                        className="w-full flex items-center justify-center gap-1.5 py-2 px-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-650 text-slate-800 dark:text-slate-200 font-medium text-xs rounded-lg transition"
                       >
-                        <ExternalLink size={16} /> Open External Site
+                        <ExternalLink size={14} /> Open Link
                       </button>
                     ) : (
                       <>
                         <button
                           onClick={() => setPreviewPdfItem(item)}
-                          className="flex-1 flex items-center justify-center gap-1.5 py-3 px-3 min-h-[44px] bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400 font-bold text-xs sm:text-sm rounded-xl transition"
+                          className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/40 dark:hover:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-medium text-xs rounded-lg transition"
                         >
-                          <Eye size={16} /> View PDF
+                          <Eye size={14} /> View
                         </button>
 
                         <a
@@ -517,10 +513,10 @@ export default function StudyMaterialLibrary({ defaultCategory = 'all' }) {
                           download
                           target="_blank"
                           rel="noreferrer"
-                          className="flex-1 flex items-center justify-center gap-1.5 py-3 px-3 min-h-[44px] bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold text-xs sm:text-sm rounded-xl transition"
+                          className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-650 text-slate-700 dark:text-slate-200 font-medium text-xs rounded-lg transition"
                           title="Download PDF"
                         >
-                          <Download size={16} /> Download
+                          <Download size={14} /> Download
                         </a>
                       </>
                     )}

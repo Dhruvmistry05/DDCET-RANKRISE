@@ -70,6 +70,11 @@ const initDb = async () => {
   if (USE_PG) {
     try {
       await pgDb.testConnection();
+      try {
+        await pgDb.initSchema();
+      } catch (schemaErr) {
+        console.warn(`[Database Warning] Schema init check: ${schemaErr.message}`);
+      }
       activeDb = pgDb;
       return 'postgresql';
     } catch (err) {

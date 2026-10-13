@@ -97,6 +97,18 @@ const requireUser = (req, res, next) => {
   });
 };
 
+const optionalUser = (req, res, next) => {
+  const token = req.headers['authorization']?.split(' ')[1];
+  if (!token) return next();
+  
+  jwt.verify(token, JWT_SECRET, (err, decoded) => {
+    if (!err && decoded) {
+      req.user = decoded;
+    }
+    next();
+  });
+};
+
 const requireAdmin = (req, res, next) => {
   if (req.user && req.user.role === 'admin') {
     next();
@@ -108,8 +120,9 @@ const requireAdmin = (req, res, next) => {
 app.use((req, res, next) => {
   const isAuthRoute = req.path.startsWith('/api/auth');
   const isUserRoute = req.path.startsWith('/api/user');
+  const isStudentRoute = req.path.startsWith('/api/student');
   
-  if (req.method !== 'GET' && !req.path.startsWith('/uploads') && !isAuthRoute && !isUserRoute) {
+  if (req.method !== 'GET' && !req.path.startsWith('/uploads') && !isAuthRoute && !isUserRoute && !isStudentRoute) {
     return requireUser(req, res, () => requireAdmin(req, res, next));
   }
   next();
@@ -914,6 +927,414 @@ app.get('/api/student/syllabus', async (req, res) => {
   });
   
   res.json(tree);
+});
+
+// --- STUDENT STATS, LEADERBOARD & ATTEMPTS API ---
+
+// Practice time formatter: '0 hours', '25 mins', '1.5 hours'
+const formatPracticeTime = (seconds) => {
+  if (!seconds || seconds <= 0) return '0 hours';
+  if (seconds < 3600) {
+    const mins = Math.max(1, Math.round(seconds / 60));
+    return `${mins} min${mins === 1 ? '' : 's'}`;
+  }
+  const hours = (seconds / 3600).toFixed(1);
+  return `${hours.replace(/\.0$/, '')} hour${hours === '1.0' || hours === '1' ? '' : 's'}`;
+};
+
+// Safe student name getter (no invented names, clean fallback)
+const getStudentDisplayName = (student) => {
+  if (student && typeof student.name === 'string' && student.name.trim().length > 0) {
+    return student.name.trim();
+  }
+  return `Student #${student?.id || 'Candidate'}`;
+};
+
+// Helper: Calculate live leaderboard from real recorded student data
+const computeLeaderboardData = async () => {
+  const users = await db.getAll('users');
+  const students = users.filter(u => u.role === 'student');
+  
+  let allAttempts = [];
+  try {
+    allAttempts = await db.getAll('student_attempts');
+  } catch (e) {
+    allAttempts = [];
+  }
+
+  let allActivity = [];
+  try {
+    allActivity = await db.getAll('student_activity');
+  } catch (e) {
+    allActivity = [];
+  }
+
+  const studentMap = new Map();
+  for (const s of students) {
+    studentMap.set(String(s.id), {
+      student_id: s.id,
+      name: getStudentDisplayName(s),
+      branch: s.branch || 'Engineering',
+      attempts: [],
+      activities: []
+    });
+  }
+
+  for (const a of allAttempts) {
+    const uid = String(a.user_id);
+    if (studentMap.has(uid)) {
+      studentMap.get(uid).attempts.push(a);
+    }
+  }
+
+  for (const act of allActivity) {
+    const uid = String(act.user_id);
+    if (studentMap.has(uid)) {
+      studentMap.get(uid).activities.push(act);
+    }
+  }
+
+  const rankedStudents = [];
+  for (const [id, s] of studentMap.entries()) {
+    const attempts = s.attempts;
+    const tests_completed = attempts.length;
+
+    // Eligibility rule: only registered students who have completed at least 1 test appear in competitive rankings
+    if (tests_completed === 0) continue;
+
+    let totalScore = 0;
+    let scorePercentageSum = 0;
+    let totalTime = 0;
+    let lastSubmittedAt = null;
+
+    for (const a of attempts) {
+      let answersObj = {};
+      if (typeof a.answers === 'string') {
+        try { answersObj = JSON.parse(a.answers); } catch (e) {}
+      } else if (a.answers && typeof a.answers === 'object') {
+        answersObj = a.answers;
+      }
+
+      const parsedScore = a.score !== undefined && a.score !== null ? parseFloat(a.score) : (parseFloat(answersObj.score) || 0);
+      const parsedMax = a.max_score !== undefined && a.max_score !== null ? parseFloat(a.max_score) : (parseFloat(answersObj.max_score) || 20);
+      const parsedTime = parseInt(a.time_spent_seconds) || (parseInt(answersObj.time_spent_seconds) || 0);
+      const subTime = a.submitted_at || answersObj.submitted_at;
+
+      totalScore += parsedScore;
+      scorePercentageSum += parsedMax > 0 ? (parsedScore / parsedMax) * 100 : parsedScore;
+      totalTime += parsedTime;
+
+      if (!lastSubmittedAt || (subTime && new Date(subTime) > new Date(lastSubmittedAt))) {
+        lastSubmittedAt = subTime;
+      }
+    }
+
+    for (const act of s.activities) {
+      totalTime += parseInt(act.time_spent_seconds) || 0;
+    }
+
+    const avgScore = tests_completed > 0 ? Math.round((scorePercentageSum / tests_completed) * 10) / 10 : 0;
+
+    rankedStudents.push({
+      student_id: s.student_id,
+      name: s.name,
+      branch: s.branch,
+      tests_completed,
+      average_score: avgScore,
+      points: Math.round(totalScore * 10) / 10,
+      total_practice_time: formatPracticeTime(totalTime),
+      practice_time_seconds: totalTime,
+      last_submitted_at: lastSubmittedAt || new Date(0).toISOString()
+    });
+  }
+
+  // Consistent, deterministic tie-breaking:
+  // 1. Points (marks) DESC
+  // 2. Average Score DESC
+  // 3. Tests Completed DESC
+  // 4. Practice Time (efficiency) ASC
+  // 5. Earlier submission date ASC
+  rankedStudents.sort((a, b) => {
+    if (b.points !== a.points) return b.points - a.points;
+    if (b.average_score !== a.average_score) return b.average_score - a.average_score;
+    if (b.tests_completed !== a.tests_completed) return b.tests_completed - a.tests_completed;
+    if (a.practice_time_seconds !== b.practice_time_seconds) return a.practice_time_seconds - b.practice_time_seconds;
+    return new Date(a.last_submitted_at) - new Date(b.last_submitted_at);
+  });
+
+  // Assign standard competition ranks with fair tie handling
+  for (let i = 0; i < rankedStudents.length; i++) {
+    if (i > 0) {
+      const prev = rankedStudents[i - 1];
+      const curr = rankedStudents[i];
+      const isTied = 
+        prev.points === curr.points &&
+        prev.average_score === curr.average_score &&
+        prev.tests_completed === curr.tests_completed &&
+        prev.practice_time_seconds === curr.practice_time_seconds;
+
+      if (isTied) {
+        curr.rank = prev.rank;
+      } else {
+        curr.rank = i + 1;
+      }
+    } else {
+      rankedStudents[0].rank = 1;
+    }
+  }
+
+  return {
+    leaderboard: rankedStudents,
+    total_registered_students: students.length,
+    total_ranked_students: rankedStudents.length
+  };
+};
+
+// Helper: Compute live dashboard stats for a student
+const computeStudentStats = async (userId) => {
+  if (!userId) {
+    return {
+      tests_completed: 0,
+      average_score: '0%',
+      practice_time: '0 hours',
+      current_rank: '-',
+      questions_attempted: 0,
+      syllabus_progress: '0%',
+      syllabus_progress_percent: 0
+    };
+  }
+
+  let allAttempts = [];
+  try {
+    allAttempts = await db.getAll('student_attempts');
+  } catch (e) {
+    allAttempts = [];
+  }
+
+  const userAttempts = allAttempts.filter(a => String(a.user_id) === String(userId));
+
+  let totalQuestions = 0;
+  let totalTime = 0;
+  let scorePercentageSum = 0;
+
+  for (const a of userAttempts) {
+    let answersObj = {};
+    if (typeof a.answers === 'string') {
+      try { answersObj = JSON.parse(a.answers); } catch (e) {}
+    } else if (a.answers && typeof a.answers === 'object') {
+      answersObj = a.answers;
+    }
+
+    const qCount = parseInt(a.questions_attempted) || (parseInt(answersObj.questions_attempted) || (answersObj.answers ? Object.keys(answersObj.answers).length : 0));
+    const parsedTime = parseInt(a.time_spent_seconds) || (parseInt(answersObj.time_spent_seconds) || 0);
+    const parsedScore = a.score !== undefined && a.score !== null ? parseFloat(a.score) : (parseFloat(answersObj.score) || 0);
+    const parsedMax = a.max_score !== undefined && a.max_score !== null ? parseFloat(a.max_score) : (parseFloat(answersObj.max_score) || 20);
+
+    totalQuestions += qCount;
+    totalTime += parsedTime;
+    scorePercentageSum += parsedMax > 0 ? (parsedScore / parsedMax) * 100 : parsedScore;
+  }
+
+  let allActivity = [];
+  try {
+    allActivity = await db.getAll('student_activity');
+  } catch (e) {
+    allActivity = [];
+  }
+  const userActivity = allActivity.filter(act => String(act.user_id) === String(userId));
+  for (const act of userActivity) {
+    totalQuestions += parseInt(act.questions_attempted) || 0;
+    totalTime += parseInt(act.time_spent_seconds) || 0;
+  }
+
+  const tests_completed = userAttempts.length;
+  const average_score = tests_completed > 0 ? `${Math.round(scorePercentageSum / tests_completed)}%` : '0%';
+  const practice_time = formatPracticeTime(totalTime);
+
+  // Syllabus progress
+  let allTopics = [];
+  try {
+    allTopics = await db.getAll('topics');
+  } catch (e) {
+    allTopics = [];
+  }
+  const publishedTopics = allTopics.filter(t => t.published !== false && t.published !== 0);
+  const totalTopicsCount = publishedTopics.length || allTopics.length || 0;
+
+  let topicProgress = [];
+  try {
+    topicProgress = await db.getAll('student_topic_progress');
+  } catch (e) {
+    topicProgress = [];
+  }
+  const userTopicProgress = topicProgress.filter(tp => String(tp.user_id) === String(userId) && tp.completed);
+  const completedTopicsCount = userTopicProgress.length;
+
+  const progressPercent = totalTopicsCount > 0 ? Math.min(100, Math.round((completedTopicsCount / totalTopicsCount) * 100)) : 0;
+  const syllabus_progress = `${progressPercent}%`;
+
+  // Live Rank
+  const leaderboardData = await computeLeaderboardData();
+  const studentEntry = leaderboardData.leaderboard.find(e => String(e.student_id) === String(userId));
+  const current_rank = studentEntry ? `#${studentEntry.rank}` : '-';
+
+  return {
+    tests_completed,
+    average_score,
+    practice_time,
+    current_rank,
+    questions_attempted: totalQuestions,
+    syllabus_progress,
+    syllabus_progress_percent: progressPercent
+  };
+};
+
+// 1. Dashboard Statistics
+app.get('/api/student/dashboard-stats', optionalUser, async (req, res) => {
+  try {
+    const stats = await computeStudentStats(req.user?.id);
+    res.json(stats);
+  } catch (err) {
+    console.error('Error fetching dashboard stats:', err);
+    res.status(500).json({ error: 'Failed to calculate dashboard statistics' });
+  }
+});
+
+// 2. Student Leaderboard (public/student-accessible, privacy-safe)
+app.get('/api/student/leaderboard', optionalUser, async (req, res) => {
+  try {
+    const leaderboard = await computeLeaderboardData();
+    res.json(leaderboard);
+  } catch (err) {
+    console.error('Error fetching leaderboard:', err);
+    res.status(500).json({ error: 'Failed to retrieve live leaderboard' });
+  }
+});
+
+// 3. Test Submission & Recording
+app.post('/api/student/tests/submit', requireUser, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { 
+      test_id, 
+      test_title, 
+      score, 
+      max_score, 
+      correct_count, 
+      wrong_count, 
+      unattempted_count, 
+      questions_attempted, 
+      accuracy, 
+      time_spent_seconds, 
+      answers 
+    } = req.body;
+
+    const payload = {
+      test_id: test_id !== undefined ? String(test_id) : 'test',
+      test_title: test_title || 'Mock Test',
+      score: parseFloat(score) || 0,
+      max_score: parseFloat(max_score) || 20,
+      correct_count: parseInt(correct_count) || 0,
+      wrong_count: parseInt(wrong_count) || 0,
+      unattempted_count: parseInt(unattempted_count) || 0,
+      questions_attempted: parseInt(questions_attempted) || 0,
+      accuracy: parseFloat(accuracy) || 0,
+      time_spent_seconds: parseInt(time_spent_seconds) || 0,
+      answers: answers || {},
+      submitted_at: new Date().toISOString()
+    };
+
+    let numericTestId = null;
+    if (test_id && !isNaN(test_id)) {
+      numericTestId = parseInt(test_id);
+    }
+
+    const USE_PG = !!process.env.DATABASE_URL;
+    const attemptRecord = {
+      user_id: userId,
+      test_id: numericTestId,
+      answers: USE_PG ? JSON.stringify(payload) : payload,
+      score: payload.score,
+      submitted_at: payload.submitted_at
+    };
+
+    const newAttempt = await db.insert('student_attempts', attemptRecord);
+    const updatedStats = await computeStudentStats(userId);
+
+    res.status(201).json({
+      success: true,
+      message: 'Assessment submitted and recorded successfully.',
+      attempt: newAttempt,
+      stats: updatedStats
+    });
+  } catch (err) {
+    console.error('Error submitting test attempt:', err);
+    res.status(500).json({ error: 'Failed to record test submission.' });
+  }
+});
+
+// 4. Student Topic Progress Check
+app.get('/api/student/topic-progress', optionalUser, async (req, res) => {
+  try {
+    if (!req.user) return res.json({ completed_topic_ids: [] });
+    let progressList = [];
+    try {
+      progressList = await db.find('student_topic_progress', { user_id: req.user.id });
+    } catch (e) {
+      progressList = [];
+    }
+    const completedIds = progressList.filter(p => p.completed).map(p => p.topic_id);
+    res.json({ completed_topic_ids: completedIds });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch topic progress.' });
+  }
+});
+
+// 5. Student Topic Progress Toggle
+app.post('/api/student/topic-progress', requireUser, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { topic_id, completed, time_spent_seconds, questions_attempted } = req.body;
+    if (!topic_id) return res.status(400).json({ error: 'topic_id is required' });
+
+    let existing = null;
+    try {
+      existing = await db.findOne('student_topic_progress', { user_id: userId, topic_id: parseInt(topic_id) });
+    } catch (e) {}
+
+    if (existing) {
+      await db.update('student_topic_progress', existing.id, { 
+        completed: completed !== false,
+        updated_at: new Date().toISOString()
+      });
+    } else {
+      await db.insert('student_topic_progress', {
+        user_id: userId,
+        topic_id: parseInt(topic_id),
+        completed: completed !== false,
+        updated_at: new Date().toISOString()
+      });
+    }
+
+    if (time_spent_seconds || questions_attempted) {
+      try {
+        await db.insert('student_activity', {
+          user_id: userId,
+          type: 'practice',
+          topic_id: parseInt(topic_id),
+          time_spent_seconds: parseInt(time_spent_seconds) || 0,
+          questions_attempted: parseInt(questions_attempted) || 0,
+          created_at: new Date().toISOString()
+        });
+      } catch (e) {}
+    }
+
+    const updatedStats = await computeStudentStats(userId);
+    res.json({ success: true, stats: updatedStats });
+  } catch (err) {
+    console.error('Error updating topic progress:', err);
+    res.status(500).json({ error: 'Failed to update topic progress.' });
+  }
 });
 
 // Health check endpoint (safe for public monitoring, zero secrets exposed)

@@ -47,58 +47,77 @@ export default function Layout() {
       />
       
       {/* Main Content Area */}
-      <main className="flex-1 lg:ml-72 flex flex-col min-w-0 pb-20 lg:pb-0">
+      <main className="flex-1 lg:ml-72 flex flex-col min-w-0 pb-20 lg:pb-8">
         
         {/* Top App Bar Header */}
-        <header className="h-16 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between px-4 sm:px-6 lg:px-8 sticky top-0 z-30 transition-all">
+        <header className="h-14 bg-white dark:bg-slate-900 border-b border-[#E2E8F0] dark:border-slate-800 flex items-center justify-between px-4 sm:px-6 sticky top-0 z-30">
           
-          <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
             {/* Hamburger Button (Mobile Only) */}
             <button 
               onClick={() => setIsMobileMenuOpen(true)}
-              className="lg:hidden p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors shrink-0"
+              className="lg:hidden p-2 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors shrink-0 flex items-center justify-center focus:outline-hidden focus:ring-2 focus:ring-[#2563EB]/40"
               aria-label="Open navigation menu"
             >
-              <Menu size={22} />
+              <Menu size={20} />
             </button>
 
             {/* Mobile Brand Title (When Sidebar is Hidden) */}
             <div className="lg:hidden flex items-center gap-2 shrink-0">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white font-black text-xs shadow-sm">
+              <div className="w-7 h-7 rounded-md bg-[#1E3A8A] flex items-center justify-center text-white font-bold text-xs shadow-xs">
                 RR
               </div>
-              <span className="font-black text-slate-900 dark:text-white text-base tracking-tight truncate">
+              <span className="font-bold text-slate-900 dark:text-white text-sm tracking-tight truncate">
                 RankRise
               </span>
             </div>
 
             {/* Search Bar (Tablet & Desktop) */}
-            <div className="hidden md:flex items-center gap-2.5 bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60 rounded-xl px-4 py-2 w-full max-w-md focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent transition-all">
-              <Search size={16} className="text-slate-400 shrink-0" />
+            <div className="hidden md:flex items-center gap-2 bg-[#F8FAFC] dark:bg-slate-800 border border-[#E2E8F0] dark:border-slate-700 rounded-lg px-3 py-1.5 w-full max-w-sm focus-within:border-[#2563EB] focus-within:bg-white dark:focus-within:bg-slate-850 focus-within:ring-1 focus-within:ring-[#2563EB] transition-all">
+              <Search size={15} className="text-slate-400 shrink-0" />
               <input 
                 type="text" 
                 placeholder="Search subjects, topics, or papers..." 
-                className="bg-transparent border-none outline-none w-full text-sm placeholder:text-slate-400 dark:text-white"
+                className="bg-transparent border-none outline-none w-full text-xs sm:text-sm placeholder:text-slate-400 text-slate-900 dark:text-white"
               />
             </div>
           </div>
           
           {/* Header Right Actions */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            {user?.name && (
-              <span className="hidden sm:inline-block text-xs font-semibold px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-full border border-slate-200/60 dark:border-slate-700">
-                {user.name.split(' ')[0]}
+            {role === 'admin' ? (
+              <span className="text-[11px] font-semibold text-[#1E3A8A] dark:text-blue-300 uppercase tracking-wider px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900">
+                Admin
+              </span>
+            ) : (
+              <span className="hidden sm:inline-block text-[11px] font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border border-[#E2E8F0] dark:border-slate-700">
+                DDCET
               </span>
             )}
 
-            <button 
-              onClick={handleLogout} 
-              className="flex items-center gap-1.5 px-3 py-1.5 text-slate-600 dark:text-slate-300 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-xl font-medium text-xs sm:text-sm transition-colors"
-              title="Log Out"
-            >
-              <LogOut size={16} />
-              <span className="hidden xs:inline">Log out</span>
-            </button>
+            {user?.name && (
+              <span className="hidden sm:inline-block text-xs font-semibold text-slate-700 dark:text-slate-200">
+                {user.name}
+              </span>
+            )}
+
+            {user ? (
+              <button 
+                onClick={handleLogout} 
+                className="flex items-center gap-1.5 px-2.5 py-1.5 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white rounded-md text-xs font-medium transition-colors"
+                title="Log Out"
+              >
+                <LogOut size={15} />
+                <span className="hidden xs:inline">Log out</span>
+              </button>
+            ) : (
+              <Link 
+                to="/login"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 text-[#1E3A8A] dark:text-blue-400 hover:underline rounded-md text-xs font-semibold transition-colors"
+              >
+                <span>Log in</span>
+              </Link>
+            )}
           </div>
         </header>
 
@@ -110,7 +129,7 @@ export default function Layout() {
 
       {/* Mobile Bottom Navigation Bar (Hidden on Desktop) */}
       <nav 
-        className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 shadow-xl px-2 py-1.5 flex items-center justify-around"
+        className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xs border-t border-[#E2E8F0] dark:border-slate-800 px-2 py-1 flex items-center justify-around h-14"
         aria-label="Mobile Bottom Navigation"
       >
         {bottomNavItems.map(item => {
@@ -120,16 +139,14 @@ export default function Layout() {
             <Link
               key={item.name}
               to={item.path}
-              className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition-all duration-150 min-w-[56px] min-h-[44px] ${
+              className={`flex flex-col items-center justify-center py-1 px-2 rounded-md transition-colors min-w-[50px] min-h-[44px] ${
                 isActive 
-                  ? 'text-blue-600 dark:text-blue-400 font-bold' 
-                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                  ? 'text-[#1E3A8A] dark:text-blue-400 font-semibold' 
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
               }`}
             >
-              <div className={`p-1 rounded-lg ${isActive ? 'bg-blue-50 dark:bg-blue-900/30' : ''}`}>
-                <Icon size={20} className={isActive ? 'text-blue-600 dark:text-blue-400' : ''} />
-              </div>
-              <span className="text-[11px] tracking-tight mt-0.5 leading-none">
+              <Icon size={18} className={isActive ? 'text-[#1E3A8A] dark:text-blue-400' : ''} />
+              <span className="text-[10px] tracking-tight mt-0.5 leading-none">
                 {item.name}
               </span>
             </Link>
@@ -139,15 +156,13 @@ export default function Layout() {
         {/* 5th Button: More Drawer Trigger */}
         <button
           onClick={() => setIsMobileMenuOpen(true)}
-          className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition-all duration-150 min-w-[56px] min-h-[44px] text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 ${
-            isMobileMenuOpen ? 'text-blue-600 dark:text-blue-400 font-bold' : ''
+          className={`flex flex-col items-center justify-center py-1 px-2 rounded-md transition-colors min-w-[50px] min-h-[44px] text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 ${
+            isMobileMenuOpen ? 'text-blue-600 dark:text-blue-400 font-semibold' : ''
           }`}
           aria-label="More menu items"
         >
-          <div className="p-1 rounded-lg">
-            <MoreHorizontal size={20} />
-          </div>
-          <span className="text-[11px] tracking-tight mt-0.5 leading-none">
+          <MoreHorizontal size={18} />
+          <span className="text-[10px] tracking-tight mt-0.5 leading-none">
             More
           </span>
         </button>

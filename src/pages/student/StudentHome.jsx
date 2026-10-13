@@ -1,136 +1,229 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getTests } from '../../store/mockData';
+import { API_BASE_URL } from '../../config/api';
 import { 
   Clock, BookOpen, Trophy, Target, TrendingUp, PlayCircle, 
-  ArrowRight, UserCircle, Sparkles, Book, FileText, Globe
+  ArrowRight, UserCircle, HelpCircle, Book, FileText
 } from 'lucide-react';
 import { useAuth } from '../../store/AuthContext';
 
 export default function StudentHome() {
   const [tests, setTests] = useState([]);
+  const [stats, setStats] = useState({
+    tests_completed: 0,
+    average_score: '0%',
+    practice_time: '0 hours',
+    current_rank: '-',
+    questions_attempted: 0,
+    syllabus_progress: '0%',
+    syllabus_progress_percent: 0
+  });
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, token } = useAuth();
 
   useEffect(() => {
-    const load = () => {
+    const loadTests = () => {
       setTests(getTests().filter(t => t.status !== 'draft'));
     };
-    load();
-    const timer = setInterval(load, 60000);
+    loadTests();
+    const timer = setInterval(loadTests, 60000);
     return () => clearInterval(timer);
   }, []);
 
-  const firstName = user?.name ? user.name.split(' ')[0] : 'Student';
-  const isFirstLogin = user?.first_login_at === user?.last_login_at;
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const headers = {};
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+        const res = await fetch(`${API_BASE_URL}/api/student/dashboard-stats`, { headers });
+        if (res.ok) {
+          const data = await res.json();
+          setStats(data);
+        }
+      } catch (err) {
+        console.error('Error fetching dashboard stats:', err);
+      }
+    };
+
+    fetchStats();
+    const interval = setInterval(fetchStats, 15000);
+    return () => clearInterval(interval);
+  }, [token]);
 
   const quickLinks = [
-    { title: 'Study Library', desc: 'Notes, Papers & Keys', icon: BookOpen, path: '/student/resources', color: 'from-blue-600 to-indigo-600' },
-    { title: 'Exam Syllabus', desc: 'Chapter-wise Topics', icon: Book, path: '/student/syllabus', color: 'from-indigo-600 to-purple-600' },
-    { title: 'Past Papers', desc: 'Archive with Solutions', icon: FileText, path: '/student/resources/papers', color: 'from-emerald-600 to-teal-600' },
-    { title: 'Leaderboard', desc: 'Statewide Mock Ranks', icon: Trophy, path: '/student/leaderboard', color: 'from-amber-500 to-orange-600' }
+    { title: 'Study Library', desc: 'Notes, Papers & Keys', icon: BookOpen, path: '/student/resources' },
+    { title: 'Exam Syllabus', desc: 'Chapter-wise Topics', icon: Book, path: '/student/syllabus' },
+    { title: 'Past Papers', desc: 'Archive with Solutions', icon: FileText, path: '/student/resources/papers' },
+    { title: 'Leaderboard', desc: 'Statewide Mock Ranks', icon: Trophy, path: '/student/leaderboard' }
   ];
 
   return (
-    <div className="p-3.5 sm:p-6 lg:p-10 w-full max-w-7xl mx-auto space-y-6 sm:space-y-8 animate-fade-in">
+    <div className="p-4 sm:p-6 lg:p-8 w-full max-w-6xl mx-auto space-y-6">
       
-      {/* Welcome Hero Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-700 via-indigo-700 to-slate-900 text-white p-5 sm:p-8 shadow-xl shadow-blue-500/10">
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
-          <div className="space-y-2 max-w-2xl">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-bold text-blue-200">
-              <Sparkles size={13} className="text-yellow-300" />
-              <span>DDCET Engineering Portal</span>
-              {user?.branch && <span className="opacity-75">• {user.branch}</span>}
-            </div>
-            
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-tight">
-              {isFirstLogin ? `Welcome, ${firstName}!` : `Welcome back, ${firstName}!`} 👋
-            </h1>
-            
-            <p className="text-xs sm:text-sm text-blue-100/90 leading-relaxed">
-              {isFirstLogin 
-                ? "Your preparation journey starts now. Practice chapter questions and attempt mock exams." 
-                : "Keep up the momentum. Consistency in mock exams is the key to top engineering merit rank."}
-            </p>
-          </div>
-
-          <div className="flex flex-wrap sm:flex-nowrap gap-2.5 shrink-0 pt-2 md:pt-0">
-            <Link 
-              to="/complete-profile" 
-              className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 bg-white/15 hover:bg-white/25 backdrop-blur-md border border-white/20 text-white px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all active:scale-95 min-h-[44px]"
-            >
-              <UserCircle size={18} />
-              <span>Profile</span>
-            </Link>
-            <Link 
-              to="/student/leaderboard" 
-              className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 bg-gradient-to-r from-amber-400 to-orange-500 text-white px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm shadow-md shadow-orange-500/30 hover:brightness-105 transition-all active:scale-95 min-h-[44px]"
-            >
-              <Trophy size={18} />
-              <span>Rankings</span>
-            </Link>
-          </div>
+      {/* Dashboard Top Header Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+            Dashboard
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+            {stats.current_rank !== '-' ? `Current Rank: ${stats.current_rank}` : 'Unranked • Attempt a test to get ranked'}
+          </p>
         </div>
 
-        {/* Decorative background shapes */}
-        <div className="absolute -right-16 -top-24 w-72 h-72 rounded-full bg-blue-400/10 blur-3xl pointer-events-none" />
+        <div className="flex items-center gap-2.5">
+          <Link 
+            to="/complete-profile" 
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#E2E8F0] dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold hover:border-blue-300 dark:hover:border-blue-700 transition-colors shadow-2xs"
+          >
+            <UserCircle size={15} className="text-[#2563EB]" />
+            <span>Profile</span>
+          </Link>
+          <Link 
+            to="/student/leaderboard" 
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white text-xs font-semibold transition-colors shadow-xs"
+          >
+            <Trophy size={15} />
+            <span>Leaderboard</span>
+          </Link>
+        </div>
       </div>
 
-      {/* Stats Overview */}
-      <div className="grid grid-cols-3 gap-2.5 sm:gap-6">
-        {[
-          { label: 'Tests Done', fullLabel: 'Tests Completed', value: '12', icon: Target, color: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-500/10' },
-          { label: 'Avg Score', fullLabel: 'Average Score', value: '85%', icon: TrendingUp, color: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-500/10' },
-          { label: 'Time Spent', fullLabel: 'Total Practice Time', value: '24h', icon: Clock, color: 'text-purple-500', bg: 'bg-purple-50 dark:bg-purple-500/10' },
-        ].map((stat, i) => (
-          <div 
-            key={i} 
-            className="bg-white dark:bg-slate-800 p-3 sm:p-5 rounded-2xl shadow-xs border border-slate-200/70 dark:border-slate-700/70 flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-4 text-center sm:text-left transition-all hover:shadow-sm"
-          >
-            <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shrink-0 ${stat.bg} ${stat.color}`}>
-              <stat.icon size={22} className="sm:w-6 sm:h-6" />
+      {/* 6 Required Dashboard Statistics */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+            Performance Overview
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+          {/* 1. Tests Completed */}
+          <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-[#E2E8F0] dark:border-slate-700 shadow-xs flex flex-col justify-between min-h-[118px]">
+            <div className="w-9 h-9 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-[#1E3A8A] dark:text-blue-400 flex items-center justify-center mb-2.5 border border-blue-100 dark:border-blue-900">
+              <Target size={18} />
             </div>
-            <div className="min-w-0">
-              <span className="hidden sm:block text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase tracking-wider mb-0.5 truncate">
-                {stat.fullLabel}
+            <div>
+              <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
+                Tests Completed
               </span>
-              <span className="block sm:hidden text-slate-500 dark:text-slate-400 text-[11px] font-bold uppercase tracking-tight truncate">
-                {stat.label}
-              </span>
-              <p className="text-lg sm:text-2xl font-black text-slate-900 dark:text-white leading-none">
-                {stat.value}
+              <p className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mt-0.5">
+                {stats.tests_completed}
               </p>
             </div>
           </div>
-        ))}
+
+          {/* 2. Average Score */}
+          <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-[#E2E8F0] dark:border-slate-700 shadow-xs flex flex-col justify-between min-h-[118px]">
+            <div className="w-9 h-9 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-[#1E3A8A] dark:text-blue-400 flex items-center justify-center mb-2.5 border border-blue-100 dark:border-blue-900">
+              <TrendingUp size={18} />
+            </div>
+            <div>
+              <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
+                Average Score
+              </span>
+              <p className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mt-0.5">
+                {stats.average_score}
+              </p>
+            </div>
+          </div>
+
+          {/* 3. Practice Time */}
+          <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-[#E2E8F0] dark:border-slate-700 shadow-xs flex flex-col justify-between min-h-[118px]">
+            <div className="w-9 h-9 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-[#1E3A8A] dark:text-blue-400 flex items-center justify-center mb-2.5 border border-blue-100 dark:border-blue-900">
+              <Clock size={18} />
+            </div>
+            <div>
+              <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
+                Practice Time
+              </span>
+              <p className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mt-0.5 truncate">
+                {stats.practice_time}
+              </p>
+            </div>
+          </div>
+
+          {/* 4. Current Rank */}
+          <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-[#E2E8F0] dark:border-slate-700 shadow-xs flex flex-col justify-between min-h-[118px]">
+            <div className="w-9 h-9 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-2.5 border border-amber-200 dark:border-amber-900">
+              <Trophy size={18} />
+            </div>
+            <div>
+              <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
+                Current Rank
+              </span>
+              <p className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mt-0.5">
+                {stats.current_rank}
+              </p>
+            </div>
+          </div>
+
+          {/* 5. Questions Attempted */}
+          <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-[#E2E8F0] dark:border-slate-700 shadow-xs flex flex-col justify-between min-h-[118px]">
+            <div className="w-9 h-9 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-[#1E3A8A] dark:text-blue-400 flex items-center justify-center mb-2.5 border border-blue-100 dark:border-blue-900">
+              <HelpCircle size={18} />
+            </div>
+            <div>
+              <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
+                Questions Attempted
+              </span>
+              <p className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mt-0.5">
+                {stats.questions_attempted}
+              </p>
+            </div>
+          </div>
+
+          {/* 6. Syllabus Progress */}
+          <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-[#E2E8F0] dark:border-slate-700 shadow-xs flex flex-col justify-between min-h-[118px]">
+            <div className="w-9 h-9 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-[#1E3A8A] dark:text-blue-400 flex items-center justify-center mb-2.5 border border-blue-100 dark:border-blue-900">
+              <BookOpen size={18} />
+            </div>
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
+                  Syllabus Progress
+                </span>
+                <span className="text-xs font-bold text-[#1E3A8A] dark:text-blue-400">
+                  {stats.syllabus_progress}
+                </span>
+              </div>
+              <div className="w-full bg-slate-100 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden mt-2">
+                <div 
+                  className="bg-[#2563EB] h-full rounded-full transition-all duration-500" 
+                  style={{ width: `${stats.syllabus_progress_percent}%` }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Quick Launch Cards */}
       <div>
-        <div className="flex items-center justify-between mb-3.5">
-          <h2 className="text-base sm:text-xl font-bold text-slate-800 dark:text-white">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
             Quick Study Portals
           </h2>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {quickLinks.map((item, idx) => {
             const Icon = item.icon;
             return (
               <Link
                 key={idx}
                 to={item.path}
-                className="group p-3.5 sm:p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 hover:border-blue-500/50 dark:hover:border-blue-500/50 shadow-xs hover:shadow-md transition-all active:scale-[0.98] flex flex-col justify-between"
+                className="group p-4 rounded-xl bg-white dark:bg-slate-800 border border-[#E2E8F0] dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-700 shadow-xs transition-colors flex flex-col justify-between"
               >
-                <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${item.color} text-white flex items-center justify-center shadow-sm mb-3 group-hover:scale-105 transition-transform`}>
-                  <Icon size={20} />
+                <div className="w-9 h-9 rounded-lg bg-slate-100 dark:bg-slate-700/60 text-[#1E3A8A] dark:text-blue-400 flex items-center justify-center mb-3 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/30 transition-colors">
+                  <Icon size={18} />
                 </div>
                 <div>
-                  <h3 className="font-bold text-slate-900 dark:text-white text-xs sm:text-base leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                  <h3 className="font-semibold text-slate-900 dark:text-white text-xs sm:text-sm group-hover:text-[#2563EB] dark:group-hover:text-blue-400 transition-colors">
                     {item.title}
                   </h3>
-                  <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-1">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">
                     {item.desc}
                   </p>
                 </div>
@@ -142,19 +235,19 @@ export default function StudentHome() {
 
       {/* Live Assessments Section */}
       <div>
-        <div className="flex items-center justify-between mb-3.5">
-          <h2 className="text-base sm:text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
-            <PlayCircle size={22} className="text-blue-600 dark:text-blue-400" />
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <PlayCircle size={20} className="text-slate-700 dark:text-slate-300" />
             <span>Scheduled & Live Assessments</span>
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {tests.length === 0 && (
-            <div className="col-span-full p-8 sm:p-12 text-center bg-white dark:bg-slate-800 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700">
-              <PlayCircle size={36} className="mx-auto text-slate-300 dark:text-slate-600 mb-2" />
-              <p className="text-slate-700 dark:text-slate-300 font-bold text-base mb-1">No Tests Scheduled</p>
-              <p className="text-slate-500 text-xs sm:text-sm max-w-sm mx-auto">
+            <div className="col-span-full p-8 text-center bg-white dark:bg-slate-800 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
+              <PlayCircle size={32} className="mx-auto text-slate-400 mb-2" />
+              <p className="text-slate-800 dark:text-slate-200 font-semibold text-sm mb-1">No Tests Scheduled</p>
+              <p className="text-slate-500 text-xs max-w-sm mx-auto">
                 Check back soon or explore chapter practice tests in the Syllabus section.
               </p>
             </div>
@@ -170,32 +263,32 @@ export default function StudentHome() {
             return (
               <div 
                 key={test.id} 
-                className={`bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-2xl border transition-all ${
+                className={`bg-white dark:bg-slate-800 p-5 rounded-xl border transition-colors shadow-xs ${
                   isLive 
-                    ? 'border-blue-500/50 dark:border-blue-500/40 shadow-lg shadow-blue-500/10' 
-                    : 'border-slate-200/80 dark:border-slate-700/80 shadow-xs hover:shadow-sm'
+                    ? 'border-[#2563EB] dark:border-blue-600' 
+                    : 'border-[#E2E8F0] dark:border-slate-700'
                 }`}
               >
                 <div className="flex justify-between items-start gap-2 mb-3">
-                  <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white leading-snug">
+                  <h3 className="text-base font-semibold text-slate-900 dark:text-white leading-snug">
                     {test.title}
                   </h3>
-                  <span className={`shrink-0 px-2.5 py-1 rounded-lg text-[10px] sm:text-xs font-black tracking-wider ${
-                    isLive ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-400 animate-pulse' 
-                    : isUpcoming ? 'bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-400' 
+                  <span className={`shrink-0 px-2 py-0.5 rounded text-xs font-semibold ${
+                    isLive ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800' 
+                    : isUpcoming ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-200 dark:border-amber-800' 
                     : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400'
                   }`}>
-                    {isLive ? '• LIVE NOW' : isUpcoming ? 'UPCOMING' : 'CLOSED'}
+                    {isLive ? 'Live Now' : isUpcoming ? 'Upcoming' : 'Closed'}
                   </span>
                 </div>
                 
-                <div className="flex flex-wrap gap-2 text-xs font-semibold text-slate-600 dark:text-slate-400 mb-5">
-                  <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-900/60 px-2.5 py-1.5 rounded-lg border border-slate-200/60 dark:border-slate-700/60">
-                    <Clock size={14} className="text-blue-500" /> 
+                <div className="flex flex-wrap gap-2 text-xs font-medium text-slate-600 dark:text-slate-400 mb-4">
+                  <div className="flex items-center gap-1.5 bg-[#F8FAFC] dark:bg-slate-900 px-2.5 py-1 rounded-md border border-[#E2E8F0] dark:border-slate-700">
+                    <Clock size={13} className="text-slate-400" /> 
                     <span>{test.durationMinutes} Mins</span>
                   </div>
-                  <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-900/60 px-2.5 py-1.5 rounded-lg border border-slate-200/60 dark:border-slate-700/60">
-                    <BookOpen size={14} className="text-purple-500" /> 
+                  <div className="flex items-center gap-1.5 bg-[#F8FAFC] dark:bg-slate-900 px-2.5 py-1 rounded-md border border-[#E2E8F0] dark:border-slate-700">
+                    <BookOpen size={13} className="text-slate-400" /> 
                     <span>{test.questions.length} Questions</span>
                   </div>
                 </div>
@@ -203,16 +296,16 @@ export default function StudentHome() {
                 <button 
                   onClick={() => navigate(`/student/test/${test.id}`)}
                   disabled={!isLive}
-                  className={`w-full py-3 px-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all min-h-[44px] ${
+                  className={`w-full py-2.5 px-4 rounded-lg font-medium text-xs sm:text-sm flex items-center justify-center gap-2 transition-colors ${
                     isLive 
-                      ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-600/20 active:scale-[0.99]' 
-                      : 'bg-slate-100 dark:bg-slate-700/60 text-slate-400 dark:text-slate-500 cursor-not-allowed'
+                      ? 'bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white shadow-xs' 
+                      : 'bg-slate-100 dark:bg-slate-750 text-slate-400 dark:text-slate-500 cursor-not-allowed'
                   }`}
                 >
                   {isLive ? (
                     <>
-                      <span>Start Assessment Now</span>
-                      <ArrowRight size={16} />
+                      <span>Start Assessment</span>
+                      <ArrowRight size={15} />
                     </>
                   ) : isUpcoming ? (
                     'Scheduled for Later'

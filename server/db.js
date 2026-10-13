@@ -14,7 +14,9 @@ const defaultDb = {
   tests: [],
   test_questions: [],
   student_attempts: [],
-  resources: []
+  resources: [],
+  student_topic_progress: [],
+  student_activity: []
 };
 
 let db = { ...defaultDb };
@@ -41,6 +43,7 @@ load();
 module.exports = {
   get: (table) => db[table] || [],
   insert: (table, record) => {
+    if (!db[table]) db[table] = [];
     const id = Date.now() + Math.floor(Math.random() * 1000);
     const newRecord = { id, ...record };
     db[table].push(newRecord);

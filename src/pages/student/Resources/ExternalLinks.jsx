@@ -90,56 +90,53 @@ export default function ExternalLinks() {
   }, [links, searchQuery, selectedSubject, selectedCategory, selectedYear]);
 
   return (
-    <div className="p-4 sm:p-6 lg:p-10 max-w-7xl mx-auto space-y-6 sm:space-y-8 animate-fade-in">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6 font-sans">
       {/* Page Header */}
       <div>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">Curated External Study Links</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Curated External Study Links</h1>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-              Verified external references, university portals, syllabus guides, and third-party educational materials.
+              Verified external references, ACPC portal guides, official circulars, and educational tools.
             </p>
           </div>
           <button
             onClick={fetchLinks}
             disabled={loading}
-            className="self-start sm:self-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs sm:text-sm font-semibold min-h-[44px] transition"
+            className="self-start sm:self-auto flex items-center justify-center gap-1.5 px-3.5 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold transition"
           >
-            <RefreshCw size={16} className={loading ? "animate-spin" : ""} /> Refresh
+            <RefreshCw size={14} className={loading ? "animate-spin" : ""} /> Refresh
           </button>
         </div>
 
-        {/* Clear External Integration Disclaimer */}
-        <div className="mt-5 p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/60 rounded-2xl flex items-start gap-3 text-xs text-amber-800 dark:text-amber-300">
-          <ShieldAlert size={20} className="shrink-0 text-amber-600 dark:text-amber-400 mt-0.5" />
-          <div className="space-y-1">
-            <p className="font-bold">Third-Party Destination Notice:</p>
-            <p className="leading-relaxed">
-              Clicking these links will direct you outside DDCET RankRise in a new browser tab. 
-              External materials, quizzes, and forms are hosted independently by their respective providers. 
-              Activities or test scores on external websites are not tracked within your RankRise score or mistake book.
+        {/* Third-Party Destination Notice */}
+        <div className="mt-4 p-3.5 bg-slate-100 dark:bg-slate-850 border border-slate-200 dark:border-slate-700 rounded-xl flex items-start gap-3 text-xs text-slate-600 dark:text-slate-300">
+          <ShieldAlert size={18} className="shrink-0 text-amber-500 mt-0.5" />
+          <div className="space-y-0.5">
+            <p className="font-semibold text-slate-900 dark:text-white">External Destination Notice</p>
+            <p className="leading-relaxed text-slate-500 dark:text-slate-400">
+              External resources open in a new tab and are hosted independently by their respective institutions. Mock tests and activities completed externally are not scored in RankRise.
             </p>
           </div>
         </div>
       </div>
 
       {/* Search and Filters Bar */}
-      <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 space-y-3">
+      <div className="bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 space-y-2.5 shadow-xs">
         <div className="relative w-full">
-          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
-            className="w-full pl-9 pr-3 py-2.5 border rounded-xl dark:bg-slate-900 dark:border-slate-700 text-sm focus:ring-2 focus:ring-indigo-500 outline-none min-h-[44px]"
+            className="w-full pl-9 pr-3 py-2 border rounded-lg dark:bg-slate-900 dark:border-slate-700 text-xs sm:text-sm focus:border-blue-600 outline-none"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            placeholder="Search by title, description, or domain (e.g. google.com)..."
+            placeholder="Search external links by title or domain..."
           />
         </div>
 
         <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 text-xs">
-          {/* Subject Filter */}
           <select
-            className="px-3 py-2.5 border rounded-xl dark:bg-slate-900 dark:border-slate-700 font-medium min-h-[44px]"
+            className="px-3 py-1.5 border rounded-lg bg-slate-50 dark:bg-slate-800 dark:border-slate-700 font-medium"
             value={selectedSubject}
             onChange={e => setSelectedSubject(e.target.value)}
           >
@@ -149,9 +146,8 @@ export default function ExternalLinks() {
             ))}
           </select>
 
-          {/* Category Filter */}
           <select
-            className="px-3 py-2.5 border rounded-xl dark:bg-slate-900 dark:border-slate-700 font-medium min-h-[44px]"
+            className="px-3 py-1.5 border rounded-lg bg-slate-50 dark:bg-slate-800 dark:border-slate-700 font-medium"
             value={selectedCategory}
             onChange={e => setSelectedCategory(e.target.value)}
           >
@@ -162,10 +158,9 @@ export default function ExternalLinks() {
             <option value="general">General Study</option>
           </select>
 
-          {/* Year Filter */}
           {uniqueYears.length > 0 && (
             <select
-              className="px-3 py-2.5 border rounded-xl dark:bg-slate-900 dark:border-slate-700 font-medium min-h-[44px]"
+              className="px-3 py-1.5 border rounded-lg bg-slate-50 dark:bg-slate-800 dark:border-slate-700 font-medium"
               value={selectedYear}
               onChange={e => setSelectedYear(e.target.value)}
             >
@@ -184,7 +179,7 @@ export default function ExternalLinks() {
                 setSelectedCategory('all');
                 setSelectedYear('all');
               }}
-              className="col-span-2 sm:col-span-1 px-3 py-2.5 text-indigo-600 dark:text-indigo-400 font-bold hover:underline min-h-[44px] flex items-center justify-center"
+              className="col-span-2 sm:col-span-1 px-3 py-1.5 text-blue-600 dark:text-blue-400 font-semibold hover:underline flex items-center justify-center text-xs"
             >
               Reset Filters
             </button>
@@ -194,21 +189,21 @@ export default function ExternalLinks() {
 
       {/* Error State */}
       {error && (
-        <div className="p-4 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 rounded-2xl text-red-700 dark:text-red-300 text-sm flex items-center gap-2">
-          <AlertCircle size={18} />
+        <div className="p-3 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300 text-xs flex items-center gap-2">
+          <AlertCircle size={16} />
           <span>{error}</span>
         </div>
       )}
 
       {/* Loading State */}
       {loading ? (
-        <div className="p-16 text-center text-slate-500 space-y-3">
-          <RefreshCw size={28} className="animate-spin mx-auto text-indigo-500" />
-          <p className="font-semibold text-sm">Loading external reference links...</p>
+        <div className="p-12 text-center text-slate-500 space-y-2">
+          <RefreshCw size={24} className="animate-spin mx-auto text-blue-600" />
+          <p className="font-semibold text-xs">Loading study links...</p>
         </div>
       ) : (
         /* Links Grid */
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredLinks.map(linkItem => {
             const domain = getDomain(linkItem.external_url);
             const subject = subjects.find(s => s.id === linkItem.subject_id);
@@ -216,59 +211,55 @@ export default function ExternalLinks() {
             return (
               <div
                 key={linkItem.id}
-                className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm hover:shadow-md transition flex flex-col justify-between space-y-4 group"
+                className="bg-white dark:bg-slate-900 rounded-xl border border-[#E2E8F0] dark:border-slate-800 p-5 shadow-xs hover:border-blue-300 dark:hover:border-slate-700 transition flex flex-col justify-between space-y-4 group"
               >
-                <div className="space-y-3">
-                  {/* Card Header Badges */}
+                <div className="space-y-2.5">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="px-2.5 py-1 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 rounded-lg text-xs font-bold flex items-center gap-1">
-                      <Tag size={12} /> {getCategoryLabel(linkItem.type)}
+                    <span className="px-2 py-0.5 bg-blue-50 dark:bg-blue-950/40 text-[#1E3A8A] dark:text-blue-300 rounded text-[11px] font-semibold flex items-center gap-1 border border-blue-100 dark:border-blue-900">
+                      <Tag size={11} /> {getCategoryLabel(linkItem.type)}
                     </span>
                     {linkItem.exam_year && (
-                      <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-xs font-semibold flex items-center gap-1">
+                      <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 rounded text-[11px] font-medium flex items-center gap-1 border border-[#E2E8F0] dark:border-slate-700">
                         <Calendar size={11} /> {linkItem.exam_year}
                       </span>
                     )}
                   </div>
 
-                  {/* Title & Subject */}
                   <div>
-                    <h2 className="text-lg font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition">
+                    <h2 className="text-base font-bold text-slate-900 dark:text-white leading-snug group-hover:text-[#2563EB] dark:group-hover:text-blue-400 transition">
                       {linkItem.title}
                     </h2>
                     {subject && (
-                      <p className="text-xs text-indigo-500 dark:text-indigo-400 mt-0.5 font-medium flex items-center gap-1">
+                      <p className="text-xs text-[#2563EB] dark:text-blue-400 mt-1 font-semibold flex items-center gap-1">
                         <BookOpen size={12} /> {subject.name}
                       </p>
                     )}
                   </div>
 
-                  {/* Description */}
                   {linkItem.description && (
-                    <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-3 leading-relaxed">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed font-medium">
                       {linkItem.description}
                     </p>
                   )}
                 </div>
 
-                {/* Card Footer: Domain pill & Open button */}
-                <div className="pt-4 border-t border-slate-100 dark:border-slate-700/60 space-y-3">
+                <div className="pt-3 border-t border-[#E2E8F0] dark:border-slate-800 space-y-2.5">
                   <div className="flex items-center justify-between text-xs text-slate-400">
-                    <span className="flex items-center gap-1.5 font-mono text-[11px] truncate max-w-[180px] bg-slate-50 dark:bg-slate-900/50 px-2 py-1 rounded">
-                      <Globe size={13} className="text-slate-400 shrink-0" />
+                    <span className="flex items-center gap-1.5 font-mono text-[11px] truncate max-w-[180px] bg-[#F8FAFC] dark:bg-slate-850 px-2 py-0.5 rounded border border-[#E2E8F0] dark:border-slate-800">
+                      <Globe size={12} className="text-slate-400 shrink-0" />
                       {domain}
                     </span>
-                    <span className="text-[11px] text-slate-400 font-medium">Leaves App ↗</span>
+                    <span className="text-[11px] text-slate-400 font-medium">External ↗</span>
                   </div>
 
                   <a
                     href={linkItem.external_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full py-3 px-4 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/40 dark:hover:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 rounded-xl text-xs sm:text-sm font-bold min-h-[44px] transition flex items-center justify-center gap-2"
+                    className="w-full py-2 px-3 bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white rounded-lg text-xs font-semibold transition flex items-center justify-center gap-1.5 shadow-xs"
                   >
-                    <span>Visit External Resource</span>
-                    <ExternalLink size={15} />
+                    <span>Visit Resource</span>
+                    <ExternalLink size={13} />
                   </a>
                 </div>
               </div>
@@ -276,11 +267,11 @@ export default function ExternalLinks() {
           })}
 
           {filteredLinks.length === 0 && (
-            <div className="col-span-full py-16 text-center text-slate-400 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-8 space-y-3">
-              <Globe size={40} className="mx-auto opacity-30 text-indigo-400" />
-              <p className="text-base font-bold text-slate-700 dark:text-slate-200">No external links found</p>
+            <div className="col-span-full py-12 text-center text-slate-400 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 space-y-2">
+              <Globe size={32} className="mx-auto opacity-30 text-slate-400" />
+              <p className="text-sm font-bold text-slate-700 dark:text-slate-200">No external links found</p>
               <p className="text-xs text-slate-400 max-w-sm mx-auto">
-                No external study resources match your active filters. Try resetting the filters or check back later!
+                No external resources match the selected criteria.
               </p>
             </div>
           )}

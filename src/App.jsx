@@ -21,6 +21,10 @@ import AnswerKeys from './pages/student/Resources/AnswerKeys';
 import OfficialSyllabus from './pages/student/Resources/OfficialSyllabus';
 import ExternalLinks from './pages/student/Resources/ExternalLinks';
 import StudyMaterialLibrary from './pages/student/Resources/StudyMaterialLibrary';
+import PracticeLab from './pages/student/PracticeLab';
+import MockTestCenter from './pages/student/MockTestCenter';
+import StudentAnalytics from './pages/student/StudentAnalytics';
+import AIMentor from './pages/student/AIMentor';
 
 import Placeholder from './pages/Placeholder';
 
@@ -79,12 +83,12 @@ function App() {
           <Route path="/student/resources/official-syllabus" element={<OfficialSyllabus />} />
           <Route path="/student/resources/links" element={<ExternalLinks />} />
           
-          <Route path="/student/practice" element={<Placeholder title="Practice Lab" />} />
-          <Route path="/student/mock" element={<Placeholder title="Mock Test Center" />} />
-          <Route path="/student/pyq" element={<Placeholder title="PYQ Zone" />} />
-          <Route path="/student/analytics" element={<Placeholder title="Analytics" />} />
-          <Route path="/student/revision" element={<Placeholder title="Smart Revision" />} />
-          <Route path="/student/mentor" element={<Placeholder title="AI Mentor" />} />
+          <Route path="/student/practice" element={<PracticeLab />} />
+          <Route path="/student/mock" element={<MockTestCenter />} />
+          <Route path="/student/pyq" element={<Navigate to="/student/resources/papers" replace />} />
+          <Route path="/student/analytics" element={<StudentAnalytics />} />
+          <Route path="/student/revision" element={<Navigate to="/student/mistakes" replace />} />
+          <Route path="/student/mentor" element={<AIMentor />} />
         </Route>
 
         {/* Fullscreen Test Routes (No Sidebar) */}

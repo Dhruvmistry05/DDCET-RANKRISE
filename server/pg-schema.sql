@@ -109,3 +109,21 @@ CREATE TABLE IF NOT EXISTS resources (
   published BOOLEAN DEFAULT FALSE,
   internal_id VARCHAR UNIQUE
 );
+
+CREATE TABLE IF NOT EXISTS student_topic_progress (
+  id BIGSERIAL PRIMARY KEY,
+  user_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
+  topic_id BIGINT,
+  completed BOOLEAN DEFAULT TRUE,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS student_activity (
+  id BIGSERIAL PRIMARY KEY,
+  user_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
+  type VARCHAR,
+  topic_id BIGINT,
+  time_spent_seconds INTEGER DEFAULT 0,
+  questions_attempted INTEGER DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

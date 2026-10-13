@@ -1,113 +1,209 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Trophy, Medal, Star, ArrowLeft, Crown } from 'lucide-react';
-
-const mockLeaderboard = [
-  { rank: 1, name: 'Rahul Sharma', score: 98.5, accuracy: 99, branch: 'Computer' },
-  { rank: 2, name: 'Priya Patel', score: 95.0, accuracy: 96, branch: 'IT' },
-  { rank: 3, name: 'Amit Kumar', score: 92.5, accuracy: 94, branch: 'Mechanical' },
-  { rank: 4, name: 'Neha Gupta', score: 89.0, accuracy: 90, branch: 'Civil' },
-  { rank: 5, name: 'Vikram Singh', score: 85.5, accuracy: 88, branch: 'Electrical' },
-  { rank: 6, name: 'Dhruv Mistry', score: 84.0, accuracy: 87, branch: 'Computer' },
-  { rank: 7, name: 'Ananya Desai', score: 81.5, accuracy: 85, branch: 'EC' },
-];
+import { API_BASE_URL } from '../../config/api';
+import { Trophy, Medal, ArrowLeft, ArrowRight, Clock, Target, Award } from 'lucide-react';
 
 export default function Leaderboard() {
+  const [leaderboard, setLeaderboard] = useState([]);
+  const [totalStudents, setTotalStudents] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchLeaderboard = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/student/leaderboard`);
+        if (res.ok) {
+          const data = await res.json();
+          setLeaderboard(Array.isArray(data.leaderboard) ? data.leaderboard : []);
+          setTotalStudents(data.total_registered_students || 0);
+        }
+      } catch (err) {
+        console.error('Error loading leaderboard:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLeaderboard();
+    const timer = setInterval(fetchLeaderboard, 30000);
+    return () => clearInterval(timer);
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="p-8 text-center text-slate-500 flex items-center justify-center min-h-[50vh]">
+        <div className="flex items-center gap-2">
+          <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+          <span className="text-sm font-medium">Loading live merit standings...</span>
+        </div>
+      </div>
+    );
+  }
+
+  const top1 = leaderboard.find(s => s.rank === 1);
+  const top2 = leaderboard.find(s => s.rank === 2);
+  const top3 = leaderboard.find(s => s.rank === 3);
+  const hasPodium = Boolean(top1);
+
   return (
-    <div className="p-3.5 sm:p-6 lg:p-10 max-w-4xl mx-auto space-y-6 font-sans animate-fade-in">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto space-y-5 font-sans">
       
       {/* Header */}
       <div className="flex justify-between items-center">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2 text-amber-500 font-bold text-xs uppercase tracking-wider">
-            <Trophy size={16} /> Statewide Rankings
+        <div className="space-y-0.5">
+          <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+            Merit Standing
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
             DDCET Leaderboard
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-            Top performers across mock test assessments
+            Real-time rankings calculated from recorded diploma mock assessments
           </p>
         </div>
 
         <Link 
           to="/student" 
-          className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-bold text-blue-600 dark:text-blue-400 hover:bg-slate-50 transition-colors min-h-[40px]"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 transition-colors"
         >
-          <ArrowLeft size={16} />
-          <span>Back</span>
+          <ArrowLeft size={14} />
+          <span>Dashboard</span>
         </Link>
       </div>
 
-      {/* Main Ranking Card */}
-      <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-md border border-slate-200/80 dark:border-slate-700/80 overflow-hidden">
-        
-        {/* Top 3 Podium Visual (Responsive) */}
-        <div className="bg-gradient-to-br from-blue-900 via-indigo-900 to-slate-950 p-4 sm:p-8 flex justify-center items-end gap-2 sm:gap-6 text-white pb-8 sm:pb-12 pt-8 relative overflow-hidden">
-          <Podium rank={2} name="Priya P." score="95.0" height="h-28 sm:h-36" badgeColor="bg-slate-300 text-slate-900" rankTitle="2nd" />
-          <Podium rank={1} name="Rahul S." score="98.5" height="h-36 sm:h-44" badgeColor="bg-amber-400 text-amber-950" rankTitle="1st" isFirst />
-          <Podium rank={3} name="Amit K." score="92.5" height="h-24 sm:h-28" badgeColor="bg-amber-600 text-white" rankTitle="3rd" />
+      {/* Top Performers Summary Card (Only shown if rankings exist) */}
+      {hasPodium && (
+        <div className="bg-[#1E3A8A] text-white rounded-xl border border-blue-900 p-5 sm:p-6 shadow-xs">
+          <div className="text-xs font-bold uppercase tracking-wider text-blue-200 mb-4 text-center">
+            Top Merit Performers
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center">
+            {/* Rank 2 */}
+            {top2 ? (
+              <div className="p-3 sm:p-4 rounded-lg border bg-white/10 border-white/15 order-2 sm:order-1">
+                <div className="text-xs font-bold text-blue-200 mb-1">Rank 2</div>
+                <div className="text-sm sm:text-base font-bold text-white truncate">{top2.name}</div>
+                <div className="text-xs text-blue-100/80 mt-0.5">{top2.branch}</div>
+                <div className="text-sm sm:text-base font-bold text-amber-300 mt-2">{top2.points} Marks</div>
+              </div>
+            ) : (
+              <div className="hidden sm:flex flex-col items-center justify-center p-3 rounded-lg border border-white/10 bg-white/5 order-2 sm:order-1 text-blue-200/60 text-xs">
+                <span>Rank 2 Vacant</span>
+              </div>
+            )}
+
+            {/* Rank 1 */}
+            {top1 && (
+              <div className="p-3 sm:p-4 rounded-lg border bg-white/15 border-white/30 shadow-xs order-1 sm:order-2">
+                <div className="text-xs font-bold text-amber-300 mb-1 flex items-center justify-center gap-1">
+                  <Trophy size={14} />
+                  <span>Rank 1</span>
+                </div>
+                <div className="text-sm sm:text-base font-bold text-white truncate">{top1.name}</div>
+                <div className="text-xs text-blue-100/80 mt-0.5">{top1.branch}</div>
+                <div className="text-base sm:text-lg font-bold text-amber-300 mt-2">{top1.points} Marks</div>
+              </div>
+            )}
+
+            {/* Rank 3 */}
+            {top3 ? (
+              <div className="p-3 sm:p-4 rounded-lg border bg-white/10 border-white/15 order-3">
+                <div className="text-xs font-bold text-blue-200 mb-1">Rank 3</div>
+                <div className="text-sm sm:text-base font-bold text-white truncate">{top3.name}</div>
+                <div className="text-xs text-blue-100/80 mt-0.5">{top3.branch}</div>
+                <div className="text-sm sm:text-base font-bold text-amber-300 mt-2">{top3.points} Marks</div>
+              </div>
+            ) : (
+              <div className="hidden sm:flex flex-col items-center justify-center p-3 rounded-lg border border-white/10 bg-white/5 order-3 text-blue-200/60 text-xs">
+                <span>Rank 3 Vacant</span>
+              </div>
+            )}
+          </div>
         </div>
+      )}
 
-        {/* Ranks List / Table */}
-        <div className="divide-y divide-slate-100 dark:divide-slate-700/60">
-          {mockLeaderboard.map(student => {
-            const isTop3 = student.rank <= 3;
-            return (
-              <div 
-                key={student.rank} 
-                className="p-3.5 sm:p-4 flex items-center justify-between gap-3 hover:bg-slate-50/70 dark:hover:bg-slate-750/50 transition-colors"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center font-black text-xs sm:text-sm shrink-0 ${
-                    student.rank === 1 ? 'bg-amber-400 text-amber-950 shadow-sm' :
-                    student.rank === 2 ? 'bg-slate-300 text-slate-800' :
-                    student.rank === 3 ? 'bg-amber-600/80 text-white' :
-                    'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
-                  }`}>
-                    {student.rank}
-                  </div>
+      {/* Ranks Table or Empty State */}
+      {leaderboard.length === 0 ? (
+        <div className="bg-white dark:bg-slate-800 rounded-xl border border-dashed border-[#E2E8F0] dark:border-slate-700 p-8 sm:p-12 text-center shadow-xs">
+          <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-[#1E3A8A] dark:text-blue-400 flex items-center justify-center mx-auto mb-3 border border-blue-100 dark:border-blue-900">
+            <Trophy size={24} />
+          </div>
+          <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+            No Student Rankings Recorded Yet
+          </h3>
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-md mx-auto leading-relaxed">
+            Rankings are computed automatically from recorded assessment attempts. Complete a live mock exam to enter the statewide leaderboard!
+          </p>
+          <Link 
+            to="/student"
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white rounded-lg text-xs font-semibold mt-4 transition-colors shadow-xs"
+          >
+            <span>Go to Live Assessments</span>
+            <ArrowRight size={14} />
+          </Link>
+        </div>
+      ) : (
+        <div className="bg-white dark:bg-slate-800 rounded-xl border border-[#E2E8F0] dark:border-slate-700 divide-y divide-[#E2E8F0] dark:divide-slate-700 shadow-xs overflow-hidden">
+          {/* Table Header Bar */}
+          <div className="bg-slate-50 dark:bg-slate-900 px-4 py-3 flex items-center justify-between text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+            <div className="flex items-center gap-4">
+              <span className="w-8 text-center">Rank</span>
+              <span>Student Details</span>
+            </div>
+            <div className="flex items-center gap-6 sm:gap-8">
+              <span className="hidden sm:inline-block">Tests</span>
+              <span className="hidden sm:inline-block">Avg Score</span>
+              <span className="hidden md:inline-block">Practice Time</span>
+              <span className="w-16 text-right">Points</span>
+            </div>
+          </div>
 
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm truncate">
-                        {student.name}
-                      </span>
-                      {student.rank === 1 && <Crown size={14} className="text-amber-500 shrink-0" />}
-                    </div>
-                    <span className="block text-[11px] text-slate-400">
-                      {student.branch} • {student.accuracy}% accuracy
-                    </span>
-                  </div>
+          {leaderboard.map(student => (
+            <div 
+              key={student.student_id} 
+              className="p-3.5 sm:p-4 flex items-center justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-750 transition-colors"
+            >
+              <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ${
+                  student.rank === 1 ? 'bg-amber-100 text-amber-900 border border-amber-300' :
+                  student.rank === 2 ? 'bg-slate-200 text-slate-800 border border-slate-300' :
+                  student.rank === 3 ? 'bg-amber-50 text-amber-800 border border-amber-200' :
+                  'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600'
+                }`}>
+                  {student.rank}
                 </div>
 
-                <div className="text-right shrink-0">
-                  <div className="font-black text-blue-600 dark:text-blue-400 text-sm sm:text-base leading-none">
-                    {student.score}
+                <div className="min-w-0">
+                  <div className="font-semibold text-slate-900 dark:text-white text-xs sm:text-sm truncate">
+                    {student.name}
                   </div>
-                  <span className="text-[10px] text-slate-400 uppercase font-bold">Marks</span>
+                  <span className="block text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                    {student.branch} • {student.tests_completed} {student.tests_completed === 1 ? 'test' : 'tests'} done
+                  </span>
                 </div>
               </div>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
-}
 
-function Podium({ rank, name, score, height, badgeColor, rankTitle, isFirst }) {
-  return (
-    <div className="flex flex-col items-center text-center w-24 sm:w-32">
-      {isFirst && <Crown size={22} className="text-amber-300 mb-1 animate-bounce" />}
-      <span className="text-xs sm:text-sm font-bold truncate max-w-full px-1">{name}</span>
-      <span className="text-xs text-blue-200 font-bold mb-2">{score} pts</span>
-      
-      <div className={`w-full ${height} rounded-t-2xl bg-white/10 backdrop-blur-md border border-white/20 flex flex-col items-center justify-center p-2 shadow-inner`}>
-        <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-black text-xs sm:text-sm ${badgeColor}`}>
-          {rank}
+              <div className="flex items-center gap-6 sm:gap-8 shrink-0">
+                <div className="hidden sm:block text-center text-xs font-medium text-slate-600 dark:text-slate-300">
+                  {student.tests_completed}
+                </div>
+                <div className="hidden sm:block text-center text-xs font-semibold text-slate-700 dark:text-slate-200">
+                  {student.average_score}%
+                </div>
+                <div className="hidden md:block text-center text-xs text-slate-500 dark:text-slate-400">
+                  {student.total_practice_time}
+                </div>
+                <div className="w-16 text-right">
+                  <div className="font-bold text-slate-900 dark:text-white text-sm sm:text-base leading-none">
+                    {student.points}
+                  </div>
+                  <span className="text-[10px] text-slate-400 font-medium uppercase">Marks</span>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
-        <span className="text-[10px] sm:text-xs font-bold tracking-wider uppercase mt-1 opacity-80">{rankTitle}</span>
-      </div>
+      )}
     </div>
   );
 }

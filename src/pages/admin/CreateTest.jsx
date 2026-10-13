@@ -96,44 +96,44 @@ export default function CreateTest() {
   if (search) filteredQuestions = filteredQuestions.filter(q => q.text.toLowerCase().includes(search.toLowerCase()));
 
   return (
-    <div className="p-3.5 sm:p-6 lg:p-10 max-w-7xl mx-auto space-y-6 font-sans animate-fade-in">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6 font-sans">
       
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
             Assessment Builder
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-            Configure mock exam settings, timeline parameters, and select questions.
+            Configure test schedule, parameters, and select questions from the bank.
           </p>
         </div>
 
         <button 
           onClick={() => navigate('/admin/tests')}
-          className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 transition-colors min-h-[40px]"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 transition"
         >
-          <ArrowLeft size={16} />
+          <ArrowLeft size={14} />
           <span>Cancel</span>
         </button>
       </div>
       
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 sm:gap-8">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         
         {/* TEST CONFIGURATION COLUMN */}
-        <div className="xl:col-span-1 bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-2xl shadow-xs border border-slate-200/80 dark:border-slate-700/80 h-fit space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
-            <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+        <div className="xl:col-span-1 bg-white dark:bg-slate-900 p-5 rounded-xl shadow-xs border border-[#E2E8F0] dark:border-slate-800 h-fit space-y-4">
+          <div className="flex items-center justify-between border-b border-[#E2E8F0] dark:border-slate-800 pb-3">
+            <h2 className="text-base font-bold text-slate-900 dark:text-white">
               Test Parameters
             </h2>
-            <span className="text-xs font-black px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
-              {selectedQuestions.size} Qs Picked
+            <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-blue-50 dark:bg-slate-800 text-[#1E3A8A] dark:text-blue-300 border border-blue-100 dark:border-slate-700">
+              {selectedQuestions.size} Selected
             </span>
           </div>
 
           <form id="test-form" onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
                 Test Title *
               </label>
               <input 
@@ -141,17 +141,17 @@ export default function CreateTest() {
                 value={title} 
                 onChange={e=>setTitle(e.target.value)} 
                 type="text" 
-                className="w-full p-2.5 sm:p-3 border rounded-xl dark:bg-slate-900 dark:border-slate-700 text-xs sm:text-sm outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]" 
+                className="w-full p-2.5 border border-[#E2E8F0] rounded-lg bg-[#F8FAFC] dark:bg-slate-900 dark:border-slate-700 text-xs sm:text-sm outline-hidden focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] transition" 
                 placeholder="e.g. DDCET State Mock 2026 #1" 
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
                 Assessment Type *
               </label>
               <select 
-                className="w-full p-2.5 sm:p-3 border rounded-xl dark:bg-slate-900 dark:border-slate-700 text-xs sm:text-sm outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]" 
+                className="w-full p-2.5 border rounded-lg bg-white dark:bg-slate-900 dark:border-slate-700 text-xs sm:text-sm outline-none focus:border-blue-600 transition" 
                 value={type} 
                 onChange={e => { setType(e.target.value); setSubjectId(''); setChapterId(''); }}
               >
@@ -164,12 +164,12 @@ export default function CreateTest() {
 
             {(type === 'subject_wise' || type === 'chapter_wise') && (
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
                   Subject *
                 </label>
                 <select 
                   required 
-                  className="w-full p-2.5 sm:p-3 border rounded-xl dark:bg-slate-900 dark:border-slate-700 text-xs sm:text-sm outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]" 
+                  className="w-full p-2.5 border rounded-lg bg-white dark:bg-slate-900 dark:border-slate-700 text-xs sm:text-sm outline-none focus:border-blue-600 transition" 
                   value={subjectId} 
                   onChange={e => { setSubjectId(e.target.value); setChapterId(''); }}
                 >
@@ -181,12 +181,12 @@ export default function CreateTest() {
 
             {type === 'chapter_wise' && (
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
                   Chapter *
                 </label>
                 <select 
                   required 
-                  className="w-full p-2.5 sm:p-3 border rounded-xl dark:bg-slate-900 dark:border-slate-700 text-xs sm:text-sm outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]" 
+                  className="w-full p-2.5 border rounded-lg bg-white dark:bg-slate-900 dark:border-slate-700 text-xs sm:text-sm outline-none focus:border-blue-600 transition" 
                   value={chapterId} 
                   onChange={e => setChapterId(e.target.value)}
                 >
@@ -197,27 +197,27 @@ export default function CreateTest() {
             )}
 
             {type === 'scheduled_live' && (
-              <div className="space-y-3 p-3 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200/60 dark:border-slate-700/60">
+              <div className="space-y-3 p-3 bg-slate-50 dark:bg-slate-850 rounded-lg border border-slate-200 dark:border-slate-700">
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
                     Start Window *
                   </label>
                   <input 
                     required 
                     type="datetime-local" 
-                    className="w-full p-2.5 border rounded-xl dark:bg-slate-900 dark:border-slate-700 text-xs sm:text-sm outline-none min-h-[44px]" 
+                    className="w-full p-2 border rounded-lg bg-white dark:bg-slate-900 dark:border-slate-700 text-xs outline-none" 
                     value={startTime} 
                     onChange={e=>setStartTime(e.target.value)} 
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
                     End Window *
                   </label>
                   <input 
                     required 
                     type="datetime-local" 
-                    className="w-full p-2.5 border rounded-xl dark:bg-slate-900 dark:border-slate-700 text-xs sm:text-sm outline-none min-h-[44px]" 
+                    className="w-full p-2 border rounded-lg bg-white dark:bg-slate-900 dark:border-slate-700 text-xs outline-none" 
                     value={endTime} 
                     onChange={e=>setEndTime(e.target.value)} 
                   />
@@ -226,7 +226,7 @@ export default function CreateTest() {
             )}
             
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
                 Duration (minutes) *
               </label>
               <input 
@@ -235,7 +235,7 @@ export default function CreateTest() {
                 onChange={e=>setDuration(e.target.value)} 
                 type="number" 
                 min="1" 
-                className="w-full p-2.5 sm:p-3 border rounded-xl dark:bg-slate-900 dark:border-slate-700 text-xs sm:text-sm outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]" 
+                className="w-full p-2.5 border rounded-lg bg-white dark:bg-slate-900 dark:border-slate-700 text-xs sm:text-sm outline-none focus:border-blue-600 transition" 
               />
             </div>
             
@@ -244,7 +244,7 @@ export default function CreateTest() {
                 type="submit" 
                 form="test-form" 
                 disabled={submitting}
-                className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs sm:text-sm transition-all shadow-md active:scale-95 disabled:opacity-60 min-h-[46px]"
+                className="w-full py-2.5 bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white rounded-lg font-semibold text-xs sm:text-sm transition shadow-xs active:scale-[0.98] disabled:opacity-60"
               >
                 {submitting ? 'Creating Test...' : `Save & Build Test (${selectedQuestions.size} Qs)`}
               </button>
@@ -256,13 +256,13 @@ export default function CreateTest() {
         <div className="xl:col-span-2 space-y-4">
           
           {/* Controls Bar */}
-          <div className="bg-white dark:bg-slate-800 p-3.5 sm:p-4 rounded-2xl shadow-xs border border-slate-200/80 dark:border-slate-700/80 flex flex-col sm:flex-row gap-3 items-center justify-between">
+          <div className="bg-white dark:bg-slate-900 p-3.5 rounded-xl shadow-xs border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row gap-3 items-center justify-between">
             <div className="relative flex-1 w-full">
-              <Search className="absolute left-3.5 top-3 text-slate-400" size={16} />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
               <input 
                 type="text" 
-                placeholder="Search questions by text..." 
-                className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm outline-none focus:ring-2 focus:ring-blue-500 min-h-[40px]"
+                placeholder="Search questions by statement..." 
+                className="w-full pl-9 pr-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs sm:text-sm outline-none focus:border-blue-600 transition"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
               />
@@ -272,14 +272,14 @@ export default function CreateTest() {
               <button 
                 type="button" 
                 onClick={handleSelectAllFiltered} 
-                className="flex-1 sm:flex-none px-3.5 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 rounded-xl text-xs font-bold transition-colors min-h-[40px]"
+                className="flex-1 sm:flex-none px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-lg text-xs font-semibold transition"
               >
                 Select Visible
               </button>
               <button 
                 type="button" 
                 onClick={handleDeselectAll} 
-                className="flex-1 sm:flex-none px-3.5 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-500 transition-colors min-h-[40px]"
+                className="flex-1 sm:flex-none px-3 py-1.5 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-semibold text-slate-500 hover:bg-slate-50 transition"
               >
                 Reset All
               </button>
@@ -287,16 +287,16 @@ export default function CreateTest() {
           </div>
 
           {/* Questions Selection Checklist */}
-          <div className="space-y-2.5 max-h-[700px] overflow-y-auto pr-1">
+          <div className="space-y-2 max-h-[700px] overflow-y-auto pr-1">
             {filteredQuestions.map(q => {
               const isSelected = selectedQuestions.has(q.id);
               return (
                 <label 
                   key={q.id} 
-                  className={`flex items-start gap-3 p-3.5 sm:p-4 rounded-2xl border cursor-pointer transition-all ${
+                  className={`flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition ${
                     isSelected 
-                      ? 'bg-blue-50/80 border-blue-500 dark:bg-blue-950/30 dark:border-blue-700' 
-                      : 'bg-white border-slate-200/80 hover:border-slate-300 dark:bg-slate-800 dark:border-slate-700'
+                      ? 'bg-blue-50/50 border-blue-600 dark:bg-blue-950/20 dark:border-blue-600' 
+                      : 'bg-white border-slate-200 hover:border-slate-300 dark:bg-slate-900 dark:border-slate-800'
                   }`}
                 >
                   <input 
@@ -306,11 +306,11 @@ export default function CreateTest() {
                     onChange={() => handleToggleQuestion(q.id)}
                   />
                   <div className="flex-1 min-w-0">
-                    <div className="flex flex-wrap gap-1.5 mb-1 text-[10px] font-bold">
-                      <span className="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded-md">
+                    <div className="flex flex-wrap gap-1.5 mb-1 text-[10px] font-semibold">
+                      <span className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded">
                         {subjects.find(s=>s.id==q.subject_id)?.name || 'General'}
                       </span>
-                      <span className="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded-md">
+                      <span className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded">
                         Marks: {q.marks}
                       </span>
                     </div>
@@ -323,7 +323,7 @@ export default function CreateTest() {
             })}
 
             {filteredQuestions.length === 0 && (
-              <div className="p-8 text-center text-slate-500 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 text-xs sm:text-sm">
+              <div className="p-8 text-center text-slate-500 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 text-xs">
                 No questions found. Add questions in the Question Bank first.
               </div>
             )}

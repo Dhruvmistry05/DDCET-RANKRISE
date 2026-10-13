@@ -3,34 +3,32 @@ import { getApiUrl } from '../config/api';
 
 const AuthContext = createContext();
 
-// Default student user profile for testing and direct website exploration
-const DEFAULT_TEST_USER = {
-  id: 1,
-  name: 'Dhruv Mistry',
-  email: 'dhruv@rankrise.edu',
-  role: 'student',
-  profile_completed: true,
-  branch: 'Computer',
-  mobile: '9426727875',
-  college: 'Government Polytechnic Gandhinagar',
-  semester: '6'
-};
-
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
     const saved = localStorage.getItem('rankrise_user');
     if (saved) {
       try { 
-        return JSON.parse(saved); 
+        const parsed = JSON.parse(saved); 
+        // Filter out any legacy hardcoded demo name
+        if (parsed && parsed.name !== 'Dhruv Mistry' && parsed.email !== 'dhruv@rankrise.edu') {
+          return parsed;
+        }
       } catch { 
-        // fallback
+        // ignore parse errors
       }
     }
-    return DEFAULT_TEST_USER;
+    // Clean legacy test user from storage if present
+    localStorage.removeItem('rankrise_user');
+    return null;
   });
 
   const [token, setToken] = useState(() => {
-    return localStorage.getItem('token') || 'rankrise_test_token_2026';
+    const savedToken = localStorage.getItem('token');
+    if (savedToken && savedToken !== 'rankrise_test_token_2026') {
+      return savedToken;
+    }
+    localStorage.removeItem('token');
+    return null;
   });
 
   const [loading, setLoading] = useState(false);
@@ -39,13 +37,19 @@ export function AuthProvider({ children }) {
     if (user) {
       localStorage.setItem('rankrise_user', JSON.stringify(user));
       localStorage.setItem('userRole', user.role || 'student');
+    } else {
+      localStorage.removeItem('rankrise_user');
     }
+
     if (token) {
       localStorage.setItem('token', token);
+    } else {
+      localStorage.removeItem('token');
     }
   }, [user, token]);
 
   const fetchProfile = async (currentToken) => {
+    if (!currentToken) return;
     try {
       const res = await fetch(getApiUrl('/api/user/profile'), {
         headers: {
@@ -59,27 +63,26 @@ export function AuthProvider({ children }) {
         localStorage.setItem('rankrise_user', JSON.stringify(data));
       }
     } catch {
-      // In offline / testing mode, preserve test user profile
+      // In offline / network error mode, preserve local state
     } finally {
       setLoading(false);
     }
   };
 
   const login = (newToken, userData) => {
-    const activeUser = userData || DEFAULT_TEST_USER;
     setToken(newToken);
-    setUser(activeUser);
+    setUser(userData);
     localStorage.setItem('token', newToken);
-    localStorage.setItem('userRole', activeUser.role);
-    localStorage.setItem('rankrise_user', JSON.stringify(activeUser));
+    if (userData?.role) localStorage.setItem('userRole', userData.role);
+    if (userData) localStorage.setItem('rankrise_user', JSON.stringify(userData));
   };
 
   const logout = () => {
-    // Reset to default active student so dashboard remains instantly accessible
-    setUser(DEFAULT_TEST_USER);
-    setToken('rankrise_test_token_2026');
+    setUser(null);
+    setToken(null);
+    localStorage.removeItem('token');
+    localStorage.removeItem('rankrise_user');
     localStorage.setItem('userRole', 'student');
-    localStorage.setItem('rankrise_user', JSON.stringify(DEFAULT_TEST_USER));
   };
 
   return (

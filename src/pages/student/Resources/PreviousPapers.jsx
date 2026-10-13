@@ -38,38 +38,38 @@ export default function PreviousPapers() {
   }
 
   return (
-    <div className="p-3.5 sm:p-6 lg:p-10 max-w-5xl mx-auto space-y-6 sm:space-y-8 font-sans animate-fade-in">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto space-y-6 font-sans">
       
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="space-y-1">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-bold border border-blue-200/60 dark:border-blue-800/60">
-            <Sparkles size={13} /> Archived Examinations
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold border border-slate-200 dark:border-slate-700">
+            <FileText size={13} className="text-blue-600" /> Previous Question Papers
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-            Previous Year Question Papers
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
+            Past DDCET Exam Papers
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-            Access certified past DDCET examination question papers for realistic offline test solving.
+            Download and practice certified previous year question papers for diploma engineering.
           </p>
         </div>
 
         <Link 
           to="/student/resources"
-          className="self-start sm:self-auto inline-flex items-center gap-1.5 px-3.5 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 transition-colors min-h-[40px]"
+          className="self-start sm:self-auto inline-flex items-center gap-1.5 px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 transition"
         >
-          <ArrowLeft size={16} />
+          <ArrowLeft size={14} />
           <span>All Resources</span>
         </Link>
       </div>
 
       {/* Year Filter Chip Bar */}
       {years.length > 0 && (
-        <div className="flex items-center gap-3 bg-white dark:bg-slate-800 p-3 sm:p-4 rounded-2xl shadow-xs border border-slate-200/80 dark:border-slate-700/80 w-full sm:w-fit">
-          <Filter size={16} className="text-slate-400 shrink-0" />
-          <span className="font-bold text-xs sm:text-sm text-slate-700 dark:text-slate-300 shrink-0">Filter by Year:</span>
+        <div className="flex items-center gap-3 bg-white dark:bg-slate-900 p-3 rounded-xl border border-[#E2E8F0] dark:border-slate-800 w-full sm:w-fit">
+          <Filter size={15} className="text-slate-400 shrink-0" />
+          <span className="font-semibold text-xs text-slate-600 dark:text-slate-300 shrink-0">Filter by Year:</span>
           <select 
-            className="p-2 border rounded-xl bg-slate-50 dark:bg-slate-900 dark:border-slate-700 text-xs sm:text-sm font-medium outline-none focus:ring-2 focus:ring-blue-500 flex-1 sm:flex-none min-h-[38px]"
+            className="p-1.5 border border-[#E2E8F0] rounded-lg bg-[#F8FAFC] dark:bg-slate-800 dark:border-slate-700 text-xs font-semibold outline-hidden focus:border-[#2563EB] flex-1 sm:flex-none"
             value={yearFilter} 
             onChange={e => setYearFilter(e.target.value)}
           >
@@ -80,7 +80,7 @@ export default function PreviousPapers() {
       )}
 
       {/* Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {filteredPapers.map(paper => {
           const viewUrl = paper.file_path ? (paper.file_path.startsWith('http') ? paper.file_path : `${API_URL}${paper.file_path}`) : '';
           const downloadUrl = `${API_URL}/api/resources/${paper.id}/download`;
@@ -88,47 +88,47 @@ export default function PreviousPapers() {
           return (
             <div 
               key={paper.id} 
-              className="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-xs hover:shadow-sm transition-all flex flex-col justify-between space-y-4"
+              className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-[#E2E8F0] dark:border-slate-800 shadow-xs hover:border-blue-300 dark:hover:border-slate-700 transition flex flex-col justify-between space-y-4"
             >
               <div>
                 <div className="flex items-start justify-between gap-2 mb-3">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl flex items-center justify-center shrink-0">
-                    <FileText size={22} />
+                  <div className="w-10 h-10 bg-blue-50 dark:bg-blue-950/40 text-[#1E3A8A] dark:text-blue-400 border border-blue-100 dark:border-blue-900 rounded-lg flex items-center justify-center shrink-0">
+                    <FileText size={20} />
                   </div>
                   {paper.exam_year && (
-                    <span className="flex items-center gap-1 bg-slate-100 dark:bg-slate-700 px-2.5 py-1 rounded-lg text-xs font-bold text-slate-700 dark:text-slate-300">
-                      <Calendar size={13}/> {paper.exam_year}
+                    <span className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 rounded text-xs font-semibold text-slate-700 dark:text-slate-300 border border-[#E2E8F0] dark:border-slate-700">
+                      <Calendar size={12}/> {paper.exam_year}
                     </span>
                   )}
                 </div>
 
-                <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white leading-snug">
+                <h2 className="text-base font-bold text-slate-900 dark:text-white leading-snug">
                   {paper.title}
                 </h2>
                 
                 {paper.description && (
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 line-clamp-2 leading-relaxed">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed">
                     {paper.description}
                   </p>
                 )}
               </div>
               
-              <div className="flex gap-2.5 pt-2 border-t border-slate-100 dark:border-slate-700/60">
+              <div className="flex gap-2 pt-3 border-t border-[#E2E8F0] dark:border-slate-800">
                 <a 
                   href={viewUrl} 
                   target="_blank" 
                   rel="noreferrer" 
-                  className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 bg-indigo-50 dark:bg-indigo-900/20 hover:bg-indigo-100 text-indigo-700 dark:text-indigo-400 rounded-xl font-bold text-xs sm:text-sm transition-colors min-h-[44px]"
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 bg-[#F8FAFC] dark:bg-slate-800 hover:bg-slate-100 text-slate-800 dark:text-slate-200 border border-[#E2E8F0] dark:border-slate-700 rounded-lg font-semibold text-xs transition"
                 >
-                  <Eye size={16} /> 
+                  <Eye size={14} /> 
                   <span>View PDF</span>
                 </a>
                 <a 
                   href={downloadUrl} 
                   download 
-                  className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-200 rounded-xl font-bold text-xs sm:text-sm transition-colors min-h-[44px]"
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white rounded-lg font-semibold text-xs transition shadow-xs"
                 >
-                  <Download size={16} /> 
+                  <Download size={14} /> 
                   <span>Download</span>
                 </a>
               </div>
@@ -137,8 +137,8 @@ export default function PreviousPapers() {
         })}
 
         {filteredPapers.length === 0 && (
-          <div className="col-span-full p-8 sm:p-12 text-center border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl bg-white dark:bg-slate-800">
-            <p className="text-slate-500 text-sm font-medium">No question papers match the selected year filter.</p>
+          <div className="col-span-full p-8 text-center border border-dashed border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900">
+            <p className="text-slate-500 text-xs font-medium">No question papers match the selected year filter.</p>
           </div>
         )}
       </div>

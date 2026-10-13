@@ -125,128 +125,123 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900 p-3 sm:p-6 lg:p-8 relative overflow-hidden">
-      {/* Subtle background glow accents */}
-      <div className="absolute -top-24 -left-24 w-72 sm:w-96 h-72 sm:h-96 bg-blue-500/15 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-24 -right-24 w-72 sm:w-96 h-72 sm:h-96 bg-indigo-500/15 rounded-full blur-3xl pointer-events-none" />
-
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-4 sm:p-6 lg:p-8">
       {/* Main Responsive Auth Card */}
-      <div className="flex w-full max-w-5xl bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-700/80 overflow-hidden z-10">
+      <div className="flex w-full max-w-4xl bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-[#E2E8F0] dark:border-slate-800 overflow-hidden font-sans">
         
-        {/* Left Visual Column (Desktop & Tablet Wide) */}
-        <div className="hidden lg:flex flex-col justify-between w-5/12 bg-gradient-to-br from-blue-700 via-indigo-800 to-slate-900 p-10 xl:p-12 text-white relative overflow-hidden">
-          <div className="relative z-10 space-y-6">
+        {/* Left Brand Column (Desktop) */}
+        <div className="hidden lg:flex flex-col justify-between w-5/12 bg-[#1E3A8A] p-10 text-white border-r border-blue-900">
+          <div className="space-y-6">
             <div className="flex items-center gap-3">
-              <div className="w-11 h-11 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-md shadow-inner">
-                <BookOpen className="text-white" size={22} />
-              </div>
-              <div>
-                <span className="text-xs tracking-widest text-blue-200 font-extrabold uppercase">DDCET</span>
-                <span className="block text-2xl font-black tracking-tight leading-none">RANKRISE</span>
-              </div>
-            </div>
-
-            <div className="pt-6">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/20 text-blue-200 text-xs font-bold border border-blue-400/30 mb-4">
-                <Sparkles size={13} className="text-amber-300" /> Diploma to Degree Engineering
-              </span>
-              <h1 className="text-3xl xl:text-4xl font-extrabold leading-tight">
-                Master DDCET with Realistic Practice & Resources
-              </h1>
-            </div>
-
-            <p className="text-blue-100/90 text-sm xl:text-base leading-relaxed">
-              Complete syllabus coverage, full-length live tests, official past papers, and comprehensive analytics built specifically for diploma engineers.
-            </p>
-          </div>
-
-          <div className="relative z-10 pt-8 border-t border-white/10 text-xs text-blue-200 flex items-center justify-between">
-            <span>© 2026 DDCET RankRise</span>
-            <span className="flex items-center gap-1"><ShieldCheck size={14} /> Secure Access</span>
-          </div>
-        </div>
-
-        {/* Right Form Column (All Screen Sizes) */}
-        <div className="w-full lg:w-7/12 p-5 sm:p-8 md:p-10 lg:p-12 flex flex-col justify-center">
-          <div className="max-w-md w-full mx-auto space-y-6">
-            
-            {/* Mobile Brand Header */}
-            <div className="lg:hidden flex items-center justify-center gap-2.5 pb-2">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white font-black text-sm shadow-sm">
+              <div className="w-10 h-10 rounded-lg bg-white/15 flex items-center justify-center font-bold text-white text-base tracking-tight border border-white/20">
                 RR
               </div>
               <div>
-                <span className="text-[10px] tracking-widest text-blue-600 dark:text-blue-400 font-black uppercase">DDCET</span>
-                <span className="block font-black text-slate-900 dark:text-white text-lg leading-none">RANKRISE</span>
+                <span className="text-[10px] font-bold tracking-widest text-blue-200 uppercase">DDCET 2026</span>
+                <span className="block text-lg font-bold text-white leading-none">RankRise</span>
               </div>
             </div>
 
-            {/* Back to Profile Creation */}
+            <div className="pt-4 space-y-3">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/10 text-blue-100 text-xs font-semibold border border-white/15">
+                Diploma to Degree Portal
+              </span>
+              <h1 className="text-2xl font-bold text-white leading-snug">
+                Structured preparation for DDCET aspirants.
+              </h1>
+              <p className="text-blue-100/90 text-xs leading-relaxed font-medium">
+                Access official past papers, chapter notes, structured question banks, and live mock tests tailored for Gujarat diploma students.
+              </p>
+            </div>
+          </div>
+
+          <div className="pt-6 border-t border-blue-800/80 text-[11px] text-blue-200 flex items-center justify-between">
+            <span>© 2026 DDCET RankRise</span>
+            <span className="flex items-center gap-1 text-blue-200"><ShieldCheck size={13} /> Secured Portal</span>
+          </div>
+        </div>
+
+        {/* Right Form Column */}
+        <div className="w-full lg:w-7/12 p-6 sm:p-10 flex flex-col justify-center">
+          <div className="max-w-md w-full mx-auto space-y-5">
+            
+            {/* Mobile Brand Header */}
+            <div className="lg:hidden flex items-center justify-center gap-2.5 pb-2">
+              <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-sm">
+                RR
+              </div>
+              <div>
+                <span className="text-[10px] font-bold tracking-widest text-blue-600 dark:text-blue-400 uppercase">DDCET</span>
+                <span className="block font-bold text-slate-900 dark:text-white text-base leading-none">RankRise</span>
+              </div>
+            </div>
+
+            {/* Back Link */}
             <div>
               <Link 
-                to="/"
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline"
+                to="/create-profile"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 transition"
               >
                 <ArrowLeft size={14} />
-                <span>New Student? Go to Profile Creation</span>
+                <span>New Student? Create Profile</span>
               </Link>
             </div>
 
-            {/* Greeting & Header */}
-            <div className="text-center sm:text-left">
-              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-                Sign In to Portal
+            {/* Heading */}
+            <div>
+              <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+                {isLogin ? 'Sign In to Portal' : 'Create an Account'}
               </h2>
-              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-                Enter your credentials to access your DDCET RankRise dashboard.
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                {isLogin 
+                  ? 'Enter your registered credentials to access your dashboard.'
+                  : 'Register your email to start preparing for DDCET.'}
               </p>
             </div>
 
             {/* Error Banner */}
             {error && (
-              <div className="bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 p-3.5 rounded-xl text-xs sm:text-sm font-medium border border-rose-200 dark:border-rose-900/60 animate-shake">
+              <div className="bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 p-3 rounded-lg text-xs font-medium border border-rose-200 dark:border-rose-900/60">
                 {error}
               </div>
             )}
 
-            {/* Role Selector (Student vs Admin) */}
-            <div className="flex bg-slate-100 dark:bg-slate-900/80 p-1 rounded-2xl border border-slate-200/80 dark:border-slate-700/80">
+            {/* Role Selector */}
+            <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-lg border border-slate-200 dark:border-slate-700/60">
               <button
                 type="button"
                 onClick={() => setRole('student')}
-                className={`flex-1 py-2 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all duration-200 flex items-center justify-center gap-2 min-h-[40px] ${
+                className={`flex-1 py-1.5 rounded-md font-semibold text-xs transition flex items-center justify-center gap-1.5 ${
                   role === 'student'
-                    ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm'
+                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
                     : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
-                <GraduationCap size={16} />
+                <GraduationCap size={15} />
                 <span>Student</span>
               </button>
               <button
                 type="button"
                 onClick={() => setRole('admin')}
-                className={`flex-1 py-2 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all duration-200 flex items-center justify-center gap-2 min-h-[40px] ${
+                className={`flex-1 py-1.5 rounded-md font-semibold text-xs transition flex items-center justify-center gap-1.5 ${
                   role === 'admin'
-                    ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm'
+                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
                     : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
-                <ShieldCheck size={16} />
+                <ShieldCheck size={15} />
                 <span>Admin</span>
               </button>
             </div>
 
-            {/* Main Form */}
+            {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
                   Email Address
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                    <Mail size={18} />
-                  </div>
+                  <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                   <input 
                     type="email" 
                     required
@@ -254,46 +249,44 @@ export default function Login() {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="student@example.com"
                     autoComplete="email"
-                    className="w-full pl-10 pr-3.5 py-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50/50 dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-600 focus:bg-white dark:focus:bg-slate-900 outline-none transition-all min-h-[44px]" 
+                    className="w-full pl-10 pr-3.5 py-2.5 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition" 
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
                   Password
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                    <Lock size={18} />
-                  </div>
+                  <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                   <input 
                     type="password" 
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password"
+                    placeholder="Enter password"
                     autoComplete={isLogin ? 'current-password' : 'new-password'}
-                    className="w-full pl-10 pr-3.5 py-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50/50 dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-600 focus:bg-white dark:focus:bg-slate-900 outline-none transition-all min-h-[44px]" 
+                    className="w-full pl-10 pr-3.5 py-2.5 border border-[#E2E8F0] dark:border-slate-700 rounded-lg bg-[#F8FAFC] dark:bg-slate-900 text-slate-900 dark:text-white text-sm outline-hidden focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] transition" 
                   />
                 </div>
               </div>
 
-              {/* Action Button */}
+              {/* Submit Button */}
               <button 
                 disabled={loading} 
                 type="submit" 
-                className="w-full mt-2 flex items-center justify-center gap-2 py-3.5 px-6 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl font-bold text-sm sm:text-base transition-all active:scale-[0.99] shadow-md shadow-blue-600/25 disabled:opacity-60 min-h-[48px]"
+                className="w-full mt-2 flex items-center justify-center gap-2 py-2.5 px-5 bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white rounded-lg font-semibold text-sm transition shadow-xs active:scale-[0.99] disabled:opacity-60"
               >
                 {loading ? (
                   <span className="flex items-center gap-2">
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Please wait...
+                    Authenticating...
                   </span>
                 ) : (
                   <>
-                    <span>{isLogin ? 'Sign In to Portal' : 'Create Student Account'}</span>
-                    <ArrowRight size={18} />
+                    <span>{isLogin ? 'Sign In' : 'Create Account'}</span>
+                    <ArrowRight size={16} />
                   </>
                 )}
               </button>
@@ -303,11 +296,11 @@ export default function Login() {
                 <button 
                   type="button" 
                   onClick={() => { setIsLogin(!isLogin); setError(''); }}
-                  className="text-xs sm:text-sm font-semibold text-blue-600 dark:text-blue-400 hover:underline min-h-[40px] px-2"
+                  className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline px-2 py-1"
                 >
                   {isLogin 
-                    ? "New to DDCET RankRise? Create an account" 
-                    : "Already registered? Sign in here"}
+                    ? "Need a new account? Register here" 
+                    : "Already registered? Sign in with password"}
                 </button>
               </div>
             </form>

@@ -56,97 +56,90 @@ export default function ProfileCompletion() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900 py-6 sm:py-12 px-3 sm:px-6 lg:px-8">
-      <div className="max-w-2xl w-full space-y-6 bg-white dark:bg-slate-800 p-5 sm:p-8 md:p-10 rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-700/80">
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 py-8 px-4 sm:px-6 lg:px-8 font-sans">
+      <div className="max-w-xl w-full bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-xl shadow-xs border border-[#E2E8F0] dark:border-slate-800 space-y-6">
         
         {/* Header */}
-        <div className="text-center space-y-2">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 mb-1">
-            <GraduationCap size={26} />
+        <div className="space-y-1.5">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-blue-50 dark:bg-blue-950/40 text-[#1E3A8A] dark:text-blue-300 text-xs font-semibold border border-blue-200 dark:border-blue-900/60 mb-1">
+            <GraduationCap size={14} /> Profile Onboarding
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
             Complete Your Student Profile
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-md mx-auto">
-            Please provide your details so we can tailor the DDCET syllabus, tests, and cut-off predictions to your diploma branch.
+          <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
+            Please enter your diploma engineering information to personalize your syllabus, question banks, and cutoff predictions.
           </p>
         </div>
 
         {error && (
-          <div className="bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 p-3.5 rounded-xl text-xs sm:text-sm font-medium border border-rose-200 dark:border-rose-900/60">
+          <div className="bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 p-3 rounded-lg text-xs font-medium border border-rose-200 dark:border-rose-900/60">
             {error}
           </div>
         )}
 
-        <form className="space-y-6" onSubmit={handleSubmit}>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+        <form className="space-y-4" onSubmit={handleSubmit}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             
-            {/* Required Section Header */}
-            <div className="sm:col-span-2 pt-2">
-              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700 pb-2 flex items-center gap-2">
-                <CheckCircle size={15} className="text-blue-500" /> Mandatory Information
-              </h2>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
+            <div className="sm:col-span-2">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
                 Full Name *
               </label>
               <div className="relative">
-                <User size={18} className="absolute left-3.5 top-3.5 text-slate-400 pointer-events-none" />
+                <User size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                 <input 
                   required 
                   type="text" 
-                  className="w-full pl-10 pr-3.5 py-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50/50 dark:bg-slate-900 text-slate-900 dark:text-white text-sm outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]" 
+                  className="w-full pl-10 pr-3.5 py-2.5 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition" 
                   value={formData.name} 
                   onChange={e => setFormData({...formData, name: e.target.value})} 
-                  placeholder="e.g. Dhruv Mistry" 
+                  placeholder="Enter your full name" 
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
                 Mobile Number *
               </label>
               <div className="relative">
-                <Phone size={18} className="absolute left-3.5 top-3.5 text-slate-400 pointer-events-none" />
+                <Phone size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                 <input 
                   required 
                   type="tel" 
-                  className="w-full pl-10 pr-3.5 py-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50/50 dark:bg-slate-900 text-slate-900 dark:text-white text-sm outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]" 
+                  className="w-full pl-10 pr-3.5 py-2.5 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition" 
                   value={formData.mobile} 
                   onChange={e => setFormData({...formData, mobile: e.target.value})} 
-                  placeholder="10-digit mobile number" 
+                  placeholder="10-digit mobile" 
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
                 Date of Birth *
               </label>
               <div className="relative">
-                <Calendar size={18} className="absolute left-3.5 top-3.5 text-slate-400 pointer-events-none" />
+                <Calendar size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                 <input 
                   required 
                   type="date" 
-                  className="w-full pl-10 pr-3.5 py-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50/50 dark:bg-slate-900 text-slate-900 dark:text-white text-sm outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]" 
+                  className="w-full pl-10 pr-3.5 py-2.5 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition" 
                   value={formData.dob} 
                   onChange={e => setFormData({...formData, dob: e.target.value})} 
                 />
               </div>
             </div>
 
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
+            <div className="sm:col-span-2">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
                 Diploma Branch *
               </label>
               <div className="relative">
-                <BookOpen size={18} className="absolute left-3.5 top-3.5 text-slate-400 pointer-events-none" />
+                <BookOpen size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                 <select 
                   required 
-                  className="w-full pl-10 pr-3.5 py-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50/50 dark:bg-slate-900 text-slate-900 dark:text-white text-sm outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]"
+                  className="w-full pl-10 pr-3.5 py-2.5 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition"
                   value={formData.branch} 
                   onChange={e => setFormData({...formData, branch: e.target.value})}
                 >
@@ -163,19 +156,12 @@ export default function ProfileCompletion() {
               </div>
             </div>
 
-            {/* Optional Section */}
-            <div className="sm:col-span-2 pt-4">
-              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700 pb-2">
-                College & Academic Details
-              </h2>
-            </div>
-
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
                 Gender
               </label>
               <select 
-                className="w-full px-3.5 py-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50/50 dark:bg-slate-900 text-slate-900 dark:text-white text-sm outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]"
+                className="w-full px-3.5 py-2.5 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition"
                 value={formData.gender} 
                 onChange={e => setFormData({...formData, gender: e.target.value})}
               >
@@ -187,11 +173,11 @@ export default function ProfileCompletion() {
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
                 Current Semester
               </label>
               <select 
-                className="w-full px-3.5 py-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50/50 dark:bg-slate-900 text-slate-900 dark:text-white text-sm outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]"
+                className="w-full px-3.5 py-2.5 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition"
                 value={formData.semester} 
                 onChange={e => setFormData({...formData, semester: e.target.value})}
               >
@@ -201,12 +187,12 @@ export default function ProfileCompletion() {
             </div>
 
             <div className="sm:col-span-2">
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
                 Polytechnic / College Name
               </label>
               <input 
                 type="text" 
-                className="w-full px-3.5 py-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50/50 dark:bg-slate-900 text-slate-900 dark:text-white text-sm outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]" 
+                className="w-full px-3.5 py-2.5 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition" 
                 value={formData.college} 
                 onChange={e => setFormData({...formData, college: e.target.value})} 
                 placeholder="e.g. Government Polytechnic Gandhinagar" 
@@ -218,14 +204,14 @@ export default function ProfileCompletion() {
           <button 
             disabled={loading} 
             type="submit" 
-            className="w-full py-3.5 px-6 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl transition-all shadow-md shadow-blue-600/20 active:scale-[0.99] disabled:opacity-70 min-h-[48px] flex items-center justify-center gap-2 text-sm sm:text-base"
+            className="w-full mt-3 py-3 px-5 bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white font-semibold rounded-lg transition shadow-xs active:scale-[0.99] disabled:opacity-70 flex items-center justify-center gap-2 text-sm"
           >
             {loading ? (
               <span>Saving details...</span>
             ) : (
               <>
-                <span>Complete Profile & Go to Dashboard</span>
-                <ArrowRight size={18} />
+                <span>Complete Profile & Open Dashboard</span>
+                <ArrowRight size={16} />
               </>
             )}
           </button>

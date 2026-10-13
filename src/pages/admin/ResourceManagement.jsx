@@ -280,64 +280,64 @@ export default function ResourceManagement() {
   };
 
   return (
-    <div className="p-6 lg:p-10 max-w-7xl mx-auto space-y-8">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6 font-sans">
       {/* Top Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black text-slate-900 dark:text-white">Official Resources Management</h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-1">
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Official Resources Management</h1>
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
             Upload, verify, publish, and manage past papers, answer keys, and study materials.
           </p>
         </div>
         <button
           onClick={fetchData}
           disabled={loading}
-          className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-semibold transition"
+          className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold transition"
         >
-          <RefreshCw size={16} className={loading ? "animate-spin" : ""} /> Refresh
+          <RefreshCw size={14} className={loading ? "animate-spin" : ""} /> Refresh
         </button>
       </div>
 
       {/* Notifications */}
       {error && (
-        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 rounded-xl text-red-700 dark:text-red-300 text-sm">
+        <div className="flex items-center justify-between p-3.5 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 rounded-xl text-red-700 dark:text-red-300 text-xs">
           <div className="flex items-center gap-2">
-            <AlertCircle size={18} className="shrink-0" />
+            <AlertCircle size={16} className="shrink-0" />
             <span>{error}</span>
           </div>
-          <button onClick={() => setError(null)} className="text-red-500 hover:text-red-700"><X size={18} /></button>
+          <button onClick={() => setError(null)} className="text-red-500 hover:text-red-700"><X size={16} /></button>
         </div>
       )}
 
       {success && (
-        <div className="flex items-center justify-between p-4 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-xl text-emerald-700 dark:text-emerald-300 text-sm">
+        <div className="flex items-center justify-between p-3.5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-xl text-emerald-700 dark:text-emerald-300 text-xs">
           <div className="flex items-center gap-2">
-            <CheckCircle2 size={18} className="shrink-0" />
+            <CheckCircle2 size={16} className="shrink-0" />
             <span>{success}</span>
           </div>
-          <button onClick={() => setSuccess(null)} className="text-emerald-500 hover:text-emerald-700"><X size={18} /></button>
+          <button onClick={() => setSuccess(null)} className="text-emerald-500 hover:text-emerald-700"><X size={16} /></button>
         </div>
       )}
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* Left Column: Create Resource Form */}
-        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 h-fit space-y-6">
-          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-700/60 pb-4">
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <UploadCloud size={22} className="text-indigo-600 dark:text-indigo-400" /> New Resource
+        <div className="bg-white dark:bg-slate-900 p-5 rounded-xl shadow-xs border border-[#E2E8F0] dark:border-slate-800 h-fit space-y-4">
+          <div className="flex items-center justify-between border-b border-[#E2E8F0] dark:border-slate-800 pb-3">
+            <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <UploadCloud size={18} className="text-[#2563EB]" /> New Resource
             </h2>
-            <div className="flex bg-slate-100 dark:bg-slate-700 p-1 rounded-lg text-xs font-semibold">
+            <div className="flex bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg text-xs font-semibold">
               <button
                 type="button"
                 onClick={() => setResourceSource('file')}
-                className={`px-3 py-1 rounded-md transition ${resourceSource === 'file' ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500 dark:text-slate-400'}`}
+                className={`px-2.5 py-1 rounded-md transition ${resourceSource === 'file' ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs' : 'text-slate-500'}`}
               >
                 PDF File
               </button>
               <button
                 type="button"
                 onClick={() => setResourceSource('url')}
-                className={`px-3 py-1 rounded-md transition ${resourceSource === 'url' ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500 dark:text-slate-400'}`}
+                className={`px-2.5 py-1 rounded-md transition ${resourceSource === 'url' ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs' : 'text-slate-500'}`}
               >
                 External URL
               </button>
@@ -346,51 +346,51 @@ export default function ResourceManagement() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Title *</label>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">Title *</label>
               <input
                 required
                 type="text"
-                className="w-full px-3 py-2 border rounded-xl dark:bg-slate-900 dark:border-slate-700 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900 dark:border-slate-700 text-xs sm:text-sm focus:border-blue-600 outline-none"
                 value={formData.title}
                 onChange={e => setFormData({ ...formData, title: e.target.value })}
                 placeholder="e.g. DDCET 2024 Question Paper"
               />
             </div>
 
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 gap-2.5">
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Type *</label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">Type *</label>
                 <select
-                  className="w-full px-3 py-2 border rounded-xl dark:bg-slate-900 dark:border-slate-700 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                  className="w-full px-2 py-2 border rounded-lg bg-white dark:bg-slate-900 dark:border-slate-700 text-xs focus:border-blue-600 outline-none"
                   value={formData.type}
                   onChange={e => setFormData({ ...formData, type: e.target.value, paper_id: '' })}
                 >
-                  <option value="question_paper">Question Paper</option>
-                  <option value="answer_key">Answer Key</option>
+                  <option value="question_paper">Paper</option>
+                  <option value="answer_key">Key</option>
                   <option value="syllabus">Syllabus</option>
-                  <option value="general">General Material</option>
+                  <option value="general">General</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Exam Year</label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">Exam Year</label>
                 <input
                   type="number"
                   min="2000"
                   max="2099"
-                  className="w-full px-3 py-2 border rounded-xl dark:bg-slate-900 dark:border-slate-700 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                  className="w-full px-2.5 py-2 border rounded-lg bg-white dark:bg-slate-900 dark:border-slate-700 text-xs outline-none focus:border-blue-600"
                   value={formData.exam_year}
                   onChange={e => setFormData({ ...formData, exam_year: e.target.value })}
-                  placeholder="e.g. 2024"
+                  placeholder="2024"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Display Order</label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">Order</label>
                 <input
                   type="number"
                   min="0"
-                  className="w-full px-3 py-2 border rounded-xl dark:bg-slate-900 dark:border-slate-700 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                  className="w-full px-2.5 py-2 border rounded-lg bg-white dark:bg-slate-900 dark:border-slate-700 text-xs outline-none focus:border-blue-600"
                   value={formData.display_order}
                   onChange={e => setFormData({ ...formData, display_order: e.target.value })}
                   placeholder="0"
@@ -400,9 +400,9 @@ export default function ResourceManagement() {
 
             {formData.type === 'answer_key' && (
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Linked Question Paper</label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">Linked Question Paper</label>
                 <select
-                  className="w-full px-3 py-2 border rounded-xl dark:bg-slate-900 dark:border-slate-700 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                  className="w-full px-2.5 py-2 border rounded-lg bg-white dark:bg-slate-900 dark:border-slate-700 text-xs outline-none focus:border-blue-600"
                   value={formData.paper_id}
                   onChange={e => setFormData({ ...formData, paper_id: e.target.value })}
                 >
@@ -419,7 +419,7 @@ export default function ResourceManagement() {
               <div>
                 <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Subject</label>
                 <select
-                  className="w-full p-1.5 text-xs border rounded-lg dark:bg-slate-900 dark:border-slate-700"
+                  className="w-full p-1.5 text-xs border rounded-lg bg-white dark:bg-slate-900 dark:border-slate-700"
                   value={formData.subject_id}
                   onChange={e => setFormData({ ...formData, subject_id: e.target.value, chapter_id: '', topic_id: '' })}
                 >
@@ -430,7 +430,7 @@ export default function ResourceManagement() {
               <div>
                 <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Chapter</label>
                 <select
-                  className="w-full p-1.5 text-xs border rounded-lg dark:bg-slate-900 dark:border-slate-700"
+                  className="w-full p-1.5 text-xs border rounded-lg bg-white dark:bg-slate-900 dark:border-slate-700"
                   value={formData.chapter_id}
                   onChange={e => setFormData({ ...formData, chapter_id: e.target.value, topic_id: '' })}
                 >
@@ -443,7 +443,7 @@ export default function ResourceManagement() {
               <div>
                 <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Topic</label>
                 <select
-                  className="w-full p-1.5 text-xs border rounded-lg dark:bg-slate-900 dark:border-slate-700"
+                  className="w-full p-1.5 text-xs border rounded-lg bg-white dark:bg-slate-900 dark:border-slate-700"
                   value={formData.topic_id}
                   onChange={e => setFormData({ ...formData, topic_id: e.target.value })}
                 >
@@ -456,9 +456,9 @@ export default function ResourceManagement() {
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Description (Optional)</label>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">Description (Optional)</label>
               <textarea
-                className="w-full px-3 py-2 border rounded-xl dark:bg-slate-900 dark:border-slate-700 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900 dark:border-slate-700 text-xs sm:text-sm outline-none focus:border-blue-600"
                 rows="2"
                 value={formData.description}
                 onChange={e => setFormData({ ...formData, description: e.target.value })}
@@ -468,23 +468,23 @@ export default function ResourceManagement() {
 
             {resourceSource === 'file' ? (
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">PDF File (Max 15MB) *</label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">PDF File (Max 15MB) *</label>
                 <input
                   id="file-upload"
                   required
                   type="file"
                   accept=".pdf,application/pdf"
-                  className="w-full p-2 border border-dashed rounded-xl dark:bg-slate-900 dark:border-slate-700 text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 dark:file:bg-indigo-900/30 dark:file:text-indigo-400"
+                  className="w-full p-2 border border-dashed rounded-lg bg-white dark:bg-slate-900 dark:border-slate-700 text-xs file:mr-3 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-slate-100 file:text-slate-800"
                   onChange={e => setFile(e.target.files[0])}
                 />
               </div>
             ) : (
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">External Web URL *</label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">External Web URL *</label>
                 <input
                   required
                   type="url"
-                  className="w-full px-3 py-2 border rounded-xl dark:bg-slate-900 dark:border-slate-700 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                  className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900 dark:border-slate-700 text-xs sm:text-sm outline-none focus:border-blue-600"
                   value={formData.external_url}
                   onChange={e => setFormData({ ...formData, external_url: e.target.value })}
                   placeholder="https://drive.google.com/... or https://..."
@@ -492,24 +492,24 @@ export default function ResourceManagement() {
               </div>
             )}
 
-            <label className="flex items-center gap-2 cursor-pointer pt-2">
+            <label className="flex items-center gap-2 cursor-pointer pt-1">
               <input
                 type="checkbox"
-                className="w-4 h-4 text-indigo-600 rounded"
+                className="w-4 h-4 text-blue-600 rounded"
                 checked={formData.published}
                 onChange={e => setFormData({ ...formData, published: e.target.checked })}
               />
-              <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">Publish Immediately</span>
+              <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">Publish Immediately</span>
             </label>
 
             <button
               type="submit"
               disabled={actionLoading}
-              className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
+              className="w-full py-2.5 bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white rounded-lg font-semibold text-xs sm:text-sm transition flex items-center justify-center gap-2 shadow-xs disabled:opacity-60"
             >
               {actionLoading ? (
                 <>
-                  <RefreshCw size={18} className="animate-spin" /> Uploading & Processing...
+                  <RefreshCw size={14} className="animate-spin" /> Uploading & Processing...
                 </>
               ) : (
                 'Create Resource'
@@ -521,33 +521,33 @@ export default function ResourceManagement() {
         {/* Right Column: Search, Filters, and Resources Table */}
         <div className="xl:col-span-2 space-y-4">
           {/* Search and Filters Bar */}
-          <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-wrap gap-3 items-center justify-between">
+          <div className="bg-white dark:bg-slate-900 p-3.5 rounded-xl shadow-xs border border-slate-200 dark:border-slate-800 flex flex-wrap gap-2.5 items-center justify-between">
             <div className="relative flex-1 min-w-[200px]">
-              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
-                className="w-full pl-9 pr-3 py-2 border rounded-xl dark:bg-slate-900 dark:border-slate-700 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                className="w-full pl-9 pr-3 py-1.5 border rounded-lg bg-white dark:bg-slate-900 dark:border-slate-700 text-xs sm:text-sm focus:border-blue-600 outline-none"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                placeholder="Search resources by title, description, or year..."
+                placeholder="Search resources by title or year..."
               />
             </div>
 
             <div className="flex flex-wrap gap-2 text-xs">
               <select
-                className="px-3 py-2 border rounded-xl dark:bg-slate-900 dark:border-slate-700 font-medium"
+                className="px-2.5 py-1.5 border rounded-lg bg-slate-50 dark:bg-slate-800 dark:border-slate-700 font-medium"
                 value={filterType}
                 onChange={e => setFilterType(e.target.value)}
               >
                 <option value="all">All Types</option>
-                <option value="question_paper">Question Papers</option>
-                <option value="answer_key">Answer Keys</option>
+                <option value="question_paper">Papers</option>
+                <option value="answer_key">Keys</option>
                 <option value="syllabus">Syllabus</option>
                 <option value="general">General</option>
               </select>
 
               <select
-                className="px-3 py-2 border rounded-xl dark:bg-slate-900 dark:border-slate-700 font-medium"
+                className="px-2.5 py-1.5 border rounded-lg bg-slate-50 dark:bg-slate-800 dark:border-slate-700 font-medium"
                 value={filterStatus}
                 onChange={e => setFilterStatus(e.target.value)}
               >
@@ -558,7 +558,7 @@ export default function ResourceManagement() {
 
               {uniqueYears.length > 0 && (
                 <select
-                  className="px-3 py-2 border rounded-xl dark:bg-slate-900 dark:border-slate-700 font-medium"
+                  className="px-2.5 py-1.5 border rounded-lg bg-slate-50 dark:bg-slate-800 dark:border-slate-700 font-medium"
                   value={filterYear}
                   onChange={e => setFilterYear(e.target.value)}
                 >
@@ -572,13 +572,13 @@ export default function ResourceManagement() {
           </div>
 
           {/* Resources Table */}
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-            <div className="px-6 py-3 border-b border-slate-100 dark:border-slate-700/60 flex items-center justify-between text-xs text-slate-500">
+          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-xs border border-slate-200 dark:border-slate-800 overflow-hidden">
+            <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500">
               <span>Showing {filteredResources.length} of {resources.length} resources</span>
               {(searchQuery || filterType !== 'all' || filterStatus !== 'all' || filterYear !== 'all') && (
                 <button
                   onClick={() => { setSearchQuery(''); setFilterType('all'); setFilterStatus('all'); setFilterYear('all'); }}
-                  className="text-indigo-600 dark:text-indigo-400 font-bold hover:underline"
+                  className="text-blue-600 dark:text-blue-400 font-semibold hover:underline"
                 >
                   Clear Filters
                 </button>
@@ -841,56 +841,56 @@ export default function ResourceManagement() {
 
       {/* MODAL 1: Edit Metadata Modal */}
       {editingItem && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4">
-          <div className="bg-white dark:bg-slate-800 w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 p-4 sm:p-6 space-y-4">
-            <div className="flex items-center justify-between border-b pb-3 dark:border-slate-700">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <Edit3 size={18} className="text-blue-500" /> Edit Metadata
+        <div className="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-white dark:bg-slate-900 w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-xl shadow-lg border border-slate-200 dark:border-slate-800 p-5 sm:p-6 space-y-4">
+            <div className="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-slate-800">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <Edit3 size={16} className="text-blue-600" /> Edit Metadata
               </h3>
-              <button onClick={() => setEditingItem(null)} className="text-slate-400 hover:text-slate-600 p-1"><X size={20} /></button>
+              <button onClick={() => setEditingItem(null)} className="text-slate-400 hover:text-slate-600 p-1"><X size={18} /></button>
             </div>
 
-            <form onSubmit={handleEditSubmit} className="space-y-4 text-sm">
+            <form onSubmit={handleEditSubmit} className="space-y-3.5 text-xs sm:text-sm">
               <div>
-                <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Title *</label>
+                <label className="block text-xs font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">Title *</label>
                 <input
                   required
                   type="text"
-                  className="w-full px-3 py-2 border rounded-xl dark:bg-slate-900 dark:border-slate-700"
+                  className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900 dark:border-slate-700 outline-none focus:border-blue-600"
                   value={editFormData.title}
                   onChange={e => setEditFormData({ ...editFormData, title: e.target.value })}
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                 <div>
-                  <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Type</label>
+                  <label className="block text-xs font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">Type</label>
                   <select
-                    className="w-full px-3 py-2 border rounded-xl dark:bg-slate-900 dark:border-slate-700"
+                    className="w-full px-2 py-2 border rounded-lg bg-white dark:bg-slate-900 dark:border-slate-700 outline-none focus:border-blue-600"
                     value={editFormData.type}
                     onChange={e => setEditFormData({ ...editFormData, type: e.target.value })}
                   >
-                    <option value="question_paper">Question Paper</option>
-                    <option value="answer_key">Answer Key</option>
+                    <option value="question_paper">Paper</option>
+                    <option value="answer_key">Key</option>
                     <option value="syllabus">Syllabus</option>
                     <option value="general">General</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Exam Year</label>
+                  <label className="block text-xs font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">Exam Year</label>
                   <input
                     type="number"
-                    className="w-full px-3 py-2 border rounded-xl dark:bg-slate-900 dark:border-slate-700"
+                    className="w-full px-2.5 py-2 border rounded-lg bg-white dark:bg-slate-900 dark:border-slate-700 outline-none focus:border-blue-600"
                     value={editFormData.exam_year}
                     onChange={e => setEditFormData({ ...editFormData, exam_year: e.target.value })}
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Display Order</label>
+                  <label className="block text-xs font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">Display Order</label>
                   <input
                     type="number"
                     min="0"
-                    className="w-full px-3 py-2 border rounded-xl dark:bg-slate-900 dark:border-slate-700"
+                    className="w-full px-2.5 py-2 border rounded-lg bg-white dark:bg-slate-900 dark:border-slate-700 outline-none focus:border-blue-600"
                     value={editFormData.display_order ?? 0}
                     onChange={e => setEditFormData({ ...editFormData, display_order: e.target.value })}
                   />
@@ -899,9 +899,9 @@ export default function ResourceManagement() {
 
               {editFormData.type === 'answer_key' && (
                 <div>
-                  <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Linked Paper</label>
+                  <label className="block text-xs font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">Linked Paper</label>
                   <select
-                    className="w-full px-3 py-2 border rounded-xl dark:bg-slate-900 dark:border-slate-700"
+                    className="w-full px-2.5 py-2 border rounded-lg bg-white dark:bg-slate-900 dark:border-slate-700 outline-none focus:border-blue-600"
                     value={editFormData.paper_id}
                     onChange={e => setEditFormData({ ...editFormData, paper_id: e.target.value })}
                   >
@@ -915,10 +915,10 @@ export default function ResourceManagement() {
 
               {editingItem.external_url !== null && (
                 <div>
-                  <label className="block text-xs font-bold uppercase text-slate-500 mb-1">External URL</label>
+                  <label className="block text-xs font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">External URL</label>
                   <input
                     type="url"
-                    className="w-full px-3 py-2 border rounded-xl dark:bg-slate-900 dark:border-slate-700"
+                    className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900 dark:border-slate-700 outline-none focus:border-blue-600"
                     value={editFormData.external_url}
                     onChange={e => setEditFormData({ ...editFormData, external_url: e.target.value })}
                   />
@@ -926,9 +926,9 @@ export default function ResourceManagement() {
               )}
 
               <div>
-                <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Description</label>
+                <label className="block text-xs font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">Description</label>
                 <textarea
-                  className="w-full px-3 py-2 border rounded-xl dark:bg-slate-900 dark:border-slate-700"
+                  className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900 dark:border-slate-700 outline-none focus:border-blue-600"
                   rows="2"
                   value={editFormData.description}
                   onChange={e => setEditFormData({ ...editFormData, description: e.target.value })}
@@ -938,25 +938,25 @@ export default function ResourceManagement() {
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
-                  className="w-4 h-4 text-indigo-600 rounded"
+                  className="w-4 h-4 text-blue-600 rounded"
                   checked={editFormData.published}
                   onChange={e => setEditFormData({ ...editFormData, published: e.target.checked })}
                 />
                 <span className="font-semibold text-slate-700 dark:text-slate-300">Published to Students</span>
               </label>
 
-              <div className="flex justify-end gap-3 pt-2">
+              <div className="flex justify-end gap-2.5 pt-2">
                 <button
                   type="button"
                   onClick={() => setEditingItem(null)}
-                  className="px-4 py-2 border rounded-xl font-semibold hover:bg-slate-50 dark:hover:bg-slate-700"
+                  className="px-3.5 py-2 border rounded-lg font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 text-xs"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={actionLoading}
-                  className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold disabled:opacity-50"
+                  className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white dark:bg-blue-600 dark:hover:bg-blue-700 rounded-lg font-semibold text-xs disabled:opacity-50"
                 >
                   {actionLoading ? 'Saving...' : 'Save Changes'}
                 </button>
@@ -968,44 +968,43 @@ export default function ResourceManagement() {
 
       {/* MODAL 2: Replace File Modal */}
       {replacingItem && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4">
-          <div className="bg-white dark:bg-slate-800 w-full max-w-md max-h-[90vh] overflow-y-auto rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 p-4 sm:p-6 space-y-4">
-            <div className="flex items-center justify-between border-b pb-3 dark:border-slate-700">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <RefreshCw size={18} className="text-amber-500" /> Replace PDF Document
+        <div className="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-white dark:bg-slate-900 w-full max-w-md max-h-[90vh] overflow-y-auto rounded-xl shadow-lg border border-slate-200 dark:border-slate-800 p-5 space-y-4">
+            <div className="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-slate-800">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <RefreshCw size={16} className="text-blue-600" /> Replace PDF Document
               </h3>
-              <button onClick={() => setReplacingItem(null)} className="text-slate-400 hover:text-slate-600"><X size={20} /></button>
+              <button onClick={() => setReplacingItem(null)} className="text-slate-400 hover:text-slate-600"><X size={18} /></button>
             </div>
 
-            <p className="text-sm text-slate-500">
+            <p className="text-xs text-slate-500">
               Replacing PDF file for: <strong className="text-slate-800 dark:text-white">{replacingItem.title}</strong>.
-              All existing links and IDs will be preserved.
             </p>
 
             <form onSubmit={handleReplaceSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Select New PDF File (Max 15MB) *</label>
+                <label className="block text-xs font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">New PDF File (Max 15MB) *</label>
                 <input
                   required
                   type="file"
                   accept=".pdf,application/pdf"
-                  className="w-full p-2 border border-dashed rounded-xl dark:bg-slate-900 dark:border-slate-700 text-xs"
+                  className="w-full p-2 border border-dashed rounded-lg bg-white dark:bg-slate-900 dark:border-slate-700 text-xs"
                   onChange={e => setReplaceFile(e.target.files[0])}
                 />
               </div>
 
-              <div className="flex justify-end gap-3 pt-2">
+              <div className="flex justify-end gap-2.5 pt-2">
                 <button
                   type="button"
                   onClick={() => setReplacingItem(null)}
-                  className="px-4 py-2 border rounded-xl text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-700"
+                  className="px-3.5 py-2 border rounded-lg text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-800"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={actionLoading || !replaceFile}
-                  className="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm rounded-xl font-bold disabled:opacity-50"
+                  className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs rounded-lg font-semibold disabled:opacity-50"
                 >
                   {actionLoading ? 'Replacing...' : 'Replace File'}
                 </button>
