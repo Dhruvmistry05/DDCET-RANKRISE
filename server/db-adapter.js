@@ -3,7 +3,7 @@ const pgDb = require('./db-pg');
 
 const USE_PG = !!process.env.DATABASE_URL;
 
-const adapter = USE_PG ? pgDb : {
+const jsonDbAdapter = {
   getAll: async (table) => {
     return jsonDb.get(table);
   },
@@ -11,7 +11,7 @@ const adapter = USE_PG ? pgDb : {
     const records = jsonDb.get(table);
     return records.filter(r => {
       for (const key in criteria) {
-        if (r[key] != criteria[key]) return false; // weak equality to match pg string vs int logic sometimes
+        if (r[key] != criteria[key]) return false;
       }
       return true;
     });
@@ -64,4 +64,38 @@ const adapter = USE_PG ? pgDb : {
   close: async () => {}
 };
 
-module.exports = adapter;
+let activeDb = USE_PG ? pgDb : jsonDbAdapter;
+
+const initDb = async () => {
+  if (USE_PG) {
+    try {
+      await pgDb.testConnection();
+      activeDb = pgDb;
+      return 'postgresql';
+    } catch (err) {
+      if (process.env.NODE_ENV !== 'production') {
+        console.warn(`[Database Warning] PostgreSQL connection timed out locally (${err.message}). Using local JSON database for local development.`);
+        activeDb = jsonDbAdapter;
+        return 'json';
+      }
+      throw err;
+    }
+  }
+  activeDb = jsonDbAdapter;
+  return 'json';
+};
+
+module.exports = {
+  initDb,
+  testConnection: (...args) => activeDb.testConnection(...args),
+  getAll: (...args) => activeDb.getAll(...args),
+  find: (...args) => activeDb.find(...args),
+  findOne: (...args) => activeDb.findOne(...args),
+  findUserByEmail: (...args) => activeDb.findUserByEmail(...args),
+  insert: (...args) => activeDb.insert(...args),
+  update: (...args) => activeDb.update(...args),
+  remove: (...args) => activeDb.remove(...args),
+  getStudentSyllabus: (...args) => activeDb.getStudentSyllabus(...args),
+  getAdminStats: (...args) => activeDb.getAdminStats(...args),
+  close: (...args) => activeDb.close(...args)
+};

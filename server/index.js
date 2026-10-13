@@ -954,8 +954,9 @@ if (process.env.NODE_ENV === 'production' && !USE_PG) {
 }
 
 const startServer = async () => {
+  let dbType = 'json';
   try {
-    await db.testConnection();
+    dbType = await db.initDb();
   } catch (err) {
     console.error('FATAL ERROR: Database connection failed.', err.message);
     process.exit(1);
@@ -963,7 +964,7 @@ const startServer = async () => {
 
   const PORT = process.env.PORT || 3001;
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Backend server running on http://0.0.0.0:${PORT} [DB: ${USE_PG ? 'PostgreSQL' : 'JSON'}]`);
+    console.log(`Backend server running on http://0.0.0.0:${PORT} [DB: ${dbType === 'postgresql' ? 'PostgreSQL' : 'JSON'}]`);
   });
 };
 
