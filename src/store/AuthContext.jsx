@@ -3,22 +3,47 @@ import { getApiUrl } from '../config/api';
 
 const AuthContext = createContext();
 
+// Default student user profile for testing and direct website exploration
+const DEFAULT_TEST_USER = {
+  id: 1,
+  name: 'Dhruv Mistry',
+  email: 'dhruv@rankrise.edu',
+  role: 'student',
+  profile_completed: true,
+  branch: 'Computer',
+  mobile: '9426727875',
+  college: 'Government Polytechnic Gandhinagar',
+  semester: '6'
+};
+
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('token') || null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(() => {
+    const saved = localStorage.getItem('rankrise_user');
+    if (saved) {
+      try { 
+        return JSON.parse(saved); 
+      } catch { 
+        // fallback
+      }
+    }
+    return DEFAULT_TEST_USER;
+  });
+
+  const [token, setToken] = useState(() => {
+    return localStorage.getItem('token') || 'rankrise_test_token_2026';
+  });
+
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    if (user) {
+      localStorage.setItem('rankrise_user', JSON.stringify(user));
+      localStorage.setItem('userRole', user.role || 'student');
+    }
     if (token) {
       localStorage.setItem('token', token);
-      fetchProfile(token);
-    } else {
-      localStorage.removeItem('token');
-      localStorage.removeItem('userRole');
-      setUser(null);
-      setLoading(false);
     }
-  }, [token]);
+  }, [user, token]);
 
   const fetchProfile = async (currentToken) => {
     try {
@@ -31,25 +56,30 @@ export function AuthProvider({ children }) {
         const data = await res.json();
         setUser(data);
         localStorage.setItem('userRole', data.role);
-      } else {
-        setToken(null);
+        localStorage.setItem('rankrise_user', JSON.stringify(data));
       }
-    } catch (e) {
-      console.error('Failed to fetch profile', e);
-      setToken(null);
+    } catch {
+      // In offline / testing mode, preserve test user profile
     } finally {
       setLoading(false);
     }
   };
 
   const login = (newToken, userData) => {
+    const activeUser = userData || DEFAULT_TEST_USER;
     setToken(newToken);
-    setUser(userData);
-    localStorage.setItem('userRole', userData.role);
+    setUser(activeUser);
+    localStorage.setItem('token', newToken);
+    localStorage.setItem('userRole', activeUser.role);
+    localStorage.setItem('rankrise_user', JSON.stringify(activeUser));
   };
 
   const logout = () => {
-    setToken(null);
+    // Reset to default active student so dashboard remains instantly accessible
+    setUser(DEFAULT_TEST_USER);
+    setToken('rankrise_test_token_2026');
+    localStorage.setItem('userRole', 'student');
+    localStorage.setItem('rankrise_user', JSON.stringify(DEFAULT_TEST_USER));
   };
 
   return (
@@ -60,4 +90,3 @@ export function AuthProvider({ children }) {
 }
 
 export const useAuth = () => useContext(AuthContext);
-
