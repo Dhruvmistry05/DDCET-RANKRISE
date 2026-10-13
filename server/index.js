@@ -327,6 +327,17 @@ app.post('/api/auth/login', async (req, res) => {
 
 // --- USER PROFILE API ---
 app.get('/api/user/profile', requireUser, async (req, res) => {
+  if (req.user && req.user.role === 'admin' && req.user.email === 'admin@rankrise.edu') {
+    return res.json({
+      id: 1,
+      email: 'admin@rankrise.edu',
+      name: 'Admin Manager',
+      role: 'admin',
+      profile_completed: true,
+      branch: 'Computer'
+    });
+  }
+
   const user = await db.findOne('users', { id: req.user.id });
   if (!user) return res.status(404).json({ error: 'User not found' });
   
