@@ -10,6 +10,7 @@ import TestResult from './pages/student/TestResult';
 import Leaderboard from './pages/student/Leaderboard';
 import MistakeBook from './pages/student/MistakeBook';
 import Login from './pages/auth/Login';
+import StudentProfileCreation from './pages/auth/StudentProfileCreation';
 import Layout from './components/Layout';
 import SyllabusManagement from './pages/admin/SyllabusManagement';
 import MaterialManagement from './pages/admin/MaterialManagement';
@@ -20,7 +21,6 @@ import AnswerKeys from './pages/student/Resources/AnswerKeys';
 import OfficialSyllabus from './pages/student/Resources/OfficialSyllabus';
 import ExternalLinks from './pages/student/Resources/ExternalLinks';
 import StudyMaterialLibrary from './pages/student/Resources/StudyMaterialLibrary';
-import { useEffect, useState } from 'react';
 
 import Placeholder from './pages/Placeholder';
 
@@ -48,7 +48,9 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Login />} />
+        <Route path="/" element={<StudentProfileCreation />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/admin/login" element={<Login />} />
         <Route path="/complete-profile" element={<ProtectedRoute allowedRole="student"><ProfileCompletion /></ProtectedRoute>} />
         
         {/* Protected Layout Routes */}

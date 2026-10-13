@@ -3,6 +3,7 @@ const cors = require('cors');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 const db = require('./db-adapter'); // CHANGED to adapter
 
 const app = express();
@@ -115,16 +116,166 @@ app.use((req, res, next) => {
 });
 
 // --- AUTHENTICATION API ---
+
+// Real-time check if an email is already registered
+app.post('/api/auth/check-email', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email || typeof email !== 'string') {
+      return res.status(400).json({ error: 'Email address is required.' });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(cleanEmail)) {
+      return res.status(400).json({ error: 'Please enter a valid email address.' });
+    }
+
+    const existingUser = await (db.findUserByEmail ? db.findUserByEmail(cleanEmail) : db.findOne('users', { email: cleanEmail }));
+    if (existingUser) {
+      return res.json({ 
+        exists: true, 
+        message: 'This email is already registered in DDCET RankRise.' 
+      });
+    }
+
+    return res.json({ 
+      exists: false, 
+      message: 'Email is available for registration.' 
+    });
+  } catch (err) {
+    console.error('Error verifying email availability:', err);
+    return res.status(500).json({ error: 'Failed to check email availability' });
+  }
+});
+
+// Student Profile Creation - Modern primary entry flow
+app.post('/api/auth/student-profile', async (req, res) => {
+  try {
+    const { 
+      name, 
+      email, 
+      mobile, 
+      dob, 
+      gender, 
+      college, 
+      branch, 
+      semester 
+    } = req.body;
+
+    // 1. Validate required fields
+    if (!email || typeof email !== 'string') {
+      return res.status(400).json({ error: 'Email Address is required.' });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(cleanEmail)) {
+      return res.status(400).json({ error: 'Please enter a valid email address.' });
+    }
+
+    if (!name || typeof name !== 'string' || name.trim().length < 2) {
+      return res.status(400).json({ error: 'Full Name must be at least 2 characters.' });
+    }
+
+    const cleanMobile = String(mobile || '').replace(/\D/g, '');
+    if (cleanMobile.length !== 10) {
+      return res.status(400).json({ error: 'Please enter a valid 10-digit mobile number.' });
+    }
+
+    if (!dob || typeof dob !== 'string' || !dob.trim()) {
+      return res.status(400).json({ error: 'Date of Birth is required.' });
+    }
+
+    if (!gender || typeof gender !== 'string' || !gender.trim()) {
+      return res.status(400).json({ error: 'Gender is required.' });
+    }
+
+    if (!college || typeof college !== 'string' || college.trim().length < 2) {
+      return res.status(400).json({ error: 'Diploma College Name is required.' });
+    }
+
+    if (!branch || typeof branch !== 'string' || !branch.trim()) {
+      return res.status(400).json({ error: 'Diploma Engineering Branch is required.' });
+    }
+
+    if (!semester) {
+      return res.status(400).json({ error: 'Current Semester is required.' });
+    }
+
+    // 2. Prevent duplicate student accounts & profile hijacking
+    const existingUser = await (db.findUserByEmail ? db.findUserByEmail(cleanEmail) : db.findOne('users', { email: cleanEmail }));
+    if (existingUser) {
+      return res.status(409).json({ 
+        error: 'This email is already registered in DDCET RankRise. Please sign in if you already have an account.' 
+      });
+    }
+
+    // 3. Generate secure cryptographic password hash to preserve bcrypt database schema
+    const secureSecret = crypto.randomBytes(32).toString('hex');
+    const hashedPassword = bcrypt.hashSync(secureSecret, 10);
+    const now = new Date().toISOString();
+
+    // 4. Insert new student into users table
+    const newUser = await db.insert('users', {
+      email: cleanEmail,
+      password: hashedPassword,
+      role: 'student',
+      profile_completed: true,
+      name: name.trim(),
+      mobile: cleanMobile,
+      dob: dob.trim(),
+      gender: gender.trim(),
+      college: college.trim(),
+      branch: branch.trim(),
+      semester: String(semester).trim(),
+      first_login_at: now,
+      last_login_at: now
+    });
+
+    // 5. Sign JWT token for the authenticated student session
+    const token = jwt.sign(
+      { id: newUser.id, email: newUser.email, role: 'student' }, 
+      JWT_SECRET, 
+      { expiresIn: '30d' }
+    );
+
+    return res.status(201).json({
+      message: 'Profile created successfully! Welcome to DDCET RankRise.',
+      token,
+      user: {
+        id: newUser.id,
+        email: newUser.email,
+        name: newUser.name,
+        role: 'student',
+        profile_completed: true,
+        mobile: newUser.mobile,
+        dob: newUser.dob,
+        gender: newUser.gender,
+        college: newUser.college,
+        branch: newUser.branch,
+        semester: newUser.semester,
+        first_login_at: newUser.first_login_at,
+        last_login_at: newUser.last_login_at
+      }
+    });
+  } catch (err) {
+    console.error('Error creating student profile:', err);
+    return res.status(500).json({ error: 'Failed to create student profile. Please try again.' });
+  }
+});
+
 app.post('/api/auth/register', async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) return res.status(400).json({ error: 'Email and password are required' });
   
-  const existingUser = await db.findOne('users', { email });
+  const cleanEmail = email.trim().toLowerCase();
+  const existingUser = await (db.findUserByEmail ? db.findUserByEmail(cleanEmail) : db.findOne('users', { email: cleanEmail }));
   if (existingUser) return res.status(400).json({ error: 'Email is already registered' });
   
   const hashedPassword = bcrypt.hashSync(password, 10);
   const newUser = await db.insert('users', {
-    email,
+    email: cleanEmail,
     password: hashedPassword,
     role: 'student', // FORCE STUDENT
     profile_completed: false,
@@ -139,7 +290,8 @@ app.post('/api/auth/login', async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) return res.status(400).json({ error: 'Email and password are required' });
   
-  const user = await db.findOne('users', { email });
+  const cleanEmail = email.trim().toLowerCase();
+  const user = await (db.findUserByEmail ? db.findUserByEmail(cleanEmail) : db.findOne('users', { email: cleanEmail }));
   if (!user) return res.status(400).json({ error: 'Invalid email or password' });
   
   const isMatch = bcrypt.compareSync(password, user.password);

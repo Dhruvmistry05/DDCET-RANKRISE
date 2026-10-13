@@ -25,6 +25,12 @@ const adapter = USE_PG ? pgDb : {
       return true;
     }) || null;
   },
+  findUserByEmail: async (email) => {
+    if (!email) return null;
+    const records = jsonDb.get('users');
+    const clean = email.trim().toLowerCase();
+    return records.find(r => r.email && r.email.toLowerCase() === clean) || null;
+  },
   insert: async (table, data) => {
     return jsonDb.insert(table, data);
   },

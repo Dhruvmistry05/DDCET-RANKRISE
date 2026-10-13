@@ -44,6 +44,12 @@ const findOne = async (table, criteria) => {
   return res.rows[0] || null;
 };
 
+const findUserByEmail = async (email) => {
+  if (!email) return null;
+  const res = await pool.query('SELECT * FROM users WHERE LOWER(email) = LOWER($1) LIMIT 1', [email.trim()]);
+  return res.rows[0] || null;
+};
+
 const insert = async (table, data) => {
   const keys = Object.keys(data);
   const values = keys.map(k => data[k]);
@@ -128,6 +134,7 @@ module.exports = {
   getAll,
   find,
   findOne,
+  findUserByEmail,
   insert,
   update,
   remove,

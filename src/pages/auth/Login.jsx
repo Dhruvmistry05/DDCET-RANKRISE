@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { BookOpen, GraduationCap, ArrowRight, ShieldCheck, Mail, Lock, Sparkles } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { BookOpen, GraduationCap, ArrowRight, ShieldCheck, Mail, Lock, Sparkles, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../../store/AuthContext';
 import { getApiUrl } from '../../config/api';
 
@@ -181,15 +181,24 @@ export default function Login() {
               </div>
             </div>
 
+            {/* Back to Profile Creation */}
+            <div>
+              <Link 
+                to="/"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline"
+              >
+                <ArrowLeft size={14} />
+                <span>New Student? Go to Profile Creation</span>
+              </Link>
+            </div>
+
             {/* Greeting & Header */}
             <div className="text-center sm:text-left">
               <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-                {isLogin ? 'Welcome Back' : 'Create Student Account'}
+                Sign In to Portal
               </h2>
               <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-                {isLogin 
-                  ? 'Sign in to access study materials, mock tests, and analytics.' 
-                  : 'Start your official DDCET exam preparation journey today.'}
+                Enter your credentials to access your DDCET RankRise dashboard.
               </p>
             </div>
 
