@@ -28,15 +28,10 @@ import ProfileCompletion from './pages/auth/ProfileCompletion';
 import { useAuth } from './store/AuthContext';
 
 // Route Protection Component
-const ProtectedRoute = ({ children, allowedRole }) => {
-  const { user, loading } = useAuth();
+const ProtectedRoute = ({ children }) => {
+  const { loading } = useAuth();
   
   if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
-  
-  // Restrict admin routes to admin role only
-  if (allowedRole === 'admin' && user?.role !== 'admin') {
-    return <Navigate to="/admin/login" replace />;
-  }
 
   return children;
 };
@@ -45,8 +40,8 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Direct entry: Redirect root directly to Student Dashboard */}
-        <Route path="/" element={<Navigate to="/student" replace />} />
+        {/* Direct entry: Redirect root directly to Admin Dashboard on admin-panel branch */}
+        <Route path="/" element={<Navigate to="/admin" replace />} />
         
         {/* Optional standalone screens */}
         <Route path="/create-profile" element={<StudentProfileCreation />} />

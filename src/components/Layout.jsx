@@ -85,6 +85,25 @@ export default function Layout() {
           
           {/* Header Right Actions */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            {/* Quick Switcher between Admin and Student Preview */}
+            {location.pathname.startsWith('/admin') ? (
+              <button
+                onClick={() => navigate('/student')}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/40 dark:hover:bg-blue-900/40 text-blue-700 dark:text-blue-300 rounded-xl text-xs font-bold transition-all border border-blue-200/80 dark:border-blue-800/80 shadow-xs"
+                title="Preview Student Experience"
+              >
+                <span>Preview Student View</span>
+              </button>
+            ) : (
+              <button
+                onClick={() => navigate('/admin')}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:hover:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 rounded-xl text-xs font-bold transition-all border border-emerald-200/80 dark:border-emerald-800/80 shadow-xs"
+                title="Manage Syllabus, Materials & Tests"
+              >
+                <span>Admin Panel</span>
+              </button>
+            )}
+
             {user?.name && (
               <span className="hidden sm:inline-block text-xs font-semibold px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-full border border-slate-200/60 dark:border-slate-700">
                 {user.name.split(' ')[0]}

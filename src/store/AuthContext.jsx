@@ -3,18 +3,17 @@ import { getApiUrl } from '../config/api';
 
 const AuthContext = createContext();
 
-// Default student user profile for testing and direct website exploration
-const DEFAULT_TEST_USER = {
+// Default admin user for the admin-panel branch so teammates can immediately manage content
+const DEFAULT_ADMIN_USER = {
   id: 1,
-  name: 'Dhruv Mistry',
-  email: 'dhruv@rankrise.edu',
-  role: 'student',
+  name: 'Admin Manager',
+  email: 'admin@rankrise.edu',
+  role: 'admin',
   profile_completed: true,
-  branch: 'Computer',
-  mobile: '9426727875',
-  college: 'Government Polytechnic Gandhinagar',
-  semester: '6'
+  branch: 'Computer'
 };
+
+const DEFAULT_ADMIN_TOKEN = 'rankrise_admin_dev_token_2026';
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
@@ -26,11 +25,11 @@ export function AuthProvider({ children }) {
         // fallback
       }
     }
-    return DEFAULT_TEST_USER;
+    return DEFAULT_ADMIN_USER;
   });
 
   const [token, setToken] = useState(() => {
-    return localStorage.getItem('token') || 'rankrise_test_token_2026';
+    return localStorage.getItem('token') || DEFAULT_ADMIN_TOKEN;
   });
 
   const [loading, setLoading] = useState(false);
@@ -38,7 +37,7 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     if (user) {
       localStorage.setItem('rankrise_user', JSON.stringify(user));
-      localStorage.setItem('userRole', user.role || 'student');
+      localStorage.setItem('userRole', user.role || 'admin');
     }
     if (token) {
       localStorage.setItem('token', token);
@@ -59,14 +58,14 @@ export function AuthProvider({ children }) {
         localStorage.setItem('rankrise_user', JSON.stringify(data));
       }
     } catch {
-      // In offline / testing mode, preserve test user profile
+      // In dev / admin mode, keep admin user
     } finally {
       setLoading(false);
     }
   };
 
   const login = (newToken, userData) => {
-    const activeUser = userData || DEFAULT_TEST_USER;
+    const activeUser = userData || DEFAULT_ADMIN_USER;
     setToken(newToken);
     setUser(activeUser);
     localStorage.setItem('token', newToken);
@@ -75,15 +74,26 @@ export function AuthProvider({ children }) {
   };
 
   const logout = () => {
-    // Reset to default active student so dashboard remains instantly accessible
-    setUser(DEFAULT_TEST_USER);
-    setToken('rankrise_test_token_2026');
-    localStorage.setItem('userRole', 'student');
-    localStorage.setItem('rankrise_user', JSON.stringify(DEFAULT_TEST_USER));
+    setUser(DEFAULT_ADMIN_USER);
+    setToken(DEFAULT_ADMIN_TOKEN);
+    localStorage.setItem('userRole', 'admin');
+    localStorage.setItem('rankrise_user', JSON.stringify(DEFAULT_ADMIN_USER));
+  };
+
+  const toggleRole = () => {
+    const nextRole = user?.role === 'admin' ? 'student' : 'admin';
+    const updated = {
+      ...user,
+      role: nextRole,
+      name: nextRole === 'admin' ? 'Admin Manager' : 'Student Preview'
+    };
+    setUser(updated);
+    localStorage.setItem('userRole', nextRole);
+    localStorage.setItem('rankrise_user', JSON.stringify(updated));
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, logout, fetchProfile }}>
+    <AuthContext.Provider value={{ user, token, loading, login, logout, fetchProfile, toggleRole }}>
       {children}
     </AuthContext.Provider>
   );

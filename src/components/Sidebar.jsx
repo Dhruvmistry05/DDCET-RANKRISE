@@ -79,33 +79,11 @@ export default function Sidebar({ isOpen, onClose }) {
 
       {/* Navigation Links List */}
       <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto overscroll-contain">
-        <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2 px-3">
-          {role === 'admin' ? 'Administration' : 'Student Learning Hub'}
-        </div>
-
-        {studentLinks.map((link) => {
-          const isActive = location.pathname === link.path;
-          return (
-            <Link
-              key={link.name}
-              to={link.path}
-              onClick={handleNavClick}
-              className={`flex items-center gap-3.5 px-3.5 py-3 rounded-xl transition-all duration-200 group ${
-                isActive 
-                  ? 'bg-blue-600/15 text-blue-400 font-bold border border-blue-500/20 shadow-sm' 
-                  : 'hover:bg-slate-800/60 hover:text-white text-slate-300'
-              }`}
-            >
-              <link.icon size={20} className={`shrink-0 transition-colors ${isActive ? 'text-blue-400' : 'text-slate-400 group-hover:text-blue-300'}`} />
-              <span className="text-sm tracking-normal">{link.name}</span>
-            </Link>
-          );
-        })}
-
-        {role === 'admin' && (
-          <div className="mt-6 pt-4 border-t border-slate-800/80">
-            <div className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider mb-2 px-3">
-              Admin Controls
+        {role === 'admin' ? (
+          <>
+            <div className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider mb-2 px-3 flex items-center justify-between">
+              <span>Admin Management</span>
+              <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full font-mono">Editor</span>
             </div>
             {adminLinks.map((link) => {
               const isActive = location.pathname === link.path;
@@ -116,7 +94,7 @@ export default function Sidebar({ isOpen, onClose }) {
                   onClick={handleNavClick}
                   className={`flex items-center gap-3.5 px-3.5 py-3 rounded-xl transition-all duration-200 group ${
                     isActive 
-                      ? 'bg-emerald-600/15 text-emerald-400 font-bold border border-emerald-500/20 shadow-sm' 
+                      ? 'bg-emerald-600/20 text-emerald-400 font-bold border border-emerald-500/30 shadow-sm' 
                       : 'hover:bg-slate-800/60 hover:text-white text-slate-300'
                   }`}
                 >
@@ -125,7 +103,55 @@ export default function Sidebar({ isOpen, onClose }) {
                 </Link>
               );
             })}
-          </div>
+
+            <div className="mt-6 pt-4 border-t border-slate-800/80">
+              <div className="text-[11px] font-bold text-blue-400 uppercase tracking-wider mb-2 px-3">
+                Student View (Preview)
+              </div>
+              {studentLinks.slice(0, 4).map((link) => {
+                const isActive = location.pathname === link.path;
+                return (
+                  <Link
+                    key={link.name}
+                    to={link.path}
+                    onClick={handleNavClick}
+                    className={`flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl transition-all duration-200 group ${
+                      isActive 
+                        ? 'bg-blue-600/15 text-blue-400 font-bold border border-blue-500/20 shadow-sm' 
+                        : 'hover:bg-slate-800/60 hover:text-white text-slate-400'
+                    }`}
+                  >
+                    <link.icon size={18} className={`shrink-0 transition-colors ${isActive ? 'text-blue-400' : 'text-slate-500 group-hover:text-blue-300'}`} />
+                    <span className="text-xs tracking-normal">{link.name}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2 px-3">
+              Student Learning Hub
+            </div>
+            {studentLinks.map((link) => {
+              const isActive = location.pathname === link.path;
+              return (
+                <Link
+                  key={link.name}
+                  to={link.path}
+                  onClick={handleNavClick}
+                  className={`flex items-center gap-3.5 px-3.5 py-3 rounded-xl transition-all duration-200 group ${
+                    isActive 
+                      ? 'bg-blue-600/15 text-blue-400 font-bold border border-blue-500/20 shadow-sm' 
+                      : 'hover:bg-slate-800/60 hover:text-white text-slate-300'
+                  }`}
+                >
+                  <link.icon size={20} className={`shrink-0 transition-colors ${isActive ? 'text-blue-400' : 'text-slate-400 group-hover:text-blue-300'}`} />
+                  <span className="text-sm tracking-normal">{link.name}</span>
+                </Link>
+              );
+            })}
+          </>
         )}
       </nav>
 
