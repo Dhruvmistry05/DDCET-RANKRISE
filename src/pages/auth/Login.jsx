@@ -3,12 +3,14 @@ import { useNavigate, Link } from 'react-router-dom';
 import { BookOpen, GraduationCap, ArrowRight, ShieldCheck, Mail, Lock, Sparkles, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../../store/AuthContext';
 import { getApiUrl } from '../../config/api';
+import PasswordInput from '../../components/PasswordInput';
 
 export default function Login() {
   const [isLogin, setIsLogin] = useState(true);
   const [role, setRole] = useState('student');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -36,6 +38,12 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    if (!isLogin && password !== confirmPassword) {
+      setError('Passwords do not match. Please verify your password.');
+      return;
+    }
+
     setLoading(true);
     
     const endpoint = getApiUrl(`/api/auth/${isLogin ? 'login' : 'register'}`);
@@ -258,19 +266,29 @@ export default function Login() {
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
                   Password
                 </label>
-                <div className="relative">
-                  <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                  <input 
-                    type="password" 
+                <PasswordInput 
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder={isLogin ? "Enter password" : "Create a password"}
+                  autoComplete={isLogin ? 'current-password' : 'new-password'}
+                />
+              </div>
+
+              {!isLogin && (
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
+                    Confirm Password
+                  </label>
+                  <PasswordInput 
                     required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter password"
-                    autoComplete={isLogin ? 'current-password' : 'new-password'}
-                    className="w-full pl-10 pr-3.5 py-2.5 border border-[#E2E8F0] dark:border-slate-700 rounded-lg bg-[#F8FAFC] dark:bg-slate-900 text-slate-900 dark:text-white text-sm outline-hidden focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] transition" 
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Confirm your password"
+                    autoComplete="new-password"
                   />
                 </div>
-              </div>
+              )}
 
               {/* Submit Button */}
               <button 
@@ -295,7 +313,7 @@ export default function Login() {
               <div className="text-center pt-2">
                 <button 
                   type="button" 
-                  onClick={() => { setIsLogin(!isLogin); setError(''); }}
+                  onClick={() => { setIsLogin(!isLogin); setError(''); setConfirmPassword(''); }}
                   className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline px-2 py-1"
                 >
                   {isLogin 
