@@ -1,3 +1,5 @@
+import { ddcet2026OfficialQuestions } from './ddcet2026Questions';
+
 export const syllabusData = [
   {
     "section": "BE-01",
@@ -185,32 +187,49 @@ export const syllabusData = [
   }
 ];
 
-// Flatten questions for the Mock test format
-export const mockQuestions = syllabusData.flatMap(topic => 
-  topic.questions.map(q => ({
-    id: q.id,
-    text: q.question,
-    options: q.options,
-    correctOptionIndex: q.answer,
-    marks: 2.0, // Based on HTML +2
-    negativeMarks: 0.5, // Based on HTML -0.5
-    subject: topic.subject,
-    chapter: topic.name,
-    explanation: q.explanation,
-    cheat: q.cheat,
-  }))
-);
+// Complete 100 questions from official DDCET 2026 examination
+export const mockQuestions = ddcet2026OfficialQuestions;
 
 export const mockTests = [
   {
-    id: 't1',
-    title: 'Full DDCET-style Mock Test',
+    id: 't-100',
+    title: 'DDCET 2026 Full Length Mock Exam (100 MCQs)',
     type: 'combined',
     scheduledStartTime: new Date(Date.now() - 3600000).toISOString(),
-    scheduledEndTime: new Date(Date.now() + 3600000).toISOString(),
+    scheduledEndTime: new Date(Date.now() + 86400000 * 365).toISOString(),
     durationMinutes: 120,
     status: 'published',
-    questions: mockQuestions,
+    questions: ddcet2026OfficialQuestions,
+  },
+  {
+    id: 't-50-sec1',
+    title: 'DDCET Section-1: Basics of Science & Engineering (50 MCQs)',
+    type: 'sectional',
+    scheduledStartTime: new Date(Date.now() - 3600000).toISOString(),
+    scheduledEndTime: new Date(Date.now() + 86400000 * 365).toISOString(),
+    durationMinutes: 60,
+    status: 'published',
+    questions: ddcet2026OfficialQuestions.filter(q => q.number <= 50),
+  },
+  {
+    id: 't-50-sec2',
+    title: 'DDCET Section-2: Aptitude & Soft Skills (50 MCQs)',
+    type: 'sectional',
+    scheduledStartTime: new Date(Date.now() - 3600000).toISOString(),
+    scheduledEndTime: new Date(Date.now() + 86400000 * 365).toISOString(),
+    durationMinutes: 60,
+    status: 'published',
+    questions: ddcet2026OfficialQuestions.filter(q => q.number > 50),
+  },
+  {
+    id: 't1',
+    title: 'Full DDCET-style Mock Test (100 MCQs)',
+    type: 'combined',
+    scheduledStartTime: new Date(Date.now() - 3600000).toISOString(),
+    scheduledEndTime: new Date(Date.now() + 86400000 * 365).toISOString(),
+    durationMinutes: 120,
+    status: 'published',
+    questions: ddcet2026OfficialQuestions,
   }
 ];
 

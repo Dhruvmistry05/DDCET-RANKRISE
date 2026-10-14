@@ -4,7 +4,7 @@ import { getTests } from '../../store/mockData';
 import { API_BASE_URL } from '../../config/api';
 import { 
   Clock, BookOpen, Trophy, Target, TrendingUp, PlayCircle, 
-  ArrowRight, UserCircle, HelpCircle, Book, FileText
+  ArrowRight, UserCircle, HelpCircle, Book, FileText, Sparkles
 } from 'lucide-react';
 import { useAuth } from '../../store/AuthContext';
 
@@ -72,7 +72,14 @@ export default function StudentHome() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2 sm:gap-2.5">
+          <Link 
+            to="/student/quiz" 
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#2563EB]/30 bg-blue-50 dark:bg-blue-950/40 text-[#1E3A8A] dark:text-blue-300 text-xs font-semibold hover:bg-blue-100 transition-colors shadow-2xs"
+          >
+            <Sparkles size={14} className="text-[#2563EB]" />
+            <span>Quiz Arena</span>
+          </Link>
           <Link 
             to="/complete-profile" 
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#E2E8F0] dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold hover:border-blue-300 dark:hover:border-blue-700 transition-colors shadow-2xs"

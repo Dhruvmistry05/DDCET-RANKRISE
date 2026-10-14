@@ -25,6 +25,7 @@ import PracticeLab from './pages/student/PracticeLab';
 import MockTestCenter from './pages/student/MockTestCenter';
 import StudentAnalytics from './pages/student/StudentAnalytics';
 import AIMentor from './pages/student/AIMentor';
+import QuizGenerator from './pages/student/QuizGenerator';
 
 import Placeholder from './pages/Placeholder';
 
@@ -85,6 +86,8 @@ function App() {
           
           <Route path="/student/practice" element={<PracticeLab />} />
           <Route path="/student/mock" element={<MockTestCenter />} />
+          <Route path="/student/quiz" element={<QuizGenerator />} />
+          <Route path="/student/quiz-generator" element={<QuizGenerator />} />
           <Route path="/student/pyq" element={<Navigate to="/student/resources/papers" replace />} />
           <Route path="/student/analytics" element={<StudentAnalytics />} />
           <Route path="/student/revision" element={<Navigate to="/student/mistakes" replace />} />

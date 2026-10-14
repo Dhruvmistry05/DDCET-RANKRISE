@@ -31,6 +31,7 @@ export default function Sidebar({ isOpen, onClose }) {
     { name: 'Study Links', path: '/student/resources/links', icon: Globe },
     { name: 'Practice', path: '/student/practice', icon: PenTool },
     { name: 'Mock Test', path: '/student/mock', icon: ClipboardCheck },
+    { name: 'Generative Quiz', path: '/student/quiz', icon: Sparkles },
     { name: 'Analytics', path: '/student/analytics', icon: PieChart },
     { name: 'Mistake Book', path: '/student/mistakes', icon: AlertTriangle },
     { name: 'AI Mentor', path: '/student/mentor', icon: MessageCircle },

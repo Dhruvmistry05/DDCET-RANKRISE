@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { getTests } from '../../store/mockData';
 import { 
   ClipboardCheck, Clock, BookOpen, AlertCircle, ArrowRight, 
-  Award, CheckCircle2, ShieldAlert, BarChart3, HelpCircle 
+  Award, CheckCircle2, ShieldAlert, BarChart3, HelpCircle, Sparkles 
 } from 'lucide-react';
 
 export default function MockTestCenter() {
@@ -73,6 +73,31 @@ export default function MockTestCenter() {
             Avoid wild guessing. Incorrect responses deduct 0.5 marks as per the DDCET admission rules.
           </p>
         </div>
+      </div>
+
+      {/* Generative Quiz Arena Launcher Banner */}
+      <div className="bg-[#1E3A8A] text-white rounded-xl p-5 sm:p-6 border border-blue-900 shadow-xs flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="space-y-1.5 text-center md:text-left">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-white/10 text-blue-200 text-xs font-semibold border border-white/15">
+            <Sparkles size={12} className="text-blue-300" />
+            <span>AI & Pattern-Based Exam Generator</span>
+          </div>
+          <h2 className="text-lg sm:text-xl font-bold tracking-tight text-white">
+            Generative DDCET Quiz Arena (50 & 100 Questions)
+          </h2>
+          <p className="text-xs text-blue-100/80 max-w-xl leading-relaxed">
+            Generate customized 100-Question full mock papers or 50-Question targeted sprints from the verified DDCET 2026 Question Bank with official +2.0 / -0.5 marking.
+          </p>
+        </div>
+
+        <Link
+          to="/student/quiz"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-white text-[#1E3A8A] font-bold text-xs sm:text-sm hover:bg-blue-50 transition-colors shadow-xs shrink-0"
+        >
+          <Sparkles size={15} className="text-[#2563EB]" />
+          <span>Launch Quiz Generator</span>
+          <ArrowRight size={14} />
+        </Link>
       </div>
 
       {/* Active Mock Assessments List */}
