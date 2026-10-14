@@ -1900,3 +1900,5 @@ export const ddcet2026OfficialQuestions = [
     "negativeMarks": 0.5
   }
 ];
+
+export const ddcet2027OfficialQuestions = ddcet2026OfficialQuestions;

@@ -24,7 +24,7 @@ export function AuthProvider({ children }) {
 
   const [token, setToken] = useState(() => {
     const savedToken = localStorage.getItem('token');
-    if (savedToken && savedToken !== 'rankrise_test_token_2026') {
+    if (savedToken && savedToken !== 'rankrise_test_token_2026' && savedToken !== 'rankrise_test_token_2027') {
       return savedToken;
     }
     localStorage.removeItem('token');

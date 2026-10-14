@@ -86,7 +86,7 @@ export default function MockTestCenter() {
             Generative DDCET Quiz Arena (50 & 100 Questions)
           </h2>
           <p className="text-xs text-blue-100/80 max-w-xl leading-relaxed">
-            Generate customized 100-Question full mock papers or 50-Question targeted sprints from the verified DDCET 2026 Question Bank with official +2.0 / -0.5 marking.
+            Generate customized 100-Question full mock papers or 50-Question targeted sprints from the verified DDCET 2027 Question Bank with official +2.0 / -0.5 marking.
           </p>
         </div>
 

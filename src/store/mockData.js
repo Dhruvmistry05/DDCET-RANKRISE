@@ -1,4 +1,4 @@
-import { ddcet2026OfficialQuestions } from './ddcet2026Questions';
+import { ddcet2027OfficialQuestions } from './ddcet2026Questions';
 
 export const syllabusData = [
   {
@@ -187,19 +187,19 @@ export const syllabusData = [
   }
 ];
 
-// Complete 100 questions from official DDCET 2026 examination
-export const mockQuestions = ddcet2026OfficialQuestions;
+// Complete 100 questions from official DDCET 2027 examination
+export const mockQuestions = ddcet2027OfficialQuestions;
 
 export const mockTests = [
   {
     id: 't-100',
-    title: 'DDCET 2026 Full Length Mock Exam (100 MCQs)',
+    title: 'DDCET 2027 Full Length Mock Exam (100 MCQs)',
     type: 'combined',
     scheduledStartTime: new Date(Date.now() - 3600000).toISOString(),
     scheduledEndTime: new Date(Date.now() + 86400000 * 365).toISOString(),
     durationMinutes: 120,
     status: 'published',
-    questions: ddcet2026OfficialQuestions,
+    questions: ddcet2027OfficialQuestions,
   },
   {
     id: 't-50-sec1',
@@ -209,7 +209,7 @@ export const mockTests = [
     scheduledEndTime: new Date(Date.now() + 86400000 * 365).toISOString(),
     durationMinutes: 60,
     status: 'published',
-    questions: ddcet2026OfficialQuestions.filter(q => q.number <= 50),
+    questions: ddcet2027OfficialQuestions.filter(q => q.number <= 50),
   },
   {
     id: 't-50-sec2',
@@ -219,7 +219,7 @@ export const mockTests = [
     scheduledEndTime: new Date(Date.now() + 86400000 * 365).toISOString(),
     durationMinutes: 60,
     status: 'published',
-    questions: ddcet2026OfficialQuestions.filter(q => q.number > 50),
+    questions: ddcet2027OfficialQuestions.filter(q => q.number > 50),
   },
   {
     id: 't1',
@@ -229,7 +229,7 @@ export const mockTests = [
     scheduledEndTime: new Date(Date.now() + 86400000 * 365).toISOString(),
     durationMinutes: 120,
     status: 'published',
-    questions: ddcet2026OfficialQuestions,
+    questions: ddcet2027OfficialQuestions,
   }
 ];
 

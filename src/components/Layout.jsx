@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Outlet, useNavigate, useLocation, Link } from 'react-router-dom';
 import Sidebar from './Sidebar';
-import ThemeToggle from './ThemeToggle';
 import { 
   Search, Menu, LogOut, Home, BookOpen, Book, 
   Trophy, MoreHorizontal, Layers, ClipboardCheck, PenTool, FileText
@@ -167,9 +166,6 @@ export default function Layout() {
           </span>
         </button>
       </nav>
-
-      {/* Floating Theme Toggle */}
-      <ThemeToggle />
     </div>
   );
 }

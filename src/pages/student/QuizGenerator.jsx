@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ddcet2026OfficialQuestions } from '../../store/ddcet2026Questions';
+import { ddcet2027OfficialQuestions } from '../../store/ddcet2026Questions';
 import { getProgressStore, saveProgressStore } from '../../store/mockData';
 import { API_BASE_URL } from '../../config/api';
 import { useAuth } from '../../store/AuthContext';
@@ -37,8 +37,8 @@ export default function QuizGenerator() {
   const [resultFilter, setResultFilter] = useState('all'); // 'all', 'wrong', 'correct', 'unattempted'
 
   // Available topics for info
-  const section1Questions = useMemo(() => ddcet2026OfficialQuestions.filter(q => q.number <= 50), []);
-  const section2Questions = useMemo(() => ddcet2026OfficialQuestions.filter(q => q.number > 50), []);
+  const section1Questions = useMemo(() => ddcet2027OfficialQuestions.filter(q => q.number <= 50), []);
+  const section2Questions = useMemo(() => ddcet2027OfficialQuestions.filter(q => q.number > 50), []);
 
   // Timer Effect
   useEffect(() => {
@@ -83,7 +83,7 @@ export default function QuizGenerator() {
         const s2 = [...section2Questions].sort(() => 0.5 - Math.random());
         pool = [...s1, ...s2];
       } else {
-        pool = [...ddcet2026OfficialQuestions];
+        pool = [...ddcet2027OfficialQuestions];
       }
     } else {
       // 50 Questions Half / Sectional Paper
@@ -606,7 +606,7 @@ export default function QuizGenerator() {
         <header className="h-14 bg-slate-900 text-white px-4 sm:px-6 flex justify-between items-center z-20 shrink-0 border-b border-slate-800 sticky top-0">
           <div className="flex items-center gap-2.5 min-w-0">
             <span className="hidden sm:inline-block px-2 py-0.5 bg-[#1E3A8A] text-blue-200 rounded text-xs font-semibold uppercase tracking-wider border border-blue-700">
-              DDCET 2026
+              DDCET 2027
             </span>
             <h1 className="text-xs sm:text-sm font-semibold text-white truncate max-w-[160px] sm:max-w-md">
               {questionCount}-Question Generative Quiz
@@ -935,7 +935,7 @@ export default function QuizGenerator() {
         <div className="space-y-1">
           <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-blue-50 dark:bg-blue-950/40 text-[#1E3A8A] dark:text-blue-300 text-xs font-semibold border border-blue-200 dark:border-blue-900">
             <Sparkles size={13} className="text-[#2563EB]" />
-            <span>Official 2026 Question Bank Engine</span>
+            <span>Official 2027 Question Bank Engine</span>
           </div>
           <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
             Generative DDCET Quiz Arena

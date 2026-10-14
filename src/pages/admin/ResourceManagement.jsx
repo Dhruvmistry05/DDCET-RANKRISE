@@ -353,7 +353,7 @@ export default function ResourceManagement() {
                 className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900 dark:border-slate-700 text-xs sm:text-sm focus:border-blue-600 outline-none"
                 value={formData.title}
                 onChange={e => setFormData({ ...formData, title: e.target.value })}
-                placeholder="e.g. DDCET 2024 Question Paper"
+                placeholder="e.g. DDCET 2027 Question Paper"
               />
             </div>
 
@@ -381,7 +381,7 @@ export default function ResourceManagement() {
                   className="w-full px-2.5 py-2 border rounded-lg bg-white dark:bg-slate-900 dark:border-slate-700 text-xs outline-none focus:border-blue-600"
                   value={formData.exam_year}
                   onChange={e => setFormData({ ...formData, exam_year: e.target.value })}
-                  placeholder="2024"
+                  placeholder="2027"
                 />
               </div>
 

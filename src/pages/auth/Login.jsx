@@ -145,7 +145,7 @@ export default function Login() {
                 RR
               </div>
               <div>
-                <span className="text-[10px] font-bold tracking-widest text-blue-200 uppercase">DDCET 2026</span>
+                <span className="text-[10px] font-bold tracking-widest text-blue-200 uppercase">DDCET 2027</span>
                 <span className="block text-lg font-bold text-white leading-none">RankRise</span>
               </div>
             </div>
@@ -164,7 +164,7 @@ export default function Login() {
           </div>
 
           <div className="pt-6 border-t border-blue-800/80 text-[11px] text-blue-200 flex items-center justify-between">
-            <span>© 2026 DDCET RankRise</span>
+            <span>© 2027 DDCET RankRise</span>
             <span className="flex items-center gap-1 text-blue-200"><ShieldCheck size={13} /> Secured Portal</span>
           </div>
         </div>

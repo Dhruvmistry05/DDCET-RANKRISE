@@ -251,7 +251,7 @@ export default function StudentProfileCreation() {
                 RR
               </div>
               <div>
-                <span className="text-[11px] tracking-wider text-blue-200 font-semibold uppercase">DDCET 2026</span>
+                <span className="text-[11px] tracking-wider text-blue-200 font-semibold uppercase">DDCET 2027</span>
                 <span className="block text-lg font-bold tracking-tight text-white leading-tight">RankRise</span>
               </div>
             </div>
@@ -299,7 +299,7 @@ export default function StudentProfileCreation() {
 
           {/* Footer note */}
           <div className="pt-4 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
-            <span>© 2026 DDCET RankRise</span>
+            <span>© 2027 DDCET RankRise</span>
             <span className="flex items-center gap-1 text-slate-300">
               <CheckCircle2 size={13} className="text-emerald-400" /> Verified Portal
             </span>
