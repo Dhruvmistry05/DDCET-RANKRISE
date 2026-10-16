@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Home, BookOpen, PenTool, ClipboardCheck, History, PieChart, 
-  AlertTriangle, Book, MessageCircle, LogOut, Globe, X, Sparkles
+  AlertTriangle, Book, MessageCircle, LogOut, Globe, X, Sparkles, ShieldCheck
 } from 'lucide-react';
 import { useAuth } from '../store/AuthContext';
 
@@ -10,6 +10,8 @@ export default function Sidebar({ isOpen, onClose }) {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const role = user?.role || localStorage.getItem('userRole');
+  const isAdmin = role === 'admin' || role === 'superadmin';
+  const isSuperAdmin = role === 'superadmin' || (user?.email && user.email.toLowerCase() === 'dhruvmistry0511@gmail.com');
 
   const handleLogout = () => {
     logout();
@@ -39,6 +41,7 @@ export default function Sidebar({ isOpen, onClose }) {
 
   const adminLinks = [
     { name: 'Dashboard', path: '/admin', icon: Home },
+    ...(isSuperAdmin ? [{ name: 'Admins', path: '/admin/admins', icon: ShieldCheck }] : []),
     { name: 'Syllabus', path: '/admin/syllabus', icon: BookOpen },
     { name: 'Materials', path: '/admin/materials', icon: Book },
     { name: 'PDF Resources', path: '/admin/resources', icon: History },
@@ -47,7 +50,7 @@ export default function Sidebar({ isOpen, onClose }) {
     { name: 'Analytics', path: '/admin/analytics', icon: PieChart },
   ];
 
-  const links = role === 'admin' ? adminLinks : studentLinks;
+  const links = isAdmin ? adminLinks : studentLinks;
 
   const sidebarContent = (
     <div className="flex flex-col h-full bg-[#0b1329] text-slate-300 border-r border-slate-800">
@@ -83,7 +86,7 @@ export default function Sidebar({ isOpen, onClose }) {
       {/* Navigation Links List */}
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto overscroll-contain">
         <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2 px-3">
-          {role === 'admin' ? 'Administration' : 'Learning Resources'}
+          {isAdmin ? 'Administration' : 'Learning Resources'}
         </div>
 
         {links.map((link) => {
@@ -105,7 +108,7 @@ export default function Sidebar({ isOpen, onClose }) {
           );
         })}
 
-        {role === 'admin' && (
+        {isAdmin && (
           <div className="mt-5 pt-4 border-t border-slate-800">
             <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2 px-3">
               Student View
@@ -136,14 +139,14 @@ export default function Sidebar({ isOpen, onClose }) {
       <div className="p-3.5 border-t border-slate-800 bg-[#080e1c]">
         <div className="flex items-center gap-3 p-2 rounded-lg bg-slate-900 border border-slate-800">
           <div className="w-8 h-8 rounded-md bg-slate-800 text-slate-200 border border-slate-700 flex items-center justify-center font-bold text-xs uppercase shrink-0">
-            {user?.name ? user.name[0] : (role === 'admin' ? 'A' : 'S')}
+            {user?.name ? user.name[0] : (isSuperAdmin ? 'SA' : (isAdmin ? 'A' : 'S'))}
           </div>
           <div className="flex-1 min-w-0">
             <span className="block text-xs text-slate-200 font-semibold truncate leading-tight">
-              {user?.name || (role === 'admin' ? 'Administrator' : 'Student')}
+              {user?.name || (isSuperAdmin ? 'Super Admin' : (isAdmin ? 'Administrator' : 'Student'))}
             </span>
             <span className="block text-slate-400 text-[11px] truncate mt-0.5">
-              {user?.email || 'Active Session'}
+              {user?.email || (isSuperAdmin ? 'Super Admin' : (isAdmin ? 'Administrator' : 'Active Session'))}
             </span>
           </div>
           {user ? (

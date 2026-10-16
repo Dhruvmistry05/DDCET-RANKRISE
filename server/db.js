@@ -51,7 +51,7 @@ module.exports = {
     return newRecord;
   },
   update: (table, id, updates) => {
-    const index = db[table].findIndex(r => r.id === id);
+    const index = db[table].findIndex(r => String(r.id) === String(id));
     if (index !== -1) {
       db[table][index] = { ...db[table][index], ...updates };
       save();
@@ -60,7 +60,7 @@ module.exports = {
     return null;
   },
   remove: (table, id) => {
-    db[table] = db[table].filter(r => r.id !== id);
+    db[table] = db[table].filter(r => String(r.id) !== String(id));
     save();
   }
 };

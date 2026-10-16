@@ -18,6 +18,8 @@ export default function AdminDashboard() {
       .catch(console.error);
   }, [token]);
 
+  const isSuperAdmin = user?.role === 'superadmin' || (user?.email && user.email.toLowerCase() === 'dhruvmistry0511@gmail.com');
+
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6 font-sans">
       
@@ -25,26 +27,41 @@ export default function AdminDashboard() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#1E3A8A] p-6 sm:p-8 rounded-xl text-white border border-blue-900 shadow-xs">
         <div className="space-y-1.5">
           <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/10 text-blue-100 text-xs font-semibold border border-white/15">
-            <ShieldCheck size={14} className="text-blue-200" /> Administrative Portal
+            <ShieldCheck size={14} className="text-blue-200" /> {isSuperAdmin ? 'Super Administrator Console' : 'Administrative Portal'}
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
             System Overview & Management
           </h1>
           <p className="text-xs sm:text-sm text-blue-100/90 font-medium">
-            Welcome back, {user?.name || 'Administrator'}. Monitor registered candidates, question banks, and live tests.
+            Welcome back, {user?.name || (isSuperAdmin ? 'Super Admin' : 'Administrator')}. {isSuperAdmin ? 'Full administrative access, role elevation, and question banks.' : 'Monitor registered candidates, question banks, and live tests.'}
           </p>
         </div>
 
-        <Link
-          to="/admin/tests/create"
-          className="self-start sm:self-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[#2563EB] hover:bg-blue-600 text-white font-semibold text-xs sm:text-sm transition shadow-xs active:scale-[0.98]"
-        >
-          <span>Create New Test</span>
-        </Link>
+        <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
+          {isSuperAdmin && (
+            <Link
+              to="/admin/admins"
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-white/10 hover:bg-white/20 text-white font-semibold text-xs sm:text-sm transition shadow-xs border border-white/20"
+            >
+              <ShieldCheck size={16} />
+              <span>Manage Admins ({stats?.admins || 1}/2)</span>
+            </Link>
+          )}
+
+          <Link
+            to="/admin/tests/create"
+            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[#2563EB] hover:bg-blue-600 text-white font-semibold text-xs sm:text-sm transition shadow-xs active:scale-[0.98]"
+          >
+            <span>Create New Test</span>
+          </Link>
+        </div>
       </div>
 
       {/* Metric Cards Grid */}
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        {isSuperAdmin && (
+          <DashboardCard title="Administrators" value={`${stats?.admins || 1} / 2 Active`} icon={ShieldCheck} to="/admin/admins" />
+        )}
         <DashboardCard title="Students" value={stats?.students} icon={Users} to="/admin" />
         <DashboardCard title="Assessments" value={stats?.tests} icon={FileText} to="/admin/tests" />
         <DashboardCard title="Question Bank" value={stats?.questions} icon={FileQuestion} to="/admin/questions" />

@@ -12,7 +12,8 @@ CREATE TABLE IF NOT EXISTS users (
   branch VARCHAR,
   gender VARCHAR,
   college VARCHAR,
-  semester VARCHAR
+  semester VARCHAR,
+  CONSTRAINT check_user_role CHECK (role IN ('student', 'admin', 'superadmin'))
 );
 
 CREATE TABLE IF NOT EXISTS subjects (
@@ -127,3 +128,48 @@ CREATE TABLE IF NOT EXISTS student_activity (
   questions_attempted INTEGER DEFAULT 0,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Admin Security & Two-Admin Maximum Enforcement Trigger
+CREATE OR REPLACE FUNCTION enforce_admin_constraints()
+RETURNS TRIGGER AS $$
+DECLARE
+  admin_count INT;
+BEGIN
+  IF TG_OP = 'DELETE' THEN
+    IF OLD.role = 'superadmin' OR LOWER(OLD.email) = 'dhruvmistry0511@gmail.com' THEN
+      RAISE EXCEPTION 'Super Admin account cannot be deleted.';
+    END IF;
+    RETURN OLD;
+  END IF;
+
+  IF NEW.role = 'superadmin' AND LOWER(NEW.email) != 'dhruvmistry0511@gmail.com' THEN
+    RAISE EXCEPTION 'Only the primary account can be Super Admin.';
+  END IF;
+
+  IF TG_OP = 'UPDATE' AND (OLD.role = 'superadmin' OR LOWER(OLD.email) = 'dhruvmistry0511@gmail.com') THEN
+    IF NEW.role != 'superadmin' THEN
+      RAISE EXCEPTION 'Super Admin account cannot be demoted.';
+    END IF;
+  END IF;
+
+  IF NEW.role IN ('admin', 'superadmin') THEN
+    SELECT COUNT(*) INTO admin_count
+    FROM users
+    WHERE role IN ('admin', 'superadmin')
+      AND id != COALESCE(NEW.id, -1);
+    
+    IF admin_count >= 2 THEN
+      RAISE EXCEPTION 'Security Policy: Maximum of 2 administrator accounts allowed.';
+    END IF;
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_enforce_admin_constraints ON users;
+CREATE TRIGGER trg_enforce_admin_constraints
+BEFORE INSERT OR UPDATE OR DELETE ON users
+FOR EACH ROW
+EXECUTE FUNCTION enforce_admin_constraints();
+

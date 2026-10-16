@@ -37,7 +37,7 @@ export default function StudentProfileCreation() {
   // If already authenticated and profile completed, redirect to appropriate dashboard
   useEffect(() => {
     if (user && token) {
-      if (user.role === 'admin') {
+      if (user.role === 'admin' || user.role === 'superadmin') {
         navigate('/admin');
       } else if (!user.profile_completed) {
         navigate('/complete-profile');

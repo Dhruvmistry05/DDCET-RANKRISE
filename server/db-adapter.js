@@ -35,10 +35,10 @@ const jsonDbAdapter = {
     return jsonDb.insert(table, data);
   },
   update: async (table, id, data) => {
-    return jsonDb.update(table, parseInt(id), data);
+    return jsonDb.update(table, id, data);
   },
   remove: async (table, id) => {
-    jsonDb.remove(table, parseInt(id));
+    jsonDb.remove(table, id);
   },
   getStudentSyllabus: async () => {
     const subjects = jsonDb.get('subjects').filter(s => s.published);
@@ -52,6 +52,7 @@ const jsonDbAdapter = {
     const users = jsonDb.get('users');
     return {
       students: users.filter(u => u.role === 'student').length,
+      admins: users.filter(u => u.role === 'admin' || u.role === 'superadmin').length,
       subjects: jsonDb.get('subjects').length,
       chapters: jsonDb.get('chapters').length,
       topics: jsonDb.get('topics').length,

@@ -15,7 +15,7 @@ export default function ProfileCompletion() {
 
   useEffect(() => {
     if (user?.profile_completed) {
-      navigate(user.role === 'admin' ? '/admin' : '/student');
+      navigate((user.role === 'admin' || user.role === 'superadmin') ? '/admin' : '/student');
     }
   }, [user, navigate]);
 
@@ -47,7 +47,7 @@ export default function ProfileCompletion() {
       if (!res.ok) throw new Error(data?.error || `Failed to save profile (${res.status})`);
       
       await fetchProfile(token); // Update context
-      navigate(data.role === 'admin' ? '/admin' : '/student');
+      navigate((data.role === 'admin' || data.role === 'superadmin') ? '/admin' : '/student');
     } catch (err) {
       setError(err.message);
     } finally {

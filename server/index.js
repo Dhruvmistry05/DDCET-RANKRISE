@@ -110,10 +110,18 @@ const optionalUser = (req, res, next) => {
 };
 
 const requireAdmin = (req, res, next) => {
-  if (req.user && req.user.role === 'admin') {
+  if (req.user && (req.user.role === 'admin' || req.user.role === 'superadmin')) {
     next();
   } else {
     return res.status(403).json({ error: 'Forbidden: Admin access required' });
+  }
+};
+
+const requireSuperAdmin = (req, res, next) => {
+  if (req.user && req.user.role === 'superadmin') {
+    next();
+  } else {
+    return res.status(403).json({ error: 'Forbidden: Super Admin access required' });
   }
 };
 
@@ -373,6 +381,158 @@ app.get('/api/admin/stats', requireUser, requireAdmin, async (req, res) => {
   res.json(stats);
 });
 
+// System Administrators Management (Super Admin only)
+app.get('/api/admin/system-admins', requireUser, requireSuperAdmin, async (req, res) => {
+  try {
+    const allUsers = await db.getAll('users');
+    
+    // Sort admins: superadmin first, then other admins
+    const admins = allUsers
+      .filter(u => u.role === 'admin' || u.role === 'superadmin')
+      .map(u => ({
+        id: u.id,
+        name: u.name || 'Administrator',
+        email: u.email,
+        role: u.role,
+        isSuperAdmin: u.role === 'superadmin' || (u.email && u.email.toLowerCase() === 'dhruvmistry0511@gmail.com'),
+        branch: u.branch || null,
+        college: u.college || null,
+        created_at: u.created_at || null
+      }))
+      .sort((a, b) => (b.isSuperAdmin ? 1 : 0) - (a.isSuperAdmin ? 1 : 0));
+
+    // Candidate registered students who can be promoted to admin
+    const students = allUsers
+      .filter(u => u.role === 'student')
+      .map(u => ({
+        id: u.id,
+        name: u.name || u.email,
+        email: u.email,
+        branch: u.branch || null,
+        college: u.college || null,
+        created_at: u.created_at || null
+      }))
+      .sort((a, b) => (a.name || a.email).localeCompare(b.name || b.email));
+
+    const maxAdmins = 2;
+    const currentCount = admins.length;
+    const canPromote = currentCount < maxAdmins;
+
+    res.json({
+      admins,
+      students,
+      currentCount,
+      maxAdmins,
+      canPromote
+    });
+  } catch (error) {
+    console.error('Error fetching system admins:', error);
+    res.status(500).json({ error: 'Failed to retrieve administrator accounts.' });
+  }
+});
+
+// Promote Student to Admin (Super Admin only, strictly capped at 2 admins total)
+app.post('/api/admin/promote-admin', requireUser, requireSuperAdmin, async (req, res) => {
+  try {
+    const { studentId, email } = req.body;
+    if (!studentId && !email) {
+      return res.status(400).json({ error: 'Student ID or email is required.' });
+    }
+
+    const allUsers = await db.getAll('users');
+    const currentAdminCount = allUsers.filter(u => u.role === 'admin' || u.role === 'superadmin').length;
+    
+    if (currentAdminCount >= 2) {
+      return res.status(400).json({ 
+        error: 'Administrator capacity reached. A maximum of 2 administrators (1 Super Admin and 1 Admin) is permitted. Demote the secondary admin first before promoting another user.' 
+      });
+    }
+
+    let targetUser = null;
+    if (studentId) {
+      targetUser = allUsers.find(u => String(u.id) === String(studentId));
+    }
+    if (!targetUser && email) {
+      const cleanEmail = email.trim().toLowerCase();
+      targetUser = allUsers.find(u => u.email && u.email.toLowerCase() === cleanEmail);
+    }
+
+    if (!targetUser) {
+      return res.status(404).json({ error: 'Student account not found.' });
+    }
+
+    if (targetUser.role === 'admin' || targetUser.role === 'superadmin') {
+      return res.status(400).json({ error: 'User is already an administrator.' });
+    }
+
+    // Update role to 'admin' (database trigger ensures admin_count <= 2)
+    const updated = await db.update('users', targetUser.id, { role: 'admin' });
+
+    res.json({
+      success: true,
+      message: `Successfully promoted ${targetUser.name || targetUser.email} to Administrator.`,
+      user: {
+        id: targetUser.id,
+        name: targetUser.name,
+        email: targetUser.email,
+        role: 'admin'
+      }
+    });
+  } catch (error) {
+    console.error('Error promoting admin:', error);
+    res.status(400).json({ error: error.message || 'Failed to promote user to Administrator.' });
+  }
+});
+
+// Demote Secondary Admin to Student (Super Admin only)
+app.post('/api/admin/demote-admin', requireUser, requireSuperAdmin, async (req, res) => {
+  try {
+    const { adminId, email } = req.body;
+    if (!adminId && !email) {
+      return res.status(400).json({ error: 'Admin ID or email is required.' });
+    }
+
+    const allUsers = await db.getAll('users');
+    let targetUser = null;
+    if (adminId) {
+      targetUser = allUsers.find(u => String(u.id) === String(adminId));
+    }
+    if (!targetUser && email) {
+      const cleanEmail = email.trim().toLowerCase();
+      targetUser = allUsers.find(u => u.email && u.email.toLowerCase() === cleanEmail);
+    }
+
+    if (!targetUser) {
+      return res.status(404).json({ error: 'Administrator account not found.' });
+    }
+
+    if (targetUser.role === 'superadmin' || (targetUser.email && targetUser.email.toLowerCase() === 'dhruvmistry0511@gmail.com')) {
+      return res.status(403).json({ error: 'The Super Administrator account cannot be demoted or modified.' });
+    }
+
+    if (targetUser.role !== 'admin') {
+      return res.status(400).json({ error: 'User is not a secondary administrator.' });
+    }
+
+    // Demote role to 'student'
+    await db.update('users', targetUser.id, { role: 'student' });
+
+    res.json({
+      success: true,
+      message: `Administrator ${targetUser.name || targetUser.email} has been demoted to Student.`,
+      user: {
+        id: targetUser.id,
+        name: targetUser.name,
+        email: targetUser.email,
+        role: 'student'
+      }
+    });
+  } catch (error) {
+    console.error('Error demoting admin:', error);
+    res.status(400).json({ error: error.message || 'Failed to demote administrator.' });
+  }
+});
+
 app.post('/api/subjects', async (req, res) => {
   const { name, display_order, published } = req.body;
   const newSubject = await db.insert('subjects', { name, display_order: display_order || 0, published: published ? true : false });
@@ -523,7 +683,7 @@ app.get('/api/resources', async (req, res) => {
   if (authHeader && authHeader.startsWith('Bearer ')) {
     try {
       const decoded = jwt.verify(authHeader.split(' ')[1], JWT_SECRET);
-      if (decoded && decoded.role === 'admin') {
+      if (decoded && (decoded.role === 'admin' || decoded.role === 'superadmin')) {
         isUserAdmin = true;
       }
     } catch (_err) {
@@ -596,7 +756,7 @@ app.get('/api/resources/:id/access', async (req, res) => {
   if (authHeader && authHeader.startsWith('Bearer ')) {
     try {
       const decoded = jwt.verify(authHeader.split(' ')[1], JWT_SECRET);
-      if (decoded && decoded.role === 'admin') isUserAdmin = true;
+      if (decoded && (decoded.role === 'admin' || decoded.role === 'superadmin')) isUserAdmin = true;
     } catch (_err) {}
   }
 
@@ -643,7 +803,7 @@ app.get('/api/resources/:id/download', async (req, res) => {
   if (authHeader && authHeader.startsWith('Bearer ')) {
     try {
       const decoded = jwt.verify(authHeader.split(' ')[1], JWT_SECRET);
-      if (decoded && decoded.role === 'admin') isUserAdmin = true;
+      if (decoded && (decoded.role === 'admin' || decoded.role === 'superadmin')) isUserAdmin = true;
     } catch (_err) {}
   }
 

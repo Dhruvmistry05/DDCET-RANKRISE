@@ -13,6 +13,8 @@ export default function Layout() {
   const location = useLocation();
   const { user, logout } = useAuth();
   const role = user?.role || localStorage.getItem('userRole');
+  const isAdmin = role === 'admin' || role === 'superadmin';
+  const isSuperAdmin = role === 'superadmin' || (user?.email && user.email.toLowerCase() === 'dhruvmistry0511@gmail.com');
 
   const handleLogout = () => {
     logout();
@@ -35,7 +37,7 @@ export default function Layout() {
     { name: 'PDFs', path: '/admin/resources', icon: FileText },
   ];
 
-  const bottomNavItems = role === 'admin' ? adminBottomNav : studentBottomNav;
+  const bottomNavItems = isAdmin ? adminBottomNav : studentBottomNav;
 
   return (
     <div className="flex min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-sans selection:bg-blue-500 selection:text-white">
@@ -84,9 +86,9 @@ export default function Layout() {
           
           {/* Header Right Actions */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            {role === 'admin' ? (
+            {isAdmin ? (
               <span className="text-[11px] font-semibold text-[#1E3A8A] dark:text-blue-300 uppercase tracking-wider px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900">
-                Admin
+                {isSuperAdmin ? 'Super Admin' : 'Admin'}
               </span>
             ) : (
               <span className="hidden sm:inline-block text-[11px] font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border border-[#E2E8F0] dark:border-slate-700">

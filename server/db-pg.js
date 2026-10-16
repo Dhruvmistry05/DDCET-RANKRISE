@@ -99,13 +99,23 @@ const getStudentSyllabus = async () => {
 
 const getAdminStats = async () => {
   const students = (await pool.query(`SELECT COUNT(*) FROM users WHERE role = 'student'`)).rows[0].count;
+  const admins = (await pool.query(`SELECT COUNT(*) FROM users WHERE role IN ('admin', 'superadmin')`)).rows[0].count;
   const subjects = (await pool.query(`SELECT COUNT(*) FROM subjects`)).rows[0].count;
   const chapters = (await pool.query(`SELECT COUNT(*) FROM chapters`)).rows[0].count;
   const topics = (await pool.query(`SELECT COUNT(*) FROM topics`)).rows[0].count;
   const materials = (await pool.query(`SELECT COUNT(*) FROM materials`)).rows[0].count;
   const questions = (await pool.query(`SELECT COUNT(*) FROM questions`)).rows[0].count;
   const tests = (await pool.query(`SELECT COUNT(*) FROM tests`)).rows[0].count;
-  return { students: parseInt(students), subjects: parseInt(subjects), chapters: parseInt(chapters), topics: parseInt(topics), materials: parseInt(materials), questions: parseInt(questions), tests: parseInt(tests) };
+  return { 
+    students: parseInt(students), 
+    admins: parseInt(admins),
+    subjects: parseInt(subjects), 
+    chapters: parseInt(chapters), 
+    topics: parseInt(topics), 
+    materials: parseInt(materials), 
+    questions: parseInt(questions), 
+    tests: parseInt(tests) 
+  };
 };
 
 const initSchema = async () => {

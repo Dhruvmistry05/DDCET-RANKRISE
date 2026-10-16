@@ -26,6 +26,7 @@ import MockTestCenter from './pages/student/MockTestCenter';
 import StudentAnalytics from './pages/student/StudentAnalytics';
 import AIMentor from './pages/student/AIMentor';
 import QuizGenerator from './pages/student/QuizGenerator';
+import AdminManagement from './pages/admin/AdminManagement';
 
 import Placeholder from './pages/Placeholder';
 
@@ -38,9 +39,17 @@ const ProtectedRoute = ({ children, allowedRole }) => {
   
   if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   
-  // Restrict admin routes to admin role only
-  if (allowedRole === 'admin' && user?.role !== 'admin') {
+  // Restrict admin routes to admin and superadmin roles
+  if (allowedRole === 'admin' && user?.role !== 'admin' && user?.role !== 'superadmin') {
     return <Navigate to="/admin/login" replace />;
+  }
+
+  // Restrict superadmin routes to superadmin role only
+  if (allowedRole === 'superadmin') {
+    const isSuperAdmin = user?.role === 'superadmin' || (user?.email && user.email.toLowerCase() === 'dhruvmistry0511@gmail.com');
+    if (!isSuperAdmin) {
+      return <Navigate to="/admin" replace />;
+    }
   }
 
   return children;
@@ -70,6 +79,7 @@ function App() {
           <Route path="/admin/syllabus" element={<ProtectedRoute allowedRole="admin"><SyllabusManagement /></ProtectedRoute>} />
           <Route path="/admin/materials" element={<ProtectedRoute allowedRole="admin"><MaterialManagement /></ProtectedRoute>} />
           <Route path="/admin/resources" element={<ProtectedRoute allowedRole="admin"><ResourceManagement /></ProtectedRoute>} />
+          <Route path="/admin/admins" element={<ProtectedRoute allowedRole="superadmin"><AdminManagement /></ProtectedRoute>} />
           
           {/* Student Routes - Direct access without auth roadblock */}
           <Route path="/student" element={<StudentHome />} />
