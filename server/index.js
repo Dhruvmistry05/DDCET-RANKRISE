@@ -369,8 +369,11 @@ app.put('/api/user/profile', requireUser, async (req, res) => {
 });
 
 app.get('/api/subjects', async (req, res) => {
-  const { publishedOnly } = req.query;
-  let subjects = publishedOnly === 'true' ? await db.find('subjects', { published: true }) : await db.getAll('subjects');
+  const { publishedOnly, section_code } = req.query;
+  const criteria = {};
+  if (publishedOnly === 'true') criteria.published = true;
+  if (section_code) criteria.section_code = section_code;
+  let subjects = Object.keys(criteria).length > 0 ? await db.find('subjects', criteria) : await db.getAll('subjects');
   subjects.sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
   res.json(subjects);
 });
@@ -534,13 +537,32 @@ app.post('/api/admin/demote-admin', requireUser, requireSuperAdmin, async (req, 
 });
 
 app.post('/api/subjects', async (req, res) => {
-  const { name, display_order, published } = req.body;
-  const newSubject = await db.insert('subjects', { name, display_order: display_order || 0, published: published ? true : false });
+  const { name, display_order, published, section_code, section_name } = req.body;
+  const newSubject = await db.insert('subjects', { 
+    name, 
+    display_order: parseInt(display_order) || 0, 
+    published: published ? true : false,
+    section_code: section_code || 'BE-01',
+    section_name: section_name || (section_code === 'BE-02' ? 'Aptitude Test (Mathematics & Soft Skill)' : 'Basics of Science & Engineering')
+  });
   res.json(newSubject);
 });
 
+app.put('/api/subjects/:id', async (req, res) => {
+  const id = parseInt(req.params.id) || req.params.id;
+  const { name, display_order, published, section_code, section_name } = req.body;
+  const updates = {};
+  if (name !== undefined) updates.name = name;
+  if (display_order !== undefined) updates.display_order = parseInt(display_order) || 0;
+  if (published !== undefined) updates.published = published ? true : false;
+  if (section_code !== undefined) updates.section_code = section_code;
+  if (section_name !== undefined) updates.section_name = section_name;
+  const updated = await db.update('subjects', id, updates);
+  res.json(updated);
+});
+
 app.delete('/api/subjects/:id', async (req, res) => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(req.params.id) || req.params.id;
   const chapters = await db.find('chapters', { subject_id: id });
   if (chapters.length > 0) return res.status(400).json({ error: "Cannot delete subject: it has dependent chapters." });
   await db.remove('subjects', id);
@@ -551,22 +573,45 @@ app.delete('/api/subjects/:id', async (req, res) => {
 app.get('/api/chapters', async (req, res) => {
   const { subject_id, publishedOnly } = req.query;
   const criteria = {};
-  if (subject_id) criteria.subject_id = subject_id;
+  if (subject_id) criteria.subject_id = parseInt(subject_id) || subject_id;
   if (publishedOnly === 'true') criteria.published = true;
   
   let chapters = await db.find('chapters', criteria);
-  chapters.sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
+  chapters.sort((a, b) => (a.chapter_number || a.display_order || 0) - (b.chapter_number || b.display_order || 0));
   res.json(chapters);
 });
 
 app.post('/api/chapters', async (req, res) => {
-  const { subject_id, name, description, display_order, published } = req.body;
-  const newChapter = await db.insert('chapters', { subject_id: parseInt(subject_id), name, description, display_order: display_order || 0, published: published ? true : false });
+  const { subject_id, name, description, weightage, chapter_number, display_order, published } = req.body;
+  const newChapter = await db.insert('chapters', { 
+    subject_id: parseInt(subject_id) || subject_id, 
+    name, 
+    description: description || null, 
+    weightage: weightage || null,
+    chapter_number: parseInt(chapter_number) || null,
+    display_order: parseInt(display_order) || 0, 
+    published: published ? true : false 
+  });
   res.json(newChapter);
 });
 
+app.put('/api/chapters/:id', async (req, res) => {
+  const id = parseInt(req.params.id) || req.params.id;
+  const { subject_id, name, description, weightage, chapter_number, display_order, published } = req.body;
+  const updates = {};
+  if (subject_id !== undefined) updates.subject_id = parseInt(subject_id) || subject_id;
+  if (name !== undefined) updates.name = name;
+  if (description !== undefined) updates.description = description;
+  if (weightage !== undefined) updates.weightage = weightage;
+  if (chapter_number !== undefined) updates.chapter_number = parseInt(chapter_number) || null;
+  if (display_order !== undefined) updates.display_order = parseInt(display_order) || 0;
+  if (published !== undefined) updates.published = published ? true : false;
+  const updated = await db.update('chapters', id, updates);
+  res.json(updated);
+});
+
 app.delete('/api/chapters/:id', async (req, res) => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(req.params.id) || req.params.id;
   const topics = await db.find('topics', { chapter_id: id });
   if (topics.length > 0) return res.status(400).json({ error: "Cannot delete chapter: it has dependent topics." });
   await db.remove('chapters', id);
@@ -577,7 +622,7 @@ app.delete('/api/chapters/:id', async (req, res) => {
 app.get('/api/topics', async (req, res) => {
   const { chapter_id, publishedOnly } = req.query;
   const criteria = {};
-  if (chapter_id) criteria.chapter_id = chapter_id;
+  if (chapter_id) criteria.chapter_id = parseInt(chapter_id) || chapter_id;
   if (publishedOnly === 'true') criteria.published = true;
   
   let topics = await db.find('topics', criteria);
@@ -586,13 +631,34 @@ app.get('/api/topics', async (req, res) => {
 });
 
 app.post('/api/topics', async (req, res) => {
-  const { chapter_id, name, display_order, published } = req.body;
-  const newTopic = await db.insert('topics', { chapter_id: parseInt(chapter_id), name, display_order: display_order || 0, published: published ? true : false });
+  const { chapter_id, name, description, important_points, display_order, published } = req.body;
+  const newTopic = await db.insert('topics', { 
+    chapter_id: parseInt(chapter_id) || chapter_id, 
+    name, 
+    description: description || null,
+    important_points: important_points || null,
+    display_order: parseInt(display_order) || 0, 
+    published: published ? true : false 
+  });
   res.json(newTopic);
 });
 
+app.put('/api/topics/:id', async (req, res) => {
+  const id = parseInt(req.params.id) || req.params.id;
+  const { chapter_id, name, description, important_points, display_order, published } = req.body;
+  const updates = {};
+  if (chapter_id !== undefined) updates.chapter_id = parseInt(chapter_id) || chapter_id;
+  if (name !== undefined) updates.name = name;
+  if (description !== undefined) updates.description = description;
+  if (important_points !== undefined) updates.important_points = important_points;
+  if (display_order !== undefined) updates.display_order = parseInt(display_order) || 0;
+  if (published !== undefined) updates.published = published ? true : false;
+  const updated = await db.update('topics', id, updates);
+  res.json(updated);
+});
+
 app.delete('/api/topics/:id', async (req, res) => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(req.params.id) || req.params.id;
   const materials = await db.find('materials', { topic_id: id });
   const questions = await db.find('questions', { topic_id: id });
   if (materials.length > 0 || questions.length > 0) return res.status(400).json({ error: "Cannot delete topic: it has linked materials or questions." });
@@ -1069,20 +1135,28 @@ app.delete('/api/tests/:id', async (req, res) => {
 app.get('/api/student/syllabus', async (req, res) => {
   const { subjects, chapters, topics, materials, questions } = await db.getStudentSyllabus();
   
-  subjects.sort((a,b)=>a.display_order - b.display_order);
-  chapters.sort((a,b)=>a.display_order - b.display_order);
-  topics.sort((a,b)=>a.display_order - b.display_order);
+  subjects.sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
+  chapters.sort((a, b) => (a.chapter_number || a.display_order || 0) - (b.chapter_number || b.display_order || 0));
+  topics.sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
   
   const tree = subjects.map(s => {
-    const sChapters = chapters.filter(c => c.subject_id === s.id).map(c => {
-      const cTopics = topics.filter(t => t.chapter_id === c.id).map(t => {
-        return { ...t, materials: materials.filter(m => m.topic_id === t.id) };
+    const sChapters = chapters.filter(c => String(c.subject_id) === String(s.id)).map(c => {
+      const cTopics = topics.filter(t => String(t.chapter_id) === String(c.id)).map(t => {
+        return { 
+          ...t, 
+          materials: materials.filter(m => String(m.topic_id) === String(t.id)) 
+        };
       });
-      const cMaterials = materials.filter(m => m.chapter_id === c.id);
-      const cQuestions = questions.filter(q => q.chapter_id === c.id);
-      return { ...c, topics: cTopics, materials: cMaterials, question_count: cQuestions.length };
+      const cMaterials = materials.filter(m => String(m.chapter_id) === String(c.id));
+      const cQuestions = questions.filter(q => String(q.chapter_id) === String(c.id));
+      return { 
+        ...c, 
+        topics: cTopics, 
+        materials: cMaterials, 
+        question_count: cQuestions.length 
+      };
     });
-    const sMaterials = materials.filter(m => m.subject_id === s.id && !m.chapter_id && !m.topic_id);
+    const sMaterials = materials.filter(m => String(m.subject_id) === String(s.id) && !m.chapter_id && !m.topic_id);
     return { ...s, chapters: sChapters, materials: sMaterials };
   });
   

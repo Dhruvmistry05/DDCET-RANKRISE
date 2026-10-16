@@ -30,7 +30,16 @@ export default function PracticeLab() {
   // Filter questions based on selected chapter/topic
   const filteredQuestions = selectedTopic === 'all' 
     ? questions 
-    : questions.filter(q => q.chapter === selectedTopic || q.subject === selectedTopic);
+    : questions.filter(q => {
+        if (!selectedTopic) return true;
+        const normSelected = selectedTopic.toLowerCase().replace(/&/g, 'and').trim();
+        const normChapter = (q.chapter || '').toLowerCase().replace(/&/g, 'and').trim();
+        const normSubject = (q.subject || '').toLowerCase().replace(/&/g, 'and').trim();
+        return normChapter === normSelected || 
+               normSubject === normSelected ||
+               (normChapter && normSelected.includes(normChapter)) ||
+               (normChapter && normChapter.includes(normSelected));
+      });
 
   // Active question
   const currentQ = filteredQuestions[currentIdx] || filteredQuestions[0];

@@ -19,6 +19,8 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS subjects (
   id BIGSERIAL PRIMARY KEY,
   name VARCHAR NOT NULL,
+  section_code VARCHAR DEFAULT 'BE-01',
+  section_name VARCHAR DEFAULT 'Basics of Science & Engineering',
   display_order INTEGER DEFAULT 0,
   published BOOLEAN DEFAULT FALSE
 );
@@ -26,7 +28,10 @@ CREATE TABLE IF NOT EXISTS subjects (
 CREATE TABLE IF NOT EXISTS chapters (
   id BIGSERIAL PRIMARY KEY,
   subject_id BIGINT REFERENCES subjects(id) ON DELETE CASCADE,
+  chapter_number INTEGER,
   name VARCHAR NOT NULL,
+  weightage VARCHAR,
+  description TEXT,
   display_order INTEGER DEFAULT 0,
   published BOOLEAN DEFAULT FALSE
 );
@@ -35,6 +40,8 @@ CREATE TABLE IF NOT EXISTS topics (
   id BIGSERIAL PRIMARY KEY,
   chapter_id BIGINT REFERENCES chapters(id) ON DELETE CASCADE,
   name VARCHAR NOT NULL,
+  important_points JSONB,
+  description TEXT,
   display_order INTEGER DEFAULT 0,
   published BOOLEAN DEFAULT FALSE
 );
