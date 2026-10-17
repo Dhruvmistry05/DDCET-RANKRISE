@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../store/AuthContext';
 import { API_BASE_URL } from '../../config/api';
-import { UploadCloud, File, Trash2, ExternalLink, Plus, BookOpen, Layers } from 'lucide-react';
+import { UploadCloud, File, Trash2, ExternalLink, Plus, BookOpen, Layers, Video, FileText } from 'lucide-react';
 
 export default function MaterialManagement() {
   const [materials, setMaterials] = useState([]);
@@ -43,7 +43,12 @@ export default function MaterialManagement() {
     e.preventDefault();
     setLoading(true);
     const data = new FormData();
-    Object.keys(formData).forEach(key => data.append(key, formData[key]));
+    const cleanFormData = { ...formData };
+    if (cleanFormData.reference_url) {
+      const match = cleanFormData.reference_url.match(/(https?:\/\/[^\s]+)/i);
+      cleanFormData.reference_url = match ? match[1].trim() : cleanFormData.reference_url.trim();
+    }
+    Object.keys(cleanFormData).forEach(key => data.append(key, cleanFormData[key]));
     if (file) data.append('file', file);
 
     try {
@@ -250,24 +255,31 @@ export default function MaterialManagement() {
                 </div>
 
                 <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
-                  <div>
-                    {item.file_path ? (
+                  <div className="flex items-center gap-3">
+                    {item.file_path && (
                       <a 
                         href={item.file_path.startsWith('http') ? item.file_path : `${API_URL}${item.file_path}`} 
                         target="_blank" 
                         rel="noreferrer" 
-                        className="text-blue-600 dark:text-blue-400 font-semibold text-xs flex items-center gap-1"
+                        className="text-blue-600 dark:text-blue-400 font-semibold text-xs flex items-center gap-1 hover:underline"
+                        title="View PDF"
                       >
-                        <File size={13}/> View PDF
+                        <FileText size={13}/> View PDF
                       </a>
-                    ) : (
+                    )}
+                    {item.reference_url && (
                       <a 
                         href={item.reference_url} 
                         target="_blank" 
                         rel="noreferrer" 
-                        className="text-blue-600 dark:text-blue-400 font-semibold text-xs flex items-center gap-1"
+                        className={item.type === 'video' || /youtube|youtu\.be|vimeo/i.test(item.reference_url) ? "text-rose-600 dark:text-rose-400 font-semibold text-xs flex items-center gap-1 hover:underline" : "text-blue-600 dark:text-blue-400 font-semibold text-xs flex items-center gap-1 hover:underline"}
+                        title="Open Resource Link"
                       >
-                        <ExternalLink size={13}/> Open URL
+                        {item.type === 'video' || /youtube|youtu\.be|vimeo/i.test(item.reference_url) ? (
+                          <><Video size={13}/> Watch Video</>
+                        ) : (
+                          <><ExternalLink size={13}/> Open Link</>
+                        )}
                       </a>
                     )}
                   </div>
@@ -307,25 +319,34 @@ export default function MaterialManagement() {
                   <tr key={item.id} className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition">
                     <td className="px-5 py-3 font-semibold text-slate-900 dark:text-white">{item.title}</td>
                     <td className="px-5 py-3">
-                      {item.file_path ? (
-                        <a 
-                          href={item.file_path.startsWith('http') ? item.file_path : `${API_URL}${item.file_path}`} 
-                          target="_blank" 
-                          rel="noreferrer" 
-                          className="text-blue-600 dark:text-blue-400 font-semibold text-xs flex items-center gap-1"
-                        >
-                          <File size={13}/> View PDF
-                        </a>
-                      ) : (
-                        <a 
-                          href={item.reference_url} 
-                          target="_blank" 
-                          rel="noreferrer" 
-                          className="text-blue-600 dark:text-blue-400 font-semibold text-xs flex items-center gap-1"
-                        >
-                          <ExternalLink size={13}/> Link
-                        </a>
-                      )}
+                      <div className="flex items-center gap-2">
+                        {item.file_path && (
+                          <a 
+                            href={item.file_path.startsWith('http') ? item.file_path : `${API_URL}${item.file_path}`} 
+                            target="_blank" 
+                            rel="noreferrer" 
+                            className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-800 hover:underline"
+                            title="View PDF Document"
+                          >
+                            <FileText size={13}/> PDF
+                          </a>
+                        )}
+                        {item.reference_url && (
+                          <a 
+                            href={item.reference_url} 
+                            target="_blank" 
+                            rel="noreferrer" 
+                            className={item.type === 'video' || /youtube|youtu\.be|vimeo/i.test(item.reference_url) ? "inline-flex items-center gap-1 text-xs font-semibold text-rose-600 hover:text-rose-800 hover:underline" : "inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-800 hover:underline"}
+                            title="Open Link"
+                          >
+                            {item.type === 'video' || /youtube|youtu\.be|vimeo/i.test(item.reference_url) ? (
+                              <><Video size={13}/> Video</>
+                            ) : (
+                              <><ExternalLink size={13}/> Link</>
+                            )}
+                          </a>
+                        )}
+                      </div>
                     </td>
                     <td className="px-5 py-3 text-xs text-slate-600 dark:text-slate-300">
                       <div>{subjects.find(s=>s.id == item.subject_id)?.name || 'N/A'}</div>

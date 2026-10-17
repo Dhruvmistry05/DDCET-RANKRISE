@@ -3,10 +3,30 @@ import { Link } from 'react-router-dom';
 import { 
   BookOpen, ChevronRight, ChevronDown, CheckCircle, ExternalLink, 
   PenTool, Search, CheckCircle2, Circle, Sparkles, Layers, Award,
-  HelpCircle, ArrowRight, BarChart2, BookCheck
+  HelpCircle, ArrowRight, BarChart2, BookCheck, Video, FileText
 } from 'lucide-react';
 import { API_BASE_URL } from '../../config/api';
 import { useAuth } from '../../store/AuthContext';
+
+// Helper to extract clean URL without trailing text/whitespace
+const getCleanUrl = (url) => {
+  if (!url) return '';
+  const trimmed = String(url).trim();
+  const match = trimmed.match(/(https?:\/\/[^\s]+)/i);
+  if (match) return match[1].trim();
+  if (trimmed.startsWith('www.') || trimmed.includes('youtube.com') || trimmed.includes('youtu.be')) {
+    return `https://${trimmed}`;
+  }
+  return trimmed;
+};
+
+// Helper to resolve full PDF URL
+const getPdfUrl = (filePath, apiUrl) => {
+  if (!filePath) return '';
+  const trimmed = String(filePath).trim();
+  if (!trimmed) return '';
+  return trimmed.startsWith('http') ? trimmed : `${apiUrl}${trimmed}`;
+};
 
 export default function StudentSyllabus() {
   const [syllabus, setSyllabus] = useState([]);
@@ -102,6 +122,81 @@ export default function StudentSyllabus() {
         console.error('Error toggling topic progress:', err);
       }
     }
+  };
+
+  // Render dedicated resource icons: video links (rose/Video) and PDFs (blue/FileText)
+  const renderTopicResources = (materials) => {
+    if (!materials || !Array.isArray(materials) || materials.length === 0) {
+      return null;
+    }
+
+    const items = [];
+
+    materials.forEach((m, idx) => {
+      const videoUrl = getCleanUrl(m.reference_url);
+      const pdfUrl = getPdfUrl(m.file_path, API_URL);
+
+      // PDF Document resource
+      if (pdfUrl || (m.type === 'pdf' && m.file_path)) {
+        if (pdfUrl) {
+          items.push({
+            key: `res-pdf-${m.id || idx}`,
+            type: 'pdf',
+            url: pdfUrl,
+            title: m.title ? `${m.title} (PDF Document)` : 'View / Download PDF Notes',
+            ariaLabel: m.title ? `${m.title} PDF Document` : 'View PDF Document'
+          });
+        }
+      }
+
+      // External Video / Resource Link
+      if (videoUrl) {
+        items.push({
+          key: `res-video-${m.id || idx}`,
+          type: 'video',
+          url: videoUrl,
+          title: m.title ? `${m.title} (Video Resource)` : 'Watch Video Tutorial',
+          ariaLabel: m.title ? `${m.title} Video Tutorial` : 'Open Video Link'
+        });
+      }
+    });
+
+    if (items.length === 0) return null;
+
+    return (
+      <div className="flex items-center gap-1.5 shrink-0" onClick={e => e.stopPropagation()}>
+        {items.map(item => {
+          if (item.type === 'video') {
+            return (
+              <a
+                key={item.key}
+                href={item.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={item.title}
+                aria-label={item.ariaLabel}
+                className="inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 hover:text-rose-700 border border-rose-200 hover:border-rose-300 transition shadow-2xs group focus:outline-none focus:ring-2 focus:ring-rose-500/40"
+              >
+                <Video size={14} className="transition-transform group-hover:scale-110" />
+              </a>
+            );
+          }
+          return (
+            <a
+              key={item.key}
+              href={item.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              title={item.title}
+              aria-label={item.ariaLabel}
+              className="inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-blue-50 hover:bg-blue-100 text-[#1E3A8A] hover:text-[#2563EB] border border-blue-200 hover:border-blue-300 transition shadow-2xs group focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+            >
+              <FileText size={14} className="transition-transform group-hover:scale-110" />
+            </a>
+          );
+        })}
+      </div>
+    );
   };
 
   // Group syllabus by Section
@@ -537,6 +632,9 @@ export default function StudentSyllabus() {
                               </div>
 
                               <div className="flex items-center gap-2 shrink-0">
+                                {/* Chapter Resources if available */}
+                                {renderTopicResources(chapter.materials)}
+
                                 {/* Direct Practice Button */}
                                 <Link
                                   to={`/student/practice?chapter=${encodeURIComponent(chapter.name)}`}
@@ -602,24 +700,8 @@ export default function StudentSyllabus() {
                                           </div>
                                         </div>
 
-                                        {/* Linked Notes/Materials */}
-                                        {topic.materials && topic.materials.length > 0 && (
-                                          <div className="flex items-center gap-1.5 shrink-0" onClick={e => e.stopPropagation()}>
-                                            {topic.materials.map(m => (
-                                              <a
-                                                key={m.id}
-                                                href={m.file_path ? (m.file_path.startsWith('http') ? m.file_path : `${API_URL}${m.file_path}`) : m.reference_url}
-                                                target="_blank"
-                                                rel="noreferrer"
-                                                className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 px-2 py-0.5 rounded transition"
-                                                title={m.title}
-                                              >
-                                                <span>Notes</span>
-                                                <ExternalLink size={10} />
-                                              </a>
-                                            ))}
-                                          </div>
-                                        )}
+                                        {/* Linked Resource Icons (Video / PDF) */}
+                                        {renderTopicResources(topic.materials)}
                                       </div>
                                     );
                                   })}

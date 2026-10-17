@@ -682,8 +682,13 @@ app.post('/api/materials', upload.single('file'), async (req, res) => {
       return res.status(400).json({ error: uploadErr.message });
     }
   }
+  let cleanRefUrl = reference_url ? String(reference_url).trim() : null;
+  if (cleanRefUrl) {
+    const match = cleanRefUrl.match(/(https?:\/\/[^\s]+)/i);
+    cleanRefUrl = match ? match[1].trim() : cleanRefUrl;
+  }
   const newMaterial = await db.insert('materials', {
-    title, type, description, file_path, reference_url,
+    title, type, description, file_path, reference_url: cleanRefUrl,
     subject_id: subject_id ? parseInt(subject_id) : null,
     chapter_id: chapter_id ? parseInt(chapter_id) : null,
     topic_id: topic_id ? parseInt(topic_id) : null,
