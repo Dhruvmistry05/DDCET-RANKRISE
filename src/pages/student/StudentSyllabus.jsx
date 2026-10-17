@@ -632,9 +632,6 @@ export default function StudentSyllabus() {
                               </div>
 
                               <div className="flex items-center gap-2 shrink-0">
-                                {/* Chapter Resources if available */}
-                                {renderTopicResources(chapter.materials)}
-
                                 {/* Direct Practice Button */}
                                 <Link
                                   to={`/student/practice?chapter=${encodeURIComponent(chapter.name)}`}
