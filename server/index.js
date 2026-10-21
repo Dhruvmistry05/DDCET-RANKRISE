@@ -669,6 +669,17 @@ app.delete('/api/topics/:id', async (req, res) => {
 // --- MATERIALS API ---
 app.post('/api/materials', upload.single('file'), async (req, res) => {
   const { title, type, description, reference_url, subject_id, chapter_id, topic_id, published } = req.body;
+  if (!title || !title.trim()) {
+    return res.status(400).json({ error: 'Document title is required.' });
+  }
+
+  const matType = type || (req.file ? 'pdf' : (reference_url ? 'link' : 'pdf'));
+  if (matType === 'pdf') {
+    if (!subject_id) return res.status(400).json({ error: 'Please select a Subject.' });
+    if (!chapter_id) return res.status(400).json({ error: 'Please select a Chapter for this PDF note.' });
+    if (!req.file) return res.status(400).json({ error: 'Please select a PDF file to upload.' });
+  }
+
   let file_path = null;
   if (req.file) {
     try {
@@ -688,13 +699,116 @@ app.post('/api/materials', upload.single('file'), async (req, res) => {
     cleanRefUrl = match ? match[1].trim() : cleanRefUrl;
   }
   const newMaterial = await db.insert('materials', {
-    title, type, description, file_path, reference_url: cleanRefUrl,
+    title: title.trim(),
+    type: matType,
+    description: description ? description.trim() : '',
+    file_path,
+    reference_url: cleanRefUrl,
     subject_id: subject_id ? parseInt(subject_id) : null,
     chapter_id: chapter_id ? parseInt(chapter_id) : null,
     topic_id: topic_id ? parseInt(topic_id) : null,
     published: published === 'true' || published === true ? true : false
   });
   res.json(newMaterial);
+});
+
+app.put('/api/materials/:id', upload.single('file'), async (req, res) => {
+  const id = parseInt(req.params.id);
+  const existing = await db.findOne('materials', { id });
+  if (!existing) return res.status(404).json({ error: 'Material not found' });
+
+  const { title, type, description, reference_url, subject_id, chapter_id, topic_id, published } = req.body;
+  const updates = {};
+
+  if (title !== undefined) updates.title = title.trim();
+  if (type !== undefined) updates.type = type;
+  if (description !== undefined) updates.description = description ? description.trim() : '';
+  if (subject_id !== undefined) updates.subject_id = subject_id ? parseInt(subject_id) : null;
+  if (chapter_id !== undefined) updates.chapter_id = chapter_id ? parseInt(chapter_id) : null;
+  if (topic_id !== undefined) updates.topic_id = topic_id ? parseInt(topic_id) : null;
+  if (published !== undefined) {
+    updates.published = published === 'true' || published === true;
+  }
+
+  if (reference_url !== undefined) {
+    let cleanRefUrl = reference_url ? String(reference_url).trim() : null;
+    if (cleanRefUrl) {
+      const match = cleanRefUrl.match(/(https?:\/\/[^\s]+)/i);
+      cleanRefUrl = match ? match[1].trim() : cleanRefUrl;
+    }
+    updates.reference_url = cleanRefUrl;
+  }
+
+  if (req.file) {
+    try {
+      const uploaded = await storageService.uploadResourceFile({
+        buffer: req.file.buffer,
+        originalname: req.file.originalname,
+        category: 'materials'
+      });
+      if (existing.file_path) {
+        await storageService.deleteResourceFile(existing.file_path);
+      }
+      updates.file_path = uploaded.fileUrl;
+      updates.type = 'pdf';
+    } catch (uploadErr) {
+      return res.status(400).json({ error: uploadErr.message });
+    }
+  }
+
+  const updated = await db.update('materials', id, updates);
+  res.json(updated);
+});
+
+app.get('/api/materials/:id/download', async (req, res) => {
+  const id = parseInt(req.params.id);
+  const material = await db.findOne('materials', { id });
+  if (!material) return res.status(404).json({ error: 'Material not found' });
+
+  if (!material.published) {
+    let isUserAdmin = false;
+    const authHeader = req.headers['authorization'];
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      try {
+        const decoded = jwt.verify(authHeader.split(' ')[1], JWT_SECRET);
+        if (decoded && (decoded.role === 'admin' || decoded.role === 'superadmin')) isUserAdmin = true;
+      } catch (_err) {}
+    }
+    if (!isUserAdmin) {
+      return res.status(403).json({ error: 'Forbidden: This material is not published.' });
+    }
+  }
+
+  if (material.file_path) {
+    if (material.file_path.startsWith('/uploads/')) {
+      const filename = path.basename(material.file_path);
+      const localPath = path.join(__dirname, 'server', 'uploads', filename);
+      if (fs.existsSync(localPath)) {
+        const safeTitle = (material.title || 'chapter_notes').replace(/[^a-zA-Z0-9_-]/g, '_');
+        return res.download(localPath, `${safeTitle}.pdf`);
+      }
+    }
+
+    try {
+      const response = await fetch(material.file_path);
+      if (!response.ok) {
+        return res.redirect(material.file_path);
+      }
+      const safeTitle = (material.title || 'chapter_notes').replace(/[^a-zA-Z0-9_-]/g, '_');
+      res.setHeader('Content-Disposition', `attachment; filename="${safeTitle}.pdf"`);
+      res.setHeader('Content-Type', response.headers.get('content-type') || 'application/pdf');
+      const arrayBuffer = await response.arrayBuffer();
+      return res.send(Buffer.from(arrayBuffer));
+    } catch (fetchErr) {
+      return res.redirect(material.file_path);
+    }
+  }
+
+  if (material.reference_url) {
+    return res.redirect(material.reference_url);
+  }
+
+  return res.status(404).json({ error: 'No downloadable file available for this material.' });
 });
 
 app.get('/api/materials', async (req, res) => {
@@ -1153,11 +1267,13 @@ app.get('/api/student/syllabus', async (req, res) => {
         };
       });
       const cMaterials = materials.filter(m => String(m.chapter_id) === String(c.id));
+      const cPdfNotes = materials.filter(m => String(m.chapter_id) === String(c.id) && (m.file_path || m.type === 'pdf'));
       const cQuestions = questions.filter(q => String(q.chapter_id) === String(c.id));
       return { 
         ...c, 
         topics: cTopics, 
-        materials: cMaterials, 
+        materials: cMaterials,
+        pdf_notes: cPdfNotes,
         question_count: cQuestions.length 
       };
     });

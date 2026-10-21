@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { 
   BookOpen, ChevronRight, ChevronDown, CheckCircle, ExternalLink, 
   PenTool, Search, CheckCircle2, Circle, Sparkles, Layers, Award,
-  HelpCircle, ArrowRight, BarChart2, BookCheck, Video, FileText
+  HelpCircle, ArrowRight, BarChart2, BookCheck, Video, FileText, Eye, Download
 } from 'lucide-react';
 import { API_BASE_URL } from '../../config/api';
 import { useAuth } from '../../store/AuthContext';
@@ -264,7 +264,8 @@ export default function StudentSyllabus() {
           const matchingChapters = (s.chapters || []).filter(c => {
             const matchChapterName = c.name && c.name.toLowerCase().includes(q);
             const matchTopic = (c.topics || []).some(t => t.name && t.name.toLowerCase().includes(q));
-            return matchChapterName || matchTopic;
+            const matchPdf = ((c.pdf_notes || c.materials || []).some(p => p.title && p.title.toLowerCase().includes(q)));
+            return matchChapterName || matchTopic || matchPdf;
           });
           return { ...s, chapters: matchingChapters };
         }).filter(s => (s.chapters && s.chapters.length > 0) || (s.name && s.name.toLowerCase().includes(q)));
@@ -654,14 +655,131 @@ export default function StudentSyllabus() {
 
                             {/* Expanded Topics / Important Points */}
                             {isExpanded && (
-                              <div className="px-4 pb-5 pt-1 sm:px-6 bg-slate-50/60 border-t border-slate-100 space-y-2.5">
+                              <div className="px-4 pb-5 pt-2 sm:px-6 bg-slate-50/60 border-t border-slate-100 space-y-4">
                                 {chapter.description && (
-                                  <p className="text-xs text-slate-500 italic pt-2 leading-relaxed">
+                                  <p className="text-xs text-slate-500 italic leading-relaxed pt-1">
                                     {chapter.description}
                                   </p>
                                 )}
 
-                                <div className="space-y-2 pt-2">
+                                {/* Dedicated Chapter-wise PDF Notes Section */}
+                                {(() => {
+                                  const chPdfNotes = (chapter.pdf_notes && chapter.pdf_notes.length > 0)
+                                    ? chapter.pdf_notes
+                                    : (chapter.materials || []).filter(m => (m.file_path || m.type === 'pdf') && (m.published !== false));
+
+                                  return (
+                                    <div className="bg-white rounded-xl border border-slate-200 p-3.5 sm:p-4 shadow-2xs space-y-3">
+                                      <div className="flex items-center justify-between pb-1 border-b border-slate-100">
+                                        <div className="flex items-center gap-2">
+                                          <div className="w-7 h-7 rounded-lg bg-blue-50 text-[#1E3A8A] border border-blue-200 flex items-center justify-center shrink-0">
+                                            <FileText size={15} />
+                                          </div>
+                                          <div>
+                                            <h5 className="text-xs sm:text-sm font-bold text-slate-900 leading-tight">
+                                              Chapter PDF Notes & Revision Sheets
+                                            </h5>
+                                            <span className="text-[11px] text-slate-500 block">
+                                              Official GTU DDCET revision notes & formula guides
+                                            </span>
+                                          </div>
+                                        </div>
+                                        
+                                        {chPdfNotes.length > 0 ? (
+                                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-50 text-[#1E3A8A] border border-blue-200 shrink-0">
+                                            <span>{chPdfNotes.length}</span>
+                                            <span className="hidden sm:inline">{chPdfNotes.length === 1 ? 'Note' : 'Notes'}</span>
+                                          </span>
+                                        ) : (
+                                          <span className="text-[11px] font-semibold text-slate-400 bg-slate-100 px-2 py-0.5 rounded shrink-0">
+                                            No Notes Uploaded
+                                          </span>
+                                        )}
+                                      </div>
+
+                                      {/* PDF Items List */}
+                                      {chPdfNotes.length > 0 ? (
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 pt-0.5">
+                                          {chPdfNotes.map((pdf) => {
+                                            const fileUrl = pdf.file_path?.startsWith('http') ? pdf.file_path : `${API_URL}${pdf.file_path}`;
+                                            const downloadUrl = `${API_URL}/api/materials/${pdf.id}/download`;
+
+                                            return (
+                                              <div 
+                                                key={pdf.id}
+                                                className="flex items-start justify-between gap-3 p-3 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-white hover:border-blue-300 transition-all shadow-2xs group"
+                                              >
+                                                <div className="flex items-start gap-2.5 min-w-0">
+                                                  <div className="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 border border-rose-200 flex items-center justify-center shrink-0 mt-0.5 group-hover:scale-105 transition-transform">
+                                                    <FileText size={16} />
+                                                  </div>
+                                                  <div className="min-w-0">
+                                                    <h6 className="text-xs sm:text-sm font-bold text-slate-900 truncate" title={pdf.title}>
+                                                      {pdf.title}
+                                                    </h6>
+                                                    {pdf.description ? (
+                                                      <p className="text-[11px] text-slate-500 line-clamp-2 mt-0.5 leading-relaxed">
+                                                        {pdf.description}
+                                                      </p>
+                                                    ) : (
+                                                      <span className="text-[10px] text-slate-400 font-medium">
+                                                        Verified Chapter PDF Note
+                                                      </span>
+                                                    )}
+                                                  </div>
+                                                </div>
+
+                                                {/* Actions: View and Download */}
+                                                <div className="flex items-center gap-1.5 shrink-0 pt-0.5" onClick={e => e.stopPropagation()}>
+                                                  <a
+                                                    href={fileUrl}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-[#1E3A8A] bg-blue-50 hover:bg-blue-100 border border-blue-200 transition shadow-2xs"
+                                                    title="View PDF in new tab"
+                                                  >
+                                                    <Eye size={12} />
+                                                    <span>View</span>
+                                                  </a>
+
+                                                  <a
+                                                    href={downloadUrl}
+                                                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-white bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 transition shadow-2xs"
+                                                    title="Download PDF to device"
+                                                  >
+                                                    <Download size={12} />
+                                                    <span className="hidden sm:inline">Download</span>
+                                                  </a>
+                                                </div>
+                                              </div>
+                                            );
+                                          })}
+                                        </div>
+                                      ) : (
+                                        <div className="p-3.5 rounded-xl border border-dashed border-slate-200 bg-slate-50/50 text-center">
+                                          <p className="text-xs font-semibold text-slate-500">
+                                            No PDF notes uploaded yet for this chapter.
+                                          </p>
+                                          <span className="text-[11px] text-slate-400 mt-0.5 block">
+                                            Explore the important points and tutorial videos below for practice.
+                                          </span>
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                })()}
+
+                                {/* Chapter Important Points / Practice Topics */}
+                                <div className="space-y-2 pt-1">
+                                  <div className="flex items-center justify-between pb-1">
+                                    <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700">
+                                      <Layers size={13} className="text-[#2563EB]" />
+                                      <span>Important Points & Practice Topics</span>
+                                    </div>
+                                    <span className="text-[11px] text-slate-400 font-medium">
+                                      {chTopics.length} Points
+                                    </span>
+                                  </div>
                                   {chTopics.map((topic, tpIdx) => {
                                     const isDone = completedTopicIds.has(topic.id);
 
