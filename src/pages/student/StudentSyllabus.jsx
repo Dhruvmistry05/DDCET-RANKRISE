@@ -589,6 +589,14 @@ export default function StudentSyllabus() {
                         const chPercent = chTopics.length > 0 ? Math.round((chDone / chTopics.length) * 100) : 0;
                         const isChapterComplete = chTopics.length > 0 && chDone === chTopics.length;
 
+                        // Chapter PDF notes (available directly from the chapter header row)
+                        const chPdfNotes = ((chapter.pdf_notes && chapter.pdf_notes.length > 0)
+                          ? chapter.pdf_notes
+                          : (chapter.materials || []).filter(m => (m.file_path || m.type === 'pdf'))
+                        ).filter(m => m.published !== false && (m.file_path || m.reference_url));
+                        const primaryPdf = chPdfNotes.length > 0 ? chPdfNotes[0] : null;
+                        const primaryPdfUrl = primaryPdf ? getPdfUrl(primaryPdf.file_path || primaryPdf.reference_url, API_URL) : '';
+
                         return (
                           <div key={chapter.id} className="transition">
                             
@@ -633,6 +641,21 @@ export default function StudentSyllabus() {
                               </div>
 
                               <div className="flex items-center gap-2 shrink-0">
+                                {/* Chapter-wise PDF Icon Button (Direct View/Download) */}
+                                {primaryPdf && primaryPdfUrl && (
+                                  <a
+                                    href={primaryPdfUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 hover:text-rose-700 border border-rose-200 hover:border-rose-300 transition shadow-2xs group focus:outline-none focus:ring-2 focus:ring-rose-500/30 shrink-0"
+                                    title={`Open Chapter PDF: ${primaryPdf.title || chapter.name}${chPdfNotes.length > 1 ? ` (${chPdfNotes.length} notes available)` : ''}`}
+                                    aria-label={`Open Chapter PDF: ${primaryPdf.title || chapter.name}`}
+                                  >
+                                    <FileText size={15} className="transition-transform group-hover:scale-110" />
+                                  </a>
+                                )}
+
                                 {/* Direct Practice Button */}
                                 <Link
                                   to={`/student/practice?chapter=${encodeURIComponent(chapter.name)}`}
