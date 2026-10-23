@@ -10,6 +10,7 @@ import TestResult from './pages/student/TestResult';
 import Leaderboard from './pages/student/Leaderboard';
 import MistakeBook from './pages/student/MistakeBook';
 import Login from './pages/auth/Login';
+import AdminLogin from './pages/auth/AdminLogin';
 import StudentProfileCreation from './pages/auth/StudentProfileCreation';
 import Layout from './components/Layout';
 import SyllabusManagement from './pages/admin/SyllabusManagement';
@@ -41,7 +42,7 @@ const ProtectedRoute = ({ children, allowedRole }) => {
   
   // Restrict admin routes to admin and superadmin roles
   if (allowedRole === 'admin' && user?.role !== 'admin' && user?.role !== 'superadmin') {
-    return <Navigate to="/admin/login" replace />;
+    return <Navigate to="/admin-login" replace />;
   }
 
   // Restrict superadmin routes to superadmin role only
@@ -62,10 +63,11 @@ function App() {
         {/* Direct entry: Redirect root directly to Student Dashboard */}
         <Route path="/" element={<Navigate to="/student" replace />} />
         
-        {/* Optional standalone screens */}
+        {/* Standalone Authentication screens */}
         <Route path="/create-profile" element={<StudentProfileCreation />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/admin/login" element={<Login />} />
+        <Route path="/admin-login" element={<AdminLogin />} />
+        <Route path="/admin/login" element={<Navigate to="/admin-login" replace />} />
         <Route path="/complete-profile" element={<ProfileCompletion />} />
         
         {/* Layout Routes */}

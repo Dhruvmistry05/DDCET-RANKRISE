@@ -628,7 +628,7 @@ export default function StudentProfileCreation() {
               </p>
               <p className="text-[11px] text-slate-400 dark:text-slate-500">
                 Educator or administrator?{' '}
-                <Link to="/admin/login" className="text-slate-600 dark:text-slate-400 hover:underline">
+                <Link to="/admin-login" className="text-slate-600 dark:text-slate-400 hover:underline">
                   Admin Sign In
                 </Link>
               </p>

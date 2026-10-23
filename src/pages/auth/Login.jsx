@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { BookOpen, GraduationCap, ArrowRight, ShieldCheck, Mail, Lock, Sparkles, ArrowLeft } from 'lucide-react';
+import { GraduationCap, ArrowRight, ShieldCheck, Mail, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../../store/AuthContext';
 import { getApiUrl } from '../../config/api';
 import PasswordInput from '../../components/PasswordInput';
 
 export default function Login() {
   const [isLogin, setIsLogin] = useState(true);
-  const [role, setRole] = useState('student');
+  const role = 'student';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -197,12 +197,16 @@ export default function Login() {
 
             {/* Heading */}
             <div>
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/60 text-[#1E3A8A] dark:text-blue-300 border border-blue-200 dark:border-blue-900 text-[11px] font-semibold mb-2">
+                <GraduationCap size={13} />
+                <span>Student Portal</span>
+              </div>
               <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
-                {isLogin ? 'Sign In to Portal' : 'Create an Account'}
+                {isLogin ? 'Sign In to Student Portal' : 'Create an Account'}
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                 {isLogin 
-                  ? 'Enter your registered credentials to access your dashboard.'
+                  ? 'Enter your registered credentials to access your student dashboard.'
                   : 'Register your email to start preparing for DDCET.'}
               </p>
             </div>
@@ -213,34 +217,6 @@ export default function Login() {
                 {error}
               </div>
             )}
-
-            {/* Role Selector */}
-            <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-lg border border-slate-200 dark:border-slate-700/60">
-              <button
-                type="button"
-                onClick={() => setRole('student')}
-                className={`flex-1 py-1.5 rounded-md font-semibold text-xs transition flex items-center justify-center gap-1.5 ${
-                  role === 'student'
-                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
-                    : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-                }`}
-              >
-                <GraduationCap size={15} />
-                <span>Student</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setRole('admin')}
-                className={`flex-1 py-1.5 rounded-md font-semibold text-xs transition flex items-center justify-center gap-1.5 ${
-                  role === 'admin'
-                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
-                    : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-                }`}
-              >
-                <ShieldCheck size={15} />
-                <span>Admin</span>
-              </button>
-            </div>
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
