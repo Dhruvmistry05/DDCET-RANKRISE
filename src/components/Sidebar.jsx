@@ -8,10 +8,12 @@ import { useAuth } from '../store/AuthContext';
 export default function Sidebar({ isOpen, onClose }) {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
-  const role = user?.role || localStorage.getItem('userRole');
-  const isAdmin = role === 'admin' || role === 'superadmin';
-  const isSuperAdmin = role === 'superadmin' || (user?.email && user.email.toLowerCase() === 'dhruvmistry0511@gmail.com');
+  const { user, token, logout } = useAuth();
+  
+  // Strictly compute roles based on active authenticated session
+  const isAuthenticated = Boolean(user && token);
+  const isAdmin = isAuthenticated && (user?.role === 'admin' || user?.role === 'superadmin');
+  const isSuperAdmin = isAuthenticated && (user?.role === 'superadmin' || (user?.email && user.email.toLowerCase() === 'dhruvmistry0511@gmail.com'));
 
   const handleLogout = () => {
     logout();
@@ -66,7 +68,7 @@ export default function Sidebar({ isOpen, onClose }) {
               <span className="text-[11px] text-slate-400 font-normal">RankRise</span>
             </div>
             <span className="block text-white font-bold tracking-tight text-base leading-tight">
-              Academic Portal
+              {isAdmin ? 'Admin Console' : 'Academic Portal'}
             </span>
           </div>
         </div>
@@ -139,17 +141,23 @@ export default function Sidebar({ isOpen, onClose }) {
       <div className="p-3.5 border-t border-slate-800 bg-[#080e1c]">
         <div className="flex items-center gap-3 p-2 rounded-lg bg-slate-900 border border-slate-800">
           <div className="w-8 h-8 rounded-md bg-slate-800 text-slate-200 border border-slate-700 flex items-center justify-center font-bold text-xs uppercase shrink-0">
-            {user?.name ? user.name[0] : (isSuperAdmin ? 'SA' : (isAdmin ? 'A' : 'S'))}
+            {isAdmin 
+              ? (isSuperAdmin ? 'SA' : 'A') 
+              : (user?.name ? user.name[0].toUpperCase() : 'S')}
           </div>
           <div className="flex-1 min-w-0">
             <span className="block text-xs text-slate-200 font-semibold truncate leading-tight">
-              {user?.name || (isSuperAdmin ? 'Super Admin' : (isAdmin ? 'Administrator' : 'Student'))}
+              {isAdmin 
+                ? (user?.name || (isSuperAdmin ? 'Super Admin' : 'Administrator')) 
+                : (user?.name || (isAuthenticated ? 'Student' : 'Student Portal'))}
             </span>
             <span className="block text-slate-400 text-[11px] truncate mt-0.5">
-              {user?.email || (isSuperAdmin ? 'Super Admin' : (isAdmin ? 'Administrator' : 'Active Session'))}
+              {isAdmin 
+                ? (user?.email || 'Admin Access') 
+                : (user?.email || (isAuthenticated ? 'DDCET Aspirant' : 'Sign in to access lab'))}
             </span>
           </div>
-          {user ? (
+          {isAuthenticated ? (
             <button 
               onClick={handleLogout} 
               className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-md transition-colors shrink-0"

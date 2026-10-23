@@ -36,20 +36,35 @@ import { useAuth } from './store/AuthContext';
 
 // Route Protection Component
 const ProtectedRoute = ({ children, allowedRole }) => {
-  const { user, loading } = useAuth();
+  const { user, token, loading } = useAuth();
   
   if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   
-  // Restrict admin routes to admin and superadmin roles
-  if (allowedRole === 'admin' && user?.role !== 'admin' && user?.role !== 'superadmin') {
-    return <Navigate to="/admin-login" replace />;
+  const isAuthenticated = Boolean(user && token);
+  const isAdmin = isAuthenticated && (user?.role === 'admin' || user?.role === 'superadmin');
+  const isSuperAdmin = isAuthenticated && (user?.role === 'superadmin' || (user?.email && user.email.toLowerCase() === 'dhruvmistry0511@gmail.com'));
+
+  // Restrict admin routes to authenticated admin and superadmin roles
+  if (allowedRole === 'admin') {
+    if (!isAdmin) {
+      return <Navigate to="/admin-login" replace />;
+    }
   }
 
-  // Restrict superadmin routes to superadmin role only
+  // Restrict superadmin routes to authenticated superadmin role only
   if (allowedRole === 'superadmin') {
-    const isSuperAdmin = user?.role === 'superadmin' || (user?.email && user.email.toLowerCase() === 'dhruvmistry0511@gmail.com');
     if (!isSuperAdmin) {
       return <Navigate to="/admin" replace />;
+    }
+  }
+
+  // Restrict student routes to authenticated users
+  if (allowedRole === 'student') {
+    if (!isAuthenticated) {
+      return <Navigate to="/login" replace />;
+    }
+    if (!user.profile_completed && !isAdmin && window.location.pathname !== '/complete-profile') {
+      return <Navigate to="/complete-profile" replace />;
     }
   }
 
@@ -60,19 +75,17 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Direct entry: Redirect root directly to Student Dashboard */}
-        <Route path="/" element={<Navigate to="/student" replace />} />
-        
-        {/* Standalone Authentication screens */}
-        <Route path="/create-profile" element={<StudentProfileCreation />} />
+        {/* Public Entry Points */}
+        <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/create-profile" element={<StudentProfileCreation />} />
         <Route path="/admin-login" element={<AdminLogin />} />
         <Route path="/admin/login" element={<Navigate to="/admin-login" replace />} />
-        <Route path="/complete-profile" element={<ProfileCompletion />} />
+        <Route path="/complete-profile" element={<ProtectedRoute allowedRole="student"><ProfileCompletion /></ProtectedRoute>} />
         
         {/* Layout Routes */}
         <Route element={<Layout />}>
-          {/* Admin Routes */}
+          {/* Admin Routes - Strictly Protected */}
           <Route path="/admin" element={<ProtectedRoute allowedRole="admin"><AdminDashboard /></ProtectedRoute>} />
           <Route path="/admin/tests" element={<ProtectedRoute allowedRole="admin"><TestManagement /></ProtectedRoute>} />
           <Route path="/admin/tests/create" element={<ProtectedRoute allowedRole="admin"><CreateTest /></ProtectedRoute>} />
@@ -83,32 +96,32 @@ function App() {
           <Route path="/admin/resources" element={<ProtectedRoute allowedRole="admin"><ResourceManagement /></ProtectedRoute>} />
           <Route path="/admin/admins" element={<ProtectedRoute allowedRole="superadmin"><AdminManagement /></ProtectedRoute>} />
           
-          {/* Student Routes - Direct access without auth roadblock */}
-          <Route path="/student" element={<StudentHome />} />
-          <Route path="/student/leaderboard" element={<Leaderboard />} />
-          <Route path="/student/mistakes" element={<MistakeBook />} />
+          {/* Student Routes - Protected via Student Login */}
+          <Route path="/student" element={<ProtectedRoute allowedRole="student"><StudentHome /></ProtectedRoute>} />
+          <Route path="/student/leaderboard" element={<ProtectedRoute allowedRole="student"><Leaderboard /></ProtectedRoute>} />
+          <Route path="/student/mistakes" element={<ProtectedRoute allowedRole="student"><MistakeBook /></ProtectedRoute>} />
           
-          <Route path="/student/syllabus" element={<StudentSyllabus />} />
+          <Route path="/student/syllabus" element={<ProtectedRoute allowedRole="student"><StudentSyllabus /></ProtectedRoute>} />
           
-          <Route path="/student/resources" element={<StudyMaterialLibrary />} />
-          <Route path="/student/resources/papers" element={<PreviousPapers />} />
-          <Route path="/student/resources/keys" element={<AnswerKeys />} />
-          <Route path="/student/resources/official-syllabus" element={<OfficialSyllabus />} />
-          <Route path="/student/resources/links" element={<ExternalLinks />} />
+          <Route path="/student/resources" element={<ProtectedRoute allowedRole="student"><StudyMaterialLibrary /></ProtectedRoute>} />
+          <Route path="/student/resources/papers" element={<ProtectedRoute allowedRole="student"><PreviousPapers /></ProtectedRoute>} />
+          <Route path="/student/resources/keys" element={<ProtectedRoute allowedRole="student"><AnswerKeys /></ProtectedRoute>} />
+          <Route path="/student/resources/official-syllabus" element={<ProtectedRoute allowedRole="student"><OfficialSyllabus /></ProtectedRoute>} />
+          <Route path="/student/resources/links" element={<ProtectedRoute allowedRole="student"><ExternalLinks /></ProtectedRoute>} />
           
-          <Route path="/student/practice" element={<PracticeLab />} />
-          <Route path="/student/mock" element={<MockTestCenter />} />
-          <Route path="/student/quiz" element={<QuizGenerator />} />
-          <Route path="/student/quiz-generator" element={<QuizGenerator />} />
+          <Route path="/student/practice" element={<ProtectedRoute allowedRole="student"><PracticeLab /></ProtectedRoute>} />
+          <Route path="/student/mock" element={<ProtectedRoute allowedRole="student"><MockTestCenter /></ProtectedRoute>} />
+          <Route path="/student/quiz" element={<ProtectedRoute allowedRole="student"><QuizGenerator /></ProtectedRoute>} />
+          <Route path="/student/quiz-generator" element={<ProtectedRoute allowedRole="student"><QuizGenerator /></ProtectedRoute>} />
           <Route path="/student/pyq" element={<Navigate to="/student/resources/papers" replace />} />
-          <Route path="/student/analytics" element={<StudentAnalytics />} />
+          <Route path="/student/analytics" element={<ProtectedRoute allowedRole="student"><StudentAnalytics /></ProtectedRoute>} />
           <Route path="/student/revision" element={<Navigate to="/student/mistakes" replace />} />
-          <Route path="/student/mentor" element={<AIMentor />} />
+          <Route path="/student/mentor" element={<ProtectedRoute allowedRole="student"><AIMentor /></ProtectedRoute>} />
         </Route>
 
         {/* Fullscreen Test Routes (No Sidebar) */}
-        <Route path="/student/test/:testId" element={<LiveTest />} />
-        <Route path="/student/result/:testId" element={<TestResult />} />
+        <Route path="/student/test/:testId" element={<ProtectedRoute allowedRole="student"><LiveTest /></ProtectedRoute>} />
+        <Route path="/student/result/:testId" element={<ProtectedRoute allowedRole="student"><TestResult /></ProtectedRoute>} />
 
       </Routes>
     </Router>

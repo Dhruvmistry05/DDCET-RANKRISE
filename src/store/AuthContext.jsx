@@ -4,9 +4,21 @@ import { getApiUrl } from '../config/api';
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
+  const [token, setToken] = useState(() => {
+    const savedToken = localStorage.getItem('token');
+    if (savedToken && savedToken !== 'rankrise_test_token_2026' && savedToken !== 'rankrise_test_token_2027') {
+      return savedToken;
+    }
+    localStorage.removeItem('token');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('rankrise_user');
+    return null;
+  });
+
   const [user, setUser] = useState(() => {
     const saved = localStorage.getItem('rankrise_user');
-    if (saved) {
+    const savedToken = localStorage.getItem('token');
+    if (saved && savedToken) {
       try { 
         const parsed = JSON.parse(saved); 
         // Filter out any legacy hardcoded demo name
@@ -17,33 +29,22 @@ export function AuthProvider({ children }) {
         // ignore parse errors
       }
     }
-    // Clean legacy test user from storage if present
+    // Clean legacy / invalid user from storage if present
     localStorage.removeItem('rankrise_user');
-    return null;
-  });
-
-  const [token, setToken] = useState(() => {
-    const savedToken = localStorage.getItem('token');
-    if (savedToken && savedToken !== 'rankrise_test_token_2026' && savedToken !== 'rankrise_test_token_2027') {
-      return savedToken;
-    }
-    localStorage.removeItem('token');
+    localStorage.removeItem('userRole');
     return null;
   });
 
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (user) {
+    if (user && token) {
       localStorage.setItem('rankrise_user', JSON.stringify(user));
       localStorage.setItem('userRole', user.role || 'student');
-    } else {
-      localStorage.removeItem('rankrise_user');
-    }
-
-    if (token) {
       localStorage.setItem('token', token);
     } else {
+      localStorage.removeItem('rankrise_user');
+      localStorage.removeItem('userRole');
       localStorage.removeItem('token');
     }
   }, [user, token]);
@@ -82,7 +83,7 @@ export function AuthProvider({ children }) {
     setToken(null);
     localStorage.removeItem('token');
     localStorage.removeItem('rankrise_user');
-    localStorage.setItem('userRole', 'student');
+    localStorage.removeItem('userRole');
   };
 
   return (

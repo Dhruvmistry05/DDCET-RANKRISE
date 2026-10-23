@@ -11,10 +11,12 @@ export default function Layout() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, logout } = useAuth();
-  const role = user?.role || localStorage.getItem('userRole');
-  const isAdmin = role === 'admin' || role === 'superadmin';
-  const isSuperAdmin = role === 'superadmin' || (user?.email && user.email.toLowerCase() === 'dhruvmistry0511@gmail.com');
+  const { user, token, logout } = useAuth();
+  
+  // Strictly compute authenticated roles
+  const isAuthenticated = Boolean(user && token);
+  const isAdmin = isAuthenticated && (user?.role === 'admin' || user?.role === 'superadmin');
+  const isSuperAdmin = isAuthenticated && (user?.role === 'superadmin' || (user?.email && user.email.toLowerCase() === 'dhruvmistry0511@gmail.com'));
 
   const handleLogout = () => {
     logout();
@@ -96,16 +98,16 @@ export default function Layout() {
               </span>
             )}
 
-            {user?.name && (
+            {isAuthenticated && user?.name && (
               <span className="hidden sm:inline-block text-xs font-semibold text-slate-700 dark:text-slate-200">
                 {user.name}
               </span>
             )}
 
-            {user ? (
+            {isAuthenticated ? (
               <button 
                 onClick={handleLogout} 
-                className="flex items-center gap-1.5 px-2.5 py-1.5 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white rounded-md text-xs font-medium transition-colors"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white rounded-md text-xs font-medium transition-colors cursor-pointer"
                 title="Log Out"
               >
                 <LogOut size={15} />
@@ -140,33 +142,17 @@ export default function Layout() {
             <Link
               key={item.name}
               to={item.path}
-              className={`flex flex-col items-center justify-center py-1 px-2 rounded-md transition-colors min-w-[50px] min-h-[44px] ${
+              className={`flex flex-col items-center justify-center flex-1 py-1 transition-colors ${
                 isActive 
-                  ? 'text-[#1E3A8A] dark:text-blue-400 font-semibold' 
+                  ? 'text-[#1E3A8A] dark:text-blue-400 font-bold' 
                   : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
               }`}
             >
-              <Icon size={18} className={isActive ? 'text-[#1E3A8A] dark:text-blue-400' : ''} />
-              <span className="text-[10px] tracking-tight mt-0.5 leading-none">
-                {item.name}
-              </span>
+              <Icon size={18} />
+              <span className="text-[10px] mt-0.5">{item.name}</span>
             </Link>
           );
         })}
-
-        {/* 5th Button: More Drawer Trigger */}
-        <button
-          onClick={() => setIsMobileMenuOpen(true)}
-          className={`flex flex-col items-center justify-center py-1 px-2 rounded-md transition-colors min-w-[50px] min-h-[44px] text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 ${
-            isMobileMenuOpen ? 'text-blue-600 dark:text-blue-400 font-semibold' : ''
-          }`}
-          aria-label="More menu items"
-        >
-          <MoreHorizontal size={18} />
-          <span className="text-[10px] tracking-tight mt-0.5 leading-none">
-            More
-          </span>
-        </button>
       </nav>
     </div>
   );
