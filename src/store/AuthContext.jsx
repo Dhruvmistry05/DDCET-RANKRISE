@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { getApiUrl } from '../config/api';
+import { logPortalActivity } from '../utils/activityTracker';
 
 const AuthContext = createContext();
 
@@ -76,6 +77,7 @@ export function AuthProvider({ children }) {
     localStorage.setItem('token', newToken);
     if (userData?.role) localStorage.setItem('userRole', userData.role);
     if (userData) localStorage.setItem('rankrise_user', JSON.stringify(userData));
+    logPortalActivity({ type: 'login', action_name: 'Logged in to DDCET Portal' });
   };
 
   const logout = () => {

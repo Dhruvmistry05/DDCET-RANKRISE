@@ -43,6 +43,7 @@ export default function PracticeLab() {
   const [showExplanation, setShowExplanation] = useState({}); // qId -> boolean
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [testStartTime, setTestStartTime] = useState(null);
   const [reviewFilter, setReviewFilter] = useState('all'); // 'all', 'wrong', 'correct', 'unattempted'
   const [showExitConfirm, setShowExitConfirm] = useState(false);
   const { token } = useAuth();
@@ -240,6 +241,7 @@ export default function PracticeLab() {
     setIsSubmitted(false);
     setShowExitConfirm(false);
     setIsTestActive(true);
+    setTestStartTime(Date.now());
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -326,9 +328,37 @@ export default function PracticeLab() {
     }
   };
 
-  const handleSubmitTest = () => {
+  const handleSubmitTest = async () => {
     setIsSubmitted(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    if (token) {
+      const elapsedSeconds = testStartTime ? Math.max(15, Math.round((Date.now() - testStartTime) / 1000)) : 180;
+      try {
+        await fetch(`${API_BASE_URL}/api/student/tests/submit`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            test_id: `practice-${practiceMode}-${selectedSubject}`,
+            test_title: `${selectedSubject}: ${practiceMode === 'topic' ? selectedTopic : (practiceMode === 'chapter' ? selectedChapter : 'Subject Practice')}`,
+            score: netScore,
+            max_score: maxPossibleMarks,
+            correct_count: correctCount,
+            wrong_count: wrongCount,
+            unattempted_count: unattemptedCount,
+            questions_attempted: answeredCount,
+            accuracy: accuracy,
+            time_spent_seconds: elapsedSeconds,
+            answers: userAnswers
+          })
+        });
+      } catch (err) {
+        console.error('Error recording practice test attempt:', err);
+      }
+    }
   };
 
   // Review filter
