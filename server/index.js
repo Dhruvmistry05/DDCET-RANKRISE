@@ -1178,7 +1178,36 @@ app.delete('/api/resources/:id', async (req, res) => {
 
 // --- QUESTIONS API ---
 app.get('/api/questions', async (req, res) => {
-  res.json(await db.getAll('questions'));
+  try {
+    const [questions, subjects, chapters, topics] = await Promise.all([
+      db.getAll('questions'),
+      db.getAll('subjects'),
+      db.getAll('chapters'),
+      db.getAll('topics')
+    ]);
+    const subMap = new Map((subjects || []).map(s => [String(s.id), s.name]));
+    const chapMap = new Map((chapters || []).map(c => [String(c.id), c.name]));
+    const topMap = new Map((topics || []).map(t => [String(t.id), t.name]));
+
+    const enriched = (questions || []).map(q => {
+      let opts = q.options;
+      if (typeof opts === 'string') {
+        try { opts = JSON.parse(opts); } catch (e) {}
+      }
+      return {
+        ...q,
+        options: Array.isArray(opts) ? opts : [],
+        correctOptionIndex: q.answer_index !== undefined ? q.answer_index : 0,
+        subject: subMap.get(String(q.subject_id)) || q.subject || 'Physics',
+        chapter: chapMap.get(String(q.chapter_id)) || q.chapter || '',
+        topic: topMap.get(String(q.topic_id)) || q.topic || ''
+      };
+    });
+    res.json(enriched);
+  } catch (err) {
+    console.error('Error fetching questions:', err);
+    res.json(await db.getAll('questions'));
+  }
 });
 
 app.post('/api/questions', async (req, res) => {

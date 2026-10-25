@@ -39,6 +39,48 @@ export default function QuizGenerator() {
   // Available topics for info
   const section1Questions = useMemo(() => ddcet2027OfficialQuestions.filter(q => q.number <= 50), []);
   const section2Questions = useMemo(() => ddcet2027OfficialQuestions.filter(q => q.number > 50), []);
+  const [bankQuestions, setBankQuestions] = useState([]);
+
+  // Fetch verified question bank on mount
+  useEffect(() => {
+    async function loadBank() {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/questions`);
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            const formatted = data.map((q, idx) => {
+              let opts = q.options;
+              if (typeof opts === 'string') {
+                try { opts = JSON.parse(opts); } catch (e) { opts = []; }
+              }
+              const ansIdx = q.correctOptionIndex !== undefined ? q.correctOptionIndex : (q.answer_index !== undefined ? q.answer_index : 0);
+              return {
+                id: q.id || `bank-q-${idx}`,
+                number: idx + 1,
+                section: 'Section-1: Basics of Science & Engineering (Physics)',
+                subject: q.subject || 'Physics',
+                chapter: q.chapter || 'Physics',
+                topic: q.topic || '',
+                text: q.text,
+                options: Array.isArray(opts) ? opts : [],
+                correctOptionIndex: ansIdx,
+                correctLetter: ['A', 'B', 'C', 'D'][ansIdx] || 'A',
+                isBonus: false,
+                marks: 2.0,
+                negativeMarks: 0.5,
+                explanation: q.explanation || ''
+              };
+            });
+            setBankQuestions(formatted);
+          }
+        }
+      } catch (e) {
+        console.warn('Could not load bank questions for quiz generator:', e);
+      }
+    }
+    loadBank();
+  }, []);
 
   // Timer Effect
   useEffect(() => {
@@ -76,11 +118,29 @@ export default function QuizGenerator() {
   const handleGenerateQuiz = () => {
     let pool = [];
 
-    if (questionCount === 100) {
+    if (sectionScope === 'physics_bank') {
+      const source = bankQuestions.length > 0 ? bankQuestions : section1Questions;
+      const shuffled = [...source].sort(() => 0.5 - Math.random());
+      pool = shuffled.slice(0, Math.min(questionCount, shuffled.length)).map((q, idx) => ({
+        ...q,
+        number: idx + 1,
+        marks: 2.0,
+        negativeMarks: 0.5
+      }));
+    } else if (questionCount === 100) {
       // Full Paper: All 100 questions (50 from Sec 1 + 50 from Sec 2)
+      const s1Source = bankQuestions.length > 0 ? bankQuestions : section1Questions;
       if (shuffleQuestions) {
-        const s1 = [...section1Questions].sort(() => 0.5 - Math.random());
-        const s2 = [...section2Questions].sort(() => 0.5 - Math.random());
+        const s1 = [...s1Source].sort(() => 0.5 - Math.random()).slice(0, 50).map((q, idx) => ({
+          ...q,
+          number: idx + 1,
+          section: 'Section-1: Basics of Science & Engineering'
+        }));
+        const s2 = [...section2Questions].sort(() => 0.5 - Math.random()).map((q, idx) => ({
+          ...q,
+          number: 50 + idx + 1,
+          section: 'Section-2: Aptitude & Soft Skills'
+        }));
         pool = [...s1, ...s2];
       } else {
         pool = [...ddcet2027OfficialQuestions];
@@ -88,8 +148,9 @@ export default function QuizGenerator() {
     } else {
       // 50 Questions Half / Sectional Paper
       if (sectionScope === 'sec1') {
+        const s1Source = bankQuestions.length > 0 ? bankQuestions : section1Questions;
         pool = shuffleQuestions 
-          ? [...section1Questions].sort(() => 0.5 - Math.random()) 
+          ? [...s1Source].sort(() => 0.5 - Math.random()).slice(0, 50).map((q, idx) => ({ ...q, number: idx + 1 }))
           : [...section1Questions];
       } else if (sectionScope === 'sec2') {
         pool = shuffleQuestions 
@@ -97,8 +158,9 @@ export default function QuizGenerator() {
           : [...section2Questions];
       } else {
         // Mixed 50 (25 from Sec 1 + 25 from Sec 2)
-        const s1 = [...section1Questions].sort(() => 0.5 - Math.random()).slice(0, 25);
-        const s2 = [...section2Questions].sort(() => 0.5 - Math.random()).slice(0, 25);
+        const s1Source = bankQuestions.length > 0 ? bankQuestions : section1Questions;
+        const s1 = [...s1Source].sort(() => 0.5 - Math.random()).slice(0, 25).map((q, idx) => ({ ...q, number: idx + 1 }));
+        const s2 = [...section2Questions].sort(() => 0.5 - Math.random()).slice(0, 25).map((q, idx) => ({ ...q, number: 25 + idx + 1 }));
         pool = shuffleQuestions ? [...s1, ...s2].sort(() => 0.5 - Math.random()) : [...s1, ...s2];
       }
     }
@@ -1078,7 +1140,7 @@ export default function QuizGenerator() {
               <span>Select Section Coverage</span>
             </label>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
               <button
                 type="button"
                 onClick={() => setSectionScope('sec1')}
@@ -1116,6 +1178,19 @@ export default function QuizGenerator() {
               >
                 <span className="block font-bold mb-0.5">Mixed 50 Sprint</span>
                 <span className="text-[11px] text-slate-500 font-normal">25 from Sec 1 + 25 from Sec 2</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setSectionScope('physics_bank')}
+                className={`p-3 rounded-lg border text-left text-xs transition-colors ${
+                  sectionScope === 'physics_bank'
+                    ? 'border-[#2563EB] bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-100 font-bold'
+                    : 'border-[#E2E8F0] dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50'
+                }`}
+              >
+                <span className="block font-bold mb-0.5">Physics Bank (780 Qs)</span>
+                <span className="text-[11px] text-slate-500 font-normal">Random 50 from all 26 syllabus topics</span>
               </button>
             </div>
           </div>
