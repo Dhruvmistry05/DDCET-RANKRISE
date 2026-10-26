@@ -3,7 +3,7 @@ import { Outlet, useNavigate, useLocation, Link } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import { 
   Search, Menu, LogOut, Home, BookOpen, Book, 
-  Trophy, MoreHorizontal, Layers, ClipboardCheck, PenTool, FileText
+  Trophy, MoreHorizontal, Layers, ClipboardCheck, PenTool, FileText, User
 } from 'lucide-react';
 import { useAuth } from '../store/AuthContext';
 
@@ -23,12 +23,13 @@ export default function Layout() {
     navigate('/');
   };
 
-  // Student bottom nav items (Top 4 destinations + More menu toggle)
+  // Student bottom nav items
   const studentBottomNav = [
     { name: 'Home', path: '/student', icon: Home },
     { name: 'Library', path: '/student/resources', icon: BookOpen },
     { name: 'Syllabus', path: '/student/syllabus', icon: Book },
     { name: 'Ranks', path: '/student/leaderboard', icon: Trophy },
+    { name: 'Profile', path: '/student/profile', icon: User },
   ];
 
   // Admin bottom nav items
@@ -99,9 +100,16 @@ export default function Layout() {
             )}
 
             {isAuthenticated && user?.name && (
-              <span className="hidden sm:inline-block text-xs font-semibold text-slate-700 dark:text-slate-200">
-                {user.name}
-              </span>
+              <Link
+                to={isAdmin ? '/admin' : '/student/profile'}
+                className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 bg-slate-100 dark:bg-slate-800 rounded-lg transition-colors border border-slate-200 dark:border-slate-700 cursor-pointer"
+                title="View My Profile"
+              >
+                <div className="w-5 h-5 rounded-md bg-[#1E3A8A] text-white flex items-center justify-center font-bold text-[10px]">
+                  {user.name[0].toUpperCase()}
+                </div>
+                <span className="hidden sm:inline-block max-w-[120px] truncate">{user.name}</span>
+              </Link>
             )}
 
             {isAuthenticated ? (

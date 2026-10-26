@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Home, BookOpen, PenTool, ClipboardCheck, History, PieChart, 
-  AlertTriangle, Book, MessageCircle, LogOut, Globe, X, Sparkles, ShieldCheck
+  AlertTriangle, Book, MessageCircle, LogOut, X, Sparkles, ShieldCheck, User
 } from 'lucide-react';
 import { useAuth } from '../store/AuthContext';
 
@@ -29,16 +29,13 @@ export default function Sidebar({ isOpen, onClose }) {
     { name: 'Dashboard', path: '/student', icon: Home },
     { name: 'Study Library', path: '/student/resources', icon: BookOpen },
     { name: 'Syllabus', path: '/student/syllabus', icon: Book },
-    { name: 'Past Papers', path: '/student/resources/papers', icon: History },
-    { name: 'Answer Keys', path: '/student/resources/keys', icon: ClipboardCheck },
-    { name: 'Official Syllabus', path: '/student/resources/official-syllabus', icon: Book },
-    { name: 'Study Links', path: '/student/resources/links', icon: Globe },
     { name: 'Practice', path: '/student/practice', icon: PenTool },
     { name: 'Mock Test', path: '/student/mock', icon: ClipboardCheck },
     { name: 'Generative Quiz', path: '/student/quiz', icon: Sparkles },
     { name: 'Analytics', path: '/student/analytics', icon: PieChart },
     { name: 'Mistake Book', path: '/student/mistakes', icon: AlertTriangle },
     { name: 'AI Mentor', path: '/student/mentor', icon: MessageCircle },
+    { name: 'My Profile', path: '/student/profile', icon: User },
   ];
 
   const adminLinks = [
@@ -140,27 +137,34 @@ export default function Sidebar({ isOpen, onClose }) {
       {/* User Footer Card */}
       <div className="p-3.5 border-t border-slate-800 bg-[#080e1c]">
         <div className="flex items-center gap-3 p-2 rounded-lg bg-slate-900 border border-slate-800">
-          <div className="w-8 h-8 rounded-md bg-slate-800 text-slate-200 border border-slate-700 flex items-center justify-center font-bold text-xs uppercase shrink-0">
-            {isAdmin 
-              ? (isSuperAdmin ? 'SA' : 'A') 
-              : (user?.name ? user.name[0].toUpperCase() : 'S')}
-          </div>
-          <div className="flex-1 min-w-0">
-            <span className="block text-xs text-slate-200 font-semibold truncate leading-tight">
+          <Link
+            to={isAdmin ? '/admin' : '/student/profile'}
+            onClick={handleNavClick}
+            className="flex items-center gap-3 flex-1 min-w-0 hover:opacity-90 transition group cursor-pointer"
+            title="View My Profile"
+          >
+            <div className="w-8 h-8 rounded-md bg-slate-800 text-slate-200 border border-slate-700 flex items-center justify-center font-bold text-xs uppercase shrink-0 group-hover:border-blue-500 transition">
               {isAdmin 
-                ? (user?.name || (isSuperAdmin ? 'Super Admin' : 'Administrator')) 
-                : (user?.name || (isAuthenticated ? 'Student' : 'Student Portal'))}
-            </span>
-            <span className="block text-slate-400 text-[11px] truncate mt-0.5">
-              {isAdmin 
-                ? (user?.email || 'Admin Access') 
-                : (user?.email || (isAuthenticated ? 'DDCET Aspirant' : 'Sign in to access lab'))}
-            </span>
-          </div>
+                ? (isSuperAdmin ? 'SA' : 'A') 
+                : (user?.name ? user.name[0].toUpperCase() : 'S')}
+            </div>
+            <div className="flex-1 min-w-0">
+              <span className="block text-xs text-slate-200 font-semibold truncate leading-tight group-hover:text-blue-300 transition">
+                {isAdmin 
+                  ? (user?.name || (isSuperAdmin ? 'Super Admin' : 'Administrator')) 
+                  : (user?.name || (isAuthenticated ? 'Student' : 'Student Portal'))}
+              </span>
+              <span className="block text-slate-400 text-[11px] truncate mt-0.5">
+                {isAdmin 
+                  ? (user?.email || 'Admin Access') 
+                  : (user?.email || (isAuthenticated ? 'DDCET Aspirant' : 'Sign in to access lab'))}
+              </span>
+            </div>
+          </Link>
           {isAuthenticated ? (
             <button 
               onClick={handleLogout} 
-              className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-md transition-colors shrink-0"
+              className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-md transition-colors shrink-0 cursor-pointer"
               title="Log Out"
               aria-label="Log out"
             >

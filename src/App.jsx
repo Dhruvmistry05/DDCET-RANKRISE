@@ -17,10 +17,7 @@ import SyllabusManagement from './pages/admin/SyllabusManagement';
 import MaterialManagement from './pages/admin/MaterialManagement';
 import ResourceManagement from './pages/admin/ResourceManagement';
 import StudentSyllabus from './pages/student/StudentSyllabus';
-import PreviousPapers from './pages/student/Resources/PreviousPapers';
-import AnswerKeys from './pages/student/Resources/AnswerKeys';
 import OfficialSyllabus from './pages/student/Resources/OfficialSyllabus';
-import ExternalLinks from './pages/student/Resources/ExternalLinks';
 import StudyMaterialLibrary from './pages/student/Resources/StudyMaterialLibrary';
 import PracticeLab from './pages/student/PracticeLab';
 import MockTestCenter from './pages/student/MockTestCenter';
@@ -28,6 +25,7 @@ import StudentAnalytics from './pages/student/StudentAnalytics';
 import AIMentor from './pages/student/AIMentor';
 import QuizGenerator from './pages/student/QuizGenerator';
 import AdminManagement from './pages/admin/AdminManagement';
+import StudentProfile from './pages/student/StudentProfile';
 
 import Placeholder from './pages/Placeholder';
 
@@ -98,22 +96,25 @@ function App() {
           
           {/* Student Routes - Protected via Student Login */}
           <Route path="/student" element={<ProtectedRoute allowedRole="student"><StudentHome /></ProtectedRoute>} />
+          <Route path="/student/profile" element={<ProtectedRoute allowedRole="student"><StudentProfile /></ProtectedRoute>} />
+          <Route path="/profile" element={<Navigate to="/student/profile" replace />} />
           <Route path="/student/leaderboard" element={<ProtectedRoute allowedRole="student"><Leaderboard /></ProtectedRoute>} />
           <Route path="/student/mistakes" element={<ProtectedRoute allowedRole="student"><MistakeBook /></ProtectedRoute>} />
           
           <Route path="/student/syllabus" element={<ProtectedRoute allowedRole="student"><StudentSyllabus /></ProtectedRoute>} />
           
+          {/* Study Library: Unified repository for Question Papers, Answer Keys & Notes */}
           <Route path="/student/resources" element={<ProtectedRoute allowedRole="student"><StudyMaterialLibrary /></ProtectedRoute>} />
-          <Route path="/student/resources/papers" element={<ProtectedRoute allowedRole="student"><PreviousPapers /></ProtectedRoute>} />
-          <Route path="/student/resources/keys" element={<ProtectedRoute allowedRole="student"><AnswerKeys /></ProtectedRoute>} />
+          <Route path="/student/resources/papers" element={<Navigate to="/student/resources" replace />} />
+          <Route path="/student/resources/keys" element={<Navigate to="/student/resources" replace />} />
+          <Route path="/student/resources/links" element={<Navigate to="/student/resources" replace />} />
+          <Route path="/student/pyq" element={<Navigate to="/student/resources" replace />} />
           <Route path="/student/resources/official-syllabus" element={<ProtectedRoute allowedRole="student"><OfficialSyllabus /></ProtectedRoute>} />
-          <Route path="/student/resources/links" element={<ProtectedRoute allowedRole="student"><ExternalLinks /></ProtectedRoute>} />
           
           <Route path="/student/practice" element={<ProtectedRoute allowedRole="student"><PracticeLab /></ProtectedRoute>} />
           <Route path="/student/mock" element={<ProtectedRoute allowedRole="student"><MockTestCenter /></ProtectedRoute>} />
           <Route path="/student/quiz" element={<ProtectedRoute allowedRole="student"><QuizGenerator /></ProtectedRoute>} />
           <Route path="/student/quiz-generator" element={<ProtectedRoute allowedRole="student"><QuizGenerator /></ProtectedRoute>} />
-          <Route path="/student/pyq" element={<Navigate to="/student/resources/papers" replace />} />
           <Route path="/student/analytics" element={<ProtectedRoute allowedRole="student"><StudentAnalytics /></ProtectedRoute>} />
           <Route path="/student/revision" element={<Navigate to="/student/mistakes" replace />} />
           <Route path="/student/mentor" element={<ProtectedRoute allowedRole="student"><AIMentor /></ProtectedRoute>} />

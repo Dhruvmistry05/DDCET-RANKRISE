@@ -15,7 +15,7 @@ export default function ProfileCompletion() {
 
   useEffect(() => {
     if (user?.profile_completed) {
-      navigate((user.role === 'admin' || user.role === 'superadmin') ? '/admin' : '/student');
+      navigate((user.role === 'admin' || user.role === 'superadmin') ? '/admin' : '/student/profile');
     }
   }, [user, navigate]);
 
