@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { 
   BookOpen, ChevronRight, ChevronDown, CheckCircle, ExternalLink, 
   PenTool, Search, CheckCircle2, Circle, Sparkles, Layers, Award,
@@ -29,6 +29,7 @@ const getPdfUrl = (filePath, apiUrl) => {
 };
 
 export default function StudentSyllabus() {
+  const [searchParams] = useSearchParams();
   const [syllabus, setSyllabus] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState('ALL'); // 'ALL' | 'BE-01' | 'BE-02'
@@ -41,6 +42,39 @@ export default function StudentSyllabus() {
   const isAuthenticated = Boolean(user && token);
 
   const API_URL = API_BASE_URL;
+
+  // React to URL parameters from global search
+  useEffect(() => {
+    const subjectParam = searchParams.get('subject');
+    const chapterParam = searchParams.get('chapter');
+    const searchParam = searchParams.get('search');
+
+    if (subjectParam) {
+      const parsed = isNaN(subjectParam) ? subjectParam : Number(subjectParam);
+      setSelectedSubjectId(parsed);
+      setActiveSection('ALL');
+    }
+
+    if (chapterParam) {
+      setExpandedChapters(prev => {
+        const next = new Set(prev);
+        next.add(Number(chapterParam));
+        return next;
+      });
+    }
+
+    if (searchParam) {
+      setSearchQuery(searchParam);
+      // Auto-expand all chapters when searching for a keyword
+      if (syllabus.length > 0) {
+        const allIds = new Set();
+        syllabus.forEach(s => {
+          (s.chapters || []).forEach(c => allIds.add(c.id));
+        });
+        setExpandedChapters(allIds);
+      }
+    }
+  }, [searchParams, syllabus]);
 
   useEffect(() => {
     fetch(`${API_URL}/api/student/syllabus`)

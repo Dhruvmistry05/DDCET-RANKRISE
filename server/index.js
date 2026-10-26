@@ -1323,6 +1323,262 @@ app.get('/api/student/syllabus', async (req, res) => {
   res.json(tree);
 });
 
+// --- GLOBAL UNIFIED SEARCH API ---
+app.get('/api/search', async (req, res) => {
+  try {
+    const q = (req.query.q || '').trim();
+    const category = (req.query.category || 'all').toLowerCase();
+    const limit = Math.min(parseInt(req.query.limit, 10) || 30, 60);
+
+    // Fetch live collections from database adapter
+    const [subjects, chapters, topics, resources, tests] = await Promise.all([
+      db.getAll('subjects'),
+      db.getAll('chapters'),
+      db.getAll('topics'),
+      db.getAll('resources'),
+      db.getAll('tests')
+    ]);
+
+    const popularSearches = [
+      { label: 'DDCET 2023 Question Paper', query: '2023 Question Paper', category: 'resources' },
+      { label: 'Official Answer Key 2023', query: '2023 Answer Key', category: 'resources' },
+      { label: 'Matrices & Determinants', query: 'Matrices', category: 'chapters' },
+      { label: 'Units and Measurement', query: 'Units and Measurement', category: 'chapters' },
+      { label: 'Official GTU Syllabus Blueprint', query: 'Syllabus', category: 'resources' }
+    ];
+
+    const subjectMap = {};
+    (subjects || []).forEach(s => { subjectMap[s.id] = s; });
+    const chapterMap = {};
+    (chapters || []).forEach(c => { chapterMap[c.id] = c; });
+
+    // If query is empty, return quick recommendations & popular searches
+    if (!q) {
+      const quickSubjects = (subjects || [])
+        .filter(s => s.published !== false)
+        .slice(0, 6)
+        .map(s => ({
+          id: `subject-${s.id}`,
+          rawId: s.id,
+          category: 'subjects',
+          categoryLabel: 'Subject',
+          title: s.name,
+          subtitle: `${s.section_code || ''} • ${s.section_name || 'DDCET Core Subject'}`,
+          badge: s.section_code || 'Subject',
+          url: `/student/syllabus?subject=${s.id}`,
+          practiceUrl: `/student/practice?subject=${encodeURIComponent(s.name)}`
+        }));
+
+      const quickResources = (resources || [])
+        .filter(r => r.published !== false && r.published !== 0)
+        .slice(0, 4)
+        .map(r => ({
+          id: `resource-${r.id}`,
+          rawId: r.id,
+          category: 'resources',
+          categoryLabel: r.type === 'question_paper' ? 'Question Paper' : (r.type === 'answer_key' ? 'Answer Key' : 'Study Resource'),
+          title: r.title,
+          subtitle: `${r.exam_year ? `Year ${r.exam_year} • ` : ''}${r.description || 'Official Resource'}`,
+          badge: r.type === 'question_paper' ? 'PYQ Paper' : (r.type === 'answer_key' ? 'Answer Key' : 'Document'),
+          url: `/student/resources?search=${encodeURIComponent(r.title)}`
+        }));
+
+      return res.json({
+        query: '',
+        total: quickSubjects.length + quickResources.length,
+        categoryCounts: {
+          all: quickSubjects.length + quickResources.length,
+          subjects: quickSubjects.length,
+          chapters: 0,
+          topics: 0,
+          resources: quickResources.length,
+          tests: 0
+        },
+        results: [...quickSubjects, ...quickResources],
+        popularSearches
+      });
+    }
+
+    const cleanQ = q.toLowerCase();
+    const tokens = cleanQ.split(/\s+/).filter(Boolean);
+
+    const scoreText = (text) => {
+      if (!text) return 0;
+      const lower = text.toLowerCase();
+      if (lower === cleanQ) return 100;
+      if (lower.startsWith(cleanQ)) return 60;
+      if (tokens.every(tok => lower.includes(tok))) return 40;
+      if (tokens.some(tok => lower.includes(tok))) return 20;
+      return 0;
+    };
+
+    let allMatches = [];
+
+    // 1. Subjects
+    (subjects || [])
+      .filter(s => s.published !== false)
+      .forEach(s => {
+        const score = Math.max(
+          scoreText(s.name),
+          scoreText(s.section_code),
+          scoreText(s.section_name)
+        );
+        if (score > 0) {
+          allMatches.push({
+            id: `subject-${s.id}`,
+            rawId: s.id,
+            category: 'subjects',
+            categoryLabel: 'Subject',
+            title: s.name,
+            subtitle: `${s.section_code || ''} • ${s.section_name || 'Core Section'}`,
+            badge: s.section_code || 'Subject',
+            score: score + 20, // priority boost
+            url: `/student/syllabus?subject=${s.id}`,
+            practiceUrl: `/student/practice?subject=${encodeURIComponent(s.name)}`
+          });
+        }
+      });
+
+    // 2. Chapters
+    (chapters || [])
+      .filter(c => c.published !== false)
+      .forEach(c => {
+        const sub = subjectMap[c.subject_id];
+        const subName = sub ? sub.name : '';
+        const score = Math.max(
+          scoreText(c.name),
+          scoreText(`${c.name} ${subName}`)
+        );
+        if (score > 0) {
+          allMatches.push({
+            id: `chapter-${c.id}`,
+            rawId: c.id,
+            category: 'chapters',
+            categoryLabel: 'Chapter',
+            title: c.name,
+            subtitle: `Chapter ${c.chapter_number || ''} in ${subName || 'Syllabus'}${c.weightage ? ` • Weightage: ${c.weightage}` : ''}`,
+            badge: subName || 'Chapter',
+            score: score + 10,
+            url: `/student/syllabus?subject=${c.subject_id}&chapter=${c.id}`,
+            practiceUrl: `/student/practice?subject=${encodeURIComponent(subName)}&chapter=${encodeURIComponent(c.name)}`
+          });
+        }
+      });
+
+    // 3. Topics
+    (topics || [])
+      .filter(t => t.published !== false)
+      .forEach(t => {
+        const chap = chapterMap[t.chapter_id];
+        const chapName = chap ? chap.name : '';
+        const sub = chap ? subjectMap[chap.subject_id] : null;
+        const subName = sub ? sub.name : '';
+        const score = Math.max(
+          scoreText(t.name),
+          scoreText(`${t.name} ${chapName}`)
+        );
+        if (score > 0) {
+          allMatches.push({
+            id: `topic-${t.id}`,
+            rawId: t.id,
+            category: 'topics',
+            categoryLabel: 'Topic',
+            title: t.name,
+            subtitle: `${chapName ? `${chapName} • ` : ''}${subName || 'Topic Guide'}`,
+            badge: 'Topic',
+            score,
+            url: `/student/syllabus?subject=${chap ? chap.subject_id : ''}&chapter=${t.chapter_id}&search=${encodeURIComponent(t.name)}`,
+            practiceUrl: `/student/practice?topic=${encodeURIComponent(t.name)}`
+          });
+        }
+      });
+
+    // 4. Resources (Question Papers, Answer Keys, Notes, Official Syllabus)
+    (resources || [])
+      .filter(r => r.published !== false && r.published !== 0)
+      .forEach(r => {
+        const score = Math.max(
+          scoreText(r.title),
+          scoreText(r.description),
+          scoreText(r.type),
+          r.exam_year && String(r.exam_year).includes(cleanQ) ? 60 : 0
+        );
+        if (score > 0) {
+          const isPaper = r.type === 'question_paper';
+          const isKey = r.type === 'answer_key';
+          allMatches.push({
+            id: `resource-${r.id}`,
+            rawId: r.id,
+            category: 'resources',
+            categoryLabel: isPaper ? 'Question Paper' : (isKey ? 'Answer Key' : 'Study Resource'),
+            title: r.title,
+            subtitle: `${r.exam_year ? `Year ${r.exam_year} • ` : ''}${r.description || 'Official Document'}`,
+            badge: isPaper ? 'PYQ Paper' : (isKey ? 'Answer Key' : 'Official PDF'),
+            score: score + 15,
+            url: `/student/resources?search=${encodeURIComponent(r.title)}`,
+            fileUrl: r.file_path
+          });
+        }
+      });
+
+    // 5. Mock Tests
+    (tests || [])
+      .filter(t => t.published !== false)
+      .forEach(t => {
+        const score = Math.max(
+          scoreText(t.title),
+          scoreText(t.subject)
+        );
+        if (score > 0) {
+          allMatches.push({
+            id: `test-${t.id}`,
+            rawId: t.id,
+            category: 'tests',
+            categoryLabel: 'Mock Test',
+            title: t.title,
+            subtitle: `${t.duration_mins || 90} mins • ${t.total_marks || 200} marks • DDCET Mock Exam`,
+            badge: 'Mock Test',
+            score,
+            url: `/student/mock`
+          });
+        }
+      });
+
+    // Sort by relevance score
+    allMatches.sort((a, b) => b.score - a.score);
+
+    // Filter by category if requested
+    let filtered = allMatches;
+    if (category && category !== 'all') {
+      if (category === 'syllabus') {
+        filtered = allMatches.filter(r => r.category === 'subjects' || r.category === 'chapters' || r.category === 'topics');
+      } else {
+        filtered = allMatches.filter(r => r.category === category);
+      }
+    }
+
+    const categoryCounts = {
+      all: allMatches.length,
+      subjects: allMatches.filter(r => r.category === 'subjects').length,
+      chapters: allMatches.filter(r => r.category === 'chapters').length,
+      topics: allMatches.filter(r => r.category === 'topics').length,
+      resources: allMatches.filter(r => r.category === 'resources').length,
+      tests: allMatches.filter(r => r.category === 'tests').length
+    };
+
+    return res.json({
+      query: q,
+      total: filtered.length,
+      categoryCounts,
+      results: filtered.slice(0, limit),
+      popularSearches
+    });
+  } catch (err) {
+    console.error('Error executing search query:', err);
+    return res.status(500).json({ error: 'Search failed' });
+  }
+});
+
 // --- STUDENT STATS, LEADERBOARD & ATTEMPTS API ---
 
 // Practice time formatter: '0 hours', '25 mins', '1.5 hours'

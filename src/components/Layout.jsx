@@ -1,14 +1,16 @@
 import { useState } from 'react';
 import { Outlet, useNavigate, useLocation, Link } from 'react-router-dom';
 import Sidebar from './Sidebar';
+import SearchBar from './SearchBar';
 import { 
   Search, Menu, LogOut, Home, BookOpen, Book, 
-  Trophy, MoreHorizontal, Layers, ClipboardCheck, PenTool, FileText, User
+  Trophy, MoreHorizontal, Layers, ClipboardCheck, PenTool, FileText, User, X
 } from 'lucide-react';
 import { useAuth } from '../store/AuthContext';
 
 export default function Layout() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { user, token, logout } = useAuth();
@@ -87,18 +89,22 @@ export default function Layout() {
             </div>
 
             {/* Search Bar (Tablet & Desktop) */}
-            <div className="hidden md:flex items-center gap-2 bg-[#F8FAFC] dark:bg-slate-800 border border-[#E2E8F0] dark:border-slate-700 rounded-lg px-3 py-1.5 w-full max-w-sm focus-within:border-[#2563EB] focus-within:bg-white dark:focus-within:bg-slate-850 focus-within:ring-1 focus-within:ring-[#2563EB] transition-all">
-              <Search size={15} className="text-slate-400 shrink-0" />
-              <input 
-                type="text" 
-                placeholder="Search subjects, topics, or papers..." 
-                className="bg-transparent border-none outline-none w-full text-xs sm:text-sm placeholder:text-slate-400 text-slate-900 dark:text-white"
-              />
+            <div className="hidden md:flex flex-1 max-w-sm lg:max-w-md">
+              <SearchBar />
             </div>
           </div>
           
           {/* Header Right Actions */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            {/* Mobile Search Button */}
+            <button
+              onClick={() => setIsMobileSearchOpen(true)}
+              className="md:hidden p-2 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors shrink-0 flex items-center justify-center focus:outline-hidden focus:ring-2 focus:ring-[#2563EB]/40"
+              aria-label="Open search bar"
+              title="Search subjects, topics, or papers"
+            >
+              <Search size={18} />
+            </button>
             {isAdmin ? (
               <span className="text-[11px] font-semibold text-[#1E3A8A] dark:text-blue-300 uppercase tracking-wider px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900">
                 {isSuperAdmin ? 'Super Admin' : 'Admin'}
@@ -149,6 +155,22 @@ export default function Layout() {
             )}
           </div>
         </header>
+
+        {/* Mobile Search Overlay Bar */}
+        {isMobileSearchOpen && (
+          <div className="md:hidden sticky top-14 inset-x-0 z-35 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 p-2.5 shadow-md flex items-center gap-2 animate-in slide-in-from-top-1">
+            <div className="flex-1">
+              <SearchBar isMobile={true} onCloseMobile={() => setIsMobileSearchOpen(false)} />
+            </div>
+            <button
+              onClick={() => setIsMobileSearchOpen(false)}
+              className="p-1.5 text-slate-500 hover:text-slate-800 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0"
+              aria-label="Close mobile search"
+            >
+              <X size={18} />
+            </button>
+          </div>
+        )}
 
         {/* Page Content Viewport */}
         <div className="flex-1 overflow-x-hidden">

@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../../store/AuthContext';
 import { API_BASE_URL } from '../../../config/api';
 import { 
@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 
 export default function StudyMaterialLibrary({ defaultCategory = 'all' }) {
+  const [searchParams] = useSearchParams();
   const [resources, setResources] = useState([]);
   const [subjects, setSubjects] = useState([]);
   const [chapters, setChapters] = useState([]);
@@ -26,6 +27,18 @@ export default function StudyMaterialLibrary({ defaultCategory = 'all' }) {
   const [selectedChapter, setSelectedChapter] = useState('all');
   const [selectedYear, setSelectedYear] = useState('all');
   const [sortBy, setSortBy] = useState('order'); // 'order', 'year_desc', 'title_asc'
+
+  // Sync URL search params (e.g. from global search bar)
+  useEffect(() => {
+    const searchParam = searchParams.get('search');
+    const catParam = searchParams.get('category');
+    if (searchParam) {
+      setSearchQuery(searchParam);
+    }
+    if (catParam) {
+      setActiveCategory(catParam);
+    }
+  }, [searchParams]);
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
