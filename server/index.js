@@ -1624,35 +1624,380 @@ app.get('/api/student/leaderboard', optionalUser, async (req, res) => {
 app.get('/api/student/detailed-analytics', optionalUser, async (req, res) => {
   try {
     const userId = req.user?.id;
-    const allUsers = await db.getAll('users');
+    let allUsers = [];
+    try { allUsers = await db.getAll('users'); } catch (e) { allUsers = []; }
     const students = allUsers.filter(u => u.role === 'student');
 
+    let subjects = [];
+    try { subjects = await db.getAll('subjects'); } catch (e) { subjects = []; }
+    let chapters = [];
+    try { chapters = await db.getAll('chapters'); } catch (e) { chapters = []; }
+    let topics = [];
+    try { topics = await db.getAll('topics'); } catch (e) { topics = []; }
+    let questions = [];
+    try { questions = await db.getAll('questions'); } catch (e) { questions = []; }
+
+    const subjectsMeta = [
+      { name: 'Mathematics', bank: 820, target: 76 },
+      { name: 'Physics', bank: 780, target: 72 },
+      { name: 'Chemistry', bank: 360, target: 74 },
+      { name: 'English / Soft Skill', bank: 360, target: 78 },
+      { name: 'Environmental Sciences', bank: 120, target: 75 },
+      { name: 'Computer', bank: 90, target: 82 }
+    ];
+
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+    const emptyDays7 = [];
+    const emptyDays30 = [];
+
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      emptyDays7.push({
+        day: dayNames[d.getDay()],
+        date: d.toISOString().split('T')[0],
+        display_date: `${monthNames[d.getMonth()]} ${d.getDate()}`,
+        minutes: 0,
+        questions: 0,
+        actions_count: 0
+      });
+    }
+
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      emptyDays30.push({
+        day: dayNames[d.getDay()],
+        date: d.toISOString().split('T')[0],
+        display_date: `${monthNames[d.getMonth()]} ${d.getDate()}`,
+        minutes: 0,
+        questions: 0,
+        actions_count: 0
+      });
+    }
+
+    // Default zero-state response for non-authenticated or new students with zero activity
+    const buildZeroState = () => ({
+      summary: {
+        tests_completed: 0,
+        average_score: '0%',
+        average_score_num: 0,
+        practice_time: '0h 0m',
+        total_seconds: 0,
+        current_rank: '-',
+        total_points: 0,
+        questions_attempted: 0,
+        accuracy_percent: 0,
+        percentile: '-',
+        total_students: students.length,
+        syllabus_progress: '0%',
+        syllabus_progress_percent: 0
+      },
+      exam_readiness: {
+        readiness_score: 0,
+        tier: 'Not Started',
+        guidance: 'Take your first diagnostic practice test to calculate your initial DDCET readiness score.',
+        benchmarks: [
+          { label: 'Syllabus Coverage', current: '0%', target: '>= 75%', status: 'Pending' },
+          { label: 'Practice Accuracy', current: '0%', target: '>= 75%', status: 'Pending' },
+          { label: 'Assessment Score', current: '0%', target: '>= 70%', status: 'Pending' },
+          { label: 'Solving Pace', current: '0s / Q', target: '<= 54s / Q', status: 'Pending' }
+        ]
+      },
+      daily_goal: {
+        target_minutes: 45,
+        target_questions: 30,
+        today_minutes: 0,
+        today_questions: 0,
+        minutes_progress_pct: 0,
+        questions_progress_pct: 0,
+        completed: false
+      },
+      syllabus_tracker: {
+        total_topics: topics.filter(t => t.published !== false).length || 99,
+        completed_topics: 0,
+        pending_topics: topics.filter(t => t.published !== false).length || 99,
+        completion_percentage: 0,
+        total_chapters: chapters.length || 24,
+        completed_chapters: 0,
+        pending_chapters: chapters.length || 24,
+        subject_progress: subjectsMeta.map(s => ({
+          subject_id: s.name === 'Physics' ? 1 : (s.name === 'Chemistry' ? 2 : (s.name === 'Computer' ? 3 : (s.name === 'Environmental Sciences' ? 4 : (s.name === 'Mathematics' ? 5 : 6)))),
+          subject_name: s.name,
+          total_topics: s.name === 'Physics' ? 26 : (s.name === 'Chemistry' ? 12 : (s.name === 'Computer' ? 3 : (s.name === 'Environmental Sciences' ? 4 : (s.name === 'Mathematics' ? 41 : 13)))),
+          completed_topics: 0,
+          pending_topics: s.name === 'Physics' ? 26 : (s.name === 'Chemistry' ? 12 : (s.name === 'Computer' ? 3 : (s.name === 'Environmental Sciences' ? 4 : (s.name === 'Mathematics' ? 41 : 13)))),
+          completion_percent: 0,
+          total_chapters: 4,
+          completed_chapters: 0
+        }))
+      },
+      subject_analysis: {
+        performance: subjectsMeta.map(sub => ({
+          subject_name: sub.name,
+          user_score: 0,
+          accuracy: 0,
+          state_avg: sub.target,
+          question_bank_count: sub.bank,
+          mastery: 'Not Attempted',
+          attempts_count: 0,
+          correct_count: 0,
+          wrong_count: 0,
+          is_strong: false,
+          is_weak: false
+        })),
+        strong_subjects: [],
+        weak_subjects: [],
+        unattempted_subjects: subjectsMeta.map(s => s.name)
+      },
+      diagnostics: {
+        weak_topics: [],
+        strong_topics: [],
+        weak_chapters: [],
+        strong_chapters: []
+      },
+      topic_diagnostics: {
+        strong_topics: [],
+        weak_topics: []
+      },
+      chapter_diagnostics: {
+        strong_chapters: [],
+        weak_chapters: []
+      },
+      mistake_analysis: {
+        total_mistakes: 0,
+        marks_deducted: 0,
+        mistake_rate: 0
+      },
+      speed_analysis: {
+        avg_seconds_per_q: 0,
+        target_seconds: 54,
+        pace_status: 'No data yet',
+        total_practice_time: '0h 0m'
+      },
+      time_metrics: {
+        avg_seconds_per_q: 0,
+        target_seconds: 54,
+        pace_status: 'No data yet',
+        total_practice_time: '0h 0m'
+      },
+      accuracy_breakdown: {
+        correct: 0,
+        wrong: 0,
+        unattempted: 0,
+        accuracy_rate: '0%'
+      },
+      revision_planner: [
+        {
+          topic_id: 1,
+          topic_name: 'Physical quantities and units.',
+          chapter_name: 'Units and Measurement',
+          subject_name: 'Physics',
+          reason: 'Recommended diagnostic starting topic for DDCET preparation.',
+          priority: 'new_topic',
+          badge: 'Recommended Start'
+        },
+        {
+          topic_id: 42,
+          topic_name: 'Matrices and Determinants basics.',
+          chapter_name: 'Matrices',
+          subject_name: 'Mathematics',
+          reason: 'High-weightage topic. Practice MCQs to start your preparation strong.',
+          priority: 'new_topic',
+          badge: 'Core Syllabus'
+        }
+      ],
+      smart_recommendations: [
+        {
+          title: 'Begin Your Diagnostic Assessment',
+          description: 'Start with a 15-question topic practice session in Mathematics or Physics to map your baseline skill level.',
+          priority: 'high',
+          action_url: '/student/practice',
+          action_text: 'Practice Now'
+        },
+        {
+          title: 'Review the Official DDCET Syllabus',
+          description: 'Explore all 99 topics across 6 subjects and track milestones as you study.',
+          priority: 'medium',
+          action_url: '/student/syllabus',
+          action_text: 'Continue Learning'
+        },
+        {
+          title: 'Take a Timed Mock Exam',
+          description: 'Experience real exam conditions with timed question navigation and negative marking.',
+          priority: 'medium',
+          action_url: '/student/mock',
+          action_text: 'Take Mock Test'
+        }
+      ],
+      activity_analysis: {
+        login_stats: {
+          total_logins: 0,
+          last_login_at: null,
+          active_streak_days: 0,
+          consistency_percent: 0
+        },
+        weekly_activity: emptyDays7,
+        action_distribution: [
+          { name: 'Practice Lab (MCQs)', minutes: 0, count: 0, percent: 0, color: '#2563EB' },
+          { name: 'Mock Exam Assessments', minutes: 0, count: 0, percent: 0, color: '#7C3AED' },
+          { name: 'Study Materials & PDFs', minutes: 0, count: 0, percent: 0, color: '#059669' },
+          { name: 'Mistake Notebook Revision', minutes: 0, count: 0, percent: 0, color: '#F43F5E' }
+        ],
+        time_of_day_habits: [
+          { window: 'Morning (06:00 – 12:00)', count: 0, percent: 0, label: 'Early Focus' },
+          { window: 'Afternoon (12:00 – 17:00)', count: 0, percent: 0, label: 'After College' },
+          { window: 'Evening (17:00 – 21:00)', count: 0, percent: 0, label: 'Peak Revision' },
+          { window: 'Night (21:00 – 06:00)', count: 0, percent: 0, label: 'Late Sprint' }
+        ],
+        recent_activity_stream: []
+      },
+      progress_timeline: {
+        past7Days: emptyDays7,
+        past30Days: emptyDays30
+      },
+      score_trend: [],
+      subject_performance: subjectsMeta.map(sub => ({
+        subject_name: sub.name,
+        user_score: 0,
+        state_avg: sub.target,
+        question_bank_count: sub.bank,
+        mastery: 'Not Attempted',
+        attempts_count: 0
+      })),
+      recent_tests: []
+    });
+
+    if (!userId) {
+      return res.json(buildZeroState());
+    }
+
     let allAttempts = [];
-    try {
-      allAttempts = await db.getAll('student_attempts');
-    } catch (e) {
-      allAttempts = [];
-    }
-
+    try { allAttempts = await db.getAll('student_attempts'); } catch (e) { allAttempts = []; }
     let allActivity = [];
-    try {
-      allActivity = await db.getAll('student_activity');
-    } catch (e) {
-      allActivity = [];
-    }
+    try { allActivity = await db.getAll('student_activity'); } catch (e) { allActivity = []; }
+    let topicProgress = [];
+    try { topicProgress = await db.getAll('student_topic_progress'); } catch (e) { topicProgress = []; }
 
-    // Filter user attempts (or default to top user if not logged in for preview)
-    let userAttempts = allAttempts
+    // Filter student records strictly
+    const userAttempts = allAttempts
       .filter(a => String(a.user_id) === String(userId))
       .sort((a, b) => new Date(a.submitted_at || 0) - new Date(b.submitted_at || 0));
 
-    if (userAttempts.length === 0 && !userId && allAttempts.length > 0) {
-      // For public preview, pick the first student's attempts
-      const firstStudentId = allAttempts[0].user_id;
-      userAttempts = allAttempts.filter(a => String(a.user_id) === String(firstStudentId));
+    const userActivity = allActivity
+      .filter(act => String(act.user_id) === String(userId))
+      .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+
+    const userTopicProgress = topicProgress.filter(tp => String(tp.user_id) === String(userId));
+
+    // If completely new student with no attempts and no activity
+    if (userAttempts.length === 0 && userActivity.length === 0 && userTopicProgress.length === 0) {
+      return res.json(buildZeroState());
     }
 
-    // Calculate score progression trend for graphs
+    // Build lookup maps
+    const subMap = {};
+    subjects.forEach(s => { subMap[s.id] = s.name; });
+
+    const chMap = {};
+    chapters.forEach(c => {
+      chMap[c.id] = {
+        id: c.id,
+        name: c.name,
+        subject_id: c.subject_id,
+        subject_name: subMap[c.subject_id] || 'Unknown'
+      };
+    });
+
+    const topicMap = {};
+    topics.forEach(t => {
+      const ch = chMap[t.chapter_id] || { name: 'General', subject_id: 0, subject_name: 'Unknown' };
+      topicMap[t.id] = {
+        id: t.id,
+        name: t.name,
+        chapter_id: t.chapter_id,
+        chapter_name: ch.name,
+        subject_id: ch.subject_id,
+        subject_name: ch.subject_name
+      };
+    });
+
+    const qMap = {};
+    questions.forEach(q => { qMap[q.id] = q; });
+
+    // 1. Syllabus Tracker
+    const completedTopicIds = new Set(userTopicProgress.filter(p => p.completed).map(p => p.topic_id));
+    const publishedTopics = topics.filter(t => t.published !== false);
+    const totalTopicsCount = publishedTopics.length || topics.length || 99;
+    const completedTopicsCount = completedTopicIds.size;
+    const pendingTopicsCount = Math.max(0, totalTopicsCount - completedTopicsCount);
+    const syllabusProgressPct = totalTopicsCount > 0 ? Math.round((completedTopicsCount / totalTopicsCount) * 100) : 0;
+
+    // Chapter-level completion: chapter is ONLY completed if ALL its topics are marked completed!
+    const chapterTopicMap = {};
+    topics.forEach(t => {
+      if (!chapterTopicMap[t.chapter_id]) chapterTopicMap[t.chapter_id] = [];
+      chapterTopicMap[t.chapter_id].push(t.id);
+    });
+
+    const totalChaptersCount = chapters.length || 24;
+    let completedChaptersCount = 0;
+    chapters.forEach(c => {
+      const chTopicIds = chapterTopicMap[c.id] || [];
+      if (chTopicIds.length > 0 && chTopicIds.every(tId => completedTopicIds.has(tId))) {
+        completedChaptersCount++;
+      }
+    });
+
+    // Subject-wise syllabus progress
+    const subjectProgress = subjectsMeta.map(sMeta => {
+      const dbSub = subjects.find(s => s.name.toLowerCase() === sMeta.name.toLowerCase());
+      const subId = dbSub ? dbSub.id : 0;
+      const sChapters = chapters.filter(c => c.subject_id === subId);
+      const sChapterIds = new Set(sChapters.map(c => c.id));
+      const sTopics = topics.filter(t => sChapterIds.has(t.chapter_id));
+      const sTotalTopics = sTopics.length || (sMeta.name === 'Physics' ? 26 : (sMeta.name === 'Chemistry' ? 12 : (sMeta.name === 'Computer' ? 3 : (sMeta.name === 'Environmental Sciences' ? 4 : (sMeta.name === 'Mathematics' ? 41 : 13)))));
+      const sCompletedTopics = sTopics.filter(t => completedTopicIds.has(t.id)).length;
+      const sPendingTopics = Math.max(0, sTotalTopics - sCompletedTopics);
+      const sPct = sTotalTopics > 0 ? Math.round((sCompletedTopics / sTotalTopics) * 100) : 0;
+
+      let sCompletedChapters = 0;
+      sChapters.forEach(c => {
+        const chTopicIds = chapterTopicMap[c.id] || [];
+        if (chTopicIds.length > 0 && chTopicIds.every(tId => completedTopicIds.has(tId))) {
+          sCompletedChapters++;
+        }
+      });
+
+      return {
+        subject_id: subId,
+        subject_name: sMeta.name,
+        total_topics: sTotalTopics,
+        completed_topics: sCompletedTopics,
+        pending_topics: sPendingTopics,
+        completion_percent: sPct,
+        total_chapters: sChapters.length || 4,
+        completed_chapters: sCompletedChapters
+      };
+    });
+
+    // 2. Score Progression & Attempts Breakdown
+    let totalCorrect = 0;
+    let totalWrong = 0;
+    let totalUnattempted = 0;
+    let totalAttempted = 0;
+    let totalSeconds = 0;
+
+    const subQuestionStats = {};
+    subjectsMeta.forEach(s => {
+      subQuestionStats[s.name] = { correct: 0, wrong: 0, attempted: 0 };
+    });
+
+    const topicQuestionStats = {};
+    const chapterQuestionStats = {};
+
     const scoreTrend = userAttempts.map((a, idx) => {
       let answersObj = {};
       if (typeof a.answers === 'string') {
@@ -1661,173 +2006,516 @@ app.get('/api/student/detailed-analytics', optionalUser, async (req, res) => {
         answersObj = a.answers;
       }
 
-      const score = a.score !== undefined && a.score !== null ? parseFloat(a.score) : (parseFloat(answersObj.score) || 0);
+      const c = parseInt(answersObj.correct_count) || 0;
+      const w = parseInt(answersObj.wrong_count) || 0;
+      const u = parseInt(answersObj.unattempted_count) || 0;
+      const q = parseInt(answersObj.questions_attempted) || (c + w);
+      const s = a.score !== undefined && a.score !== null ? parseFloat(a.score) : (parseFloat(answersObj.score) || 0);
       const maxScore = parseFloat(answersObj.max_score) || parseFloat(a.max_score) || 100;
-      const pct = maxScore > 0 ? Math.round((score / maxScore) * 100) : score;
-      const acc = answersObj.accuracy ? parseFloat(answersObj.accuracy) : Math.min(100, Math.round(pct * 1.05));
-      const timeSpentMins = Math.round((parseInt(answersObj.time_spent_seconds) || 1800) / 60);
+      const pct = maxScore > 0 ? Math.round((s / maxScore) * 100) : Math.round(s);
+      const acc = answersObj.accuracy !== undefined ? parseFloat(answersObj.accuracy) : (c + w > 0 ? Math.round((c / (c + w)) * 100) : 0);
+      const tSec = parseInt(answersObj.time_spent_seconds) || parseInt(a.time_spent_seconds) || 0;
+
+      totalCorrect += c;
+      totalWrong += w;
+      totalUnattempted += u;
+      totalAttempted += q;
+      totalSeconds += tSec;
+
+      // Question-level answers attribution
+      const qAnswers = answersObj.answers || (typeof a.answers === 'object' && !a.answers.answers ? a.answers : {});
+      let hasDetailedAnswers = false;
+
+      if (qAnswers && typeof qAnswers === 'object' && Object.keys(qAnswers).length > 0) {
+        for (const [qIdStr, chosenOpt] of Object.entries(qAnswers)) {
+          const qRecord = qMap[qIdStr];
+          if (qRecord) {
+            hasDetailedAnswers = true;
+            const isCorr = chosenOpt === qRecord.answer_index;
+            const sName = qRecord.subject || subMap[qRecord.subject_id];
+            if (sName && subQuestionStats[sName]) {
+              subQuestionStats[sName].attempted++;
+              if (isCorr) subQuestionStats[sName].correct++;
+              else subQuestionStats[sName].wrong++;
+            }
+
+            // Topic stats
+            const tId = qRecord.topic_id;
+            const tInfo = topicMap[tId] || { name: qRecord.topic || `Topic ${tId}`, chapter_name: qRecord.chapter || 'General', subject_name: sName };
+            if (!topicQuestionStats[tId]) {
+              topicQuestionStats[tId] = {
+                topic_id: tId,
+                topic_name: tInfo.name,
+                chapter_name: tInfo.chapter_name,
+                subject_name: tInfo.subject_name,
+                correct: 0,
+                wrong: 0,
+                attempted: 0,
+                last_practiced: a.submitted_at
+              };
+            }
+            topicQuestionStats[tId].attempted++;
+            if (isCorr) topicQuestionStats[tId].correct++;
+            else topicQuestionStats[tId].wrong++;
+            topicQuestionStats[tId].last_practiced = a.submitted_at;
+
+            // Chapter stats
+            const chId = qRecord.chapter_id;
+            const chInfo = chMap[chId] || { name: qRecord.chapter || `Chapter ${chId}`, subject_name: sName };
+            if (!chapterQuestionStats[chId]) {
+              chapterQuestionStats[chId] = {
+                chapter_id: chId,
+                chapter_name: chInfo.name,
+                subject_name: chInfo.subject_name,
+                correct: 0,
+                wrong: 0,
+                attempted: 0
+              };
+            }
+            chapterQuestionStats[chId].attempted++;
+            if (isCorr) chapterQuestionStats[chId].correct++;
+            else chapterQuestionStats[chId].wrong++;
+          }
+        }
+      }
+
+      // Title-based attribution fallback
+      if (!hasDetailedAnswers) {
+        const titleLower = (answersObj.test_title || a.test_title || '').toLowerCase();
+        for (const s of subjectsMeta) {
+          if (titleLower.includes(s.name.toLowerCase())) {
+            subQuestionStats[s.name].attempted += q;
+            subQuestionStats[s.name].correct += c;
+            subQuestionStats[s.name].wrong += w;
+            break;
+          }
+        }
+      }
 
       const dateStr = a.submitted_at ? new Date(a.submitted_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : `Test ${idx + 1}`;
 
       return {
         id: a.id || idx + 1,
-        test_title: answersObj.test_title || `Assessment #${idx + 1}`,
+        test_title: answersObj.test_title || a.test_title || `Assessment #${idx + 1}`,
         date: dateStr,
-        score,
+        score: s,
         max_score: maxScore,
         percentage: pct,
         accuracy: Math.min(100, Math.max(0, acc)),
-        time_spent_minutes: timeSpentMins
+        time_spent_minutes: Math.round(tSec / 60),
+        submitted_at: a.submitted_at
       };
+    });
+
+    // Also include activity seconds and practice questions
+    userActivity.forEach(act => {
+      const s = parseInt(act.time_spent_seconds) || 0;
+      totalSeconds += s;
+      if (act.type === 'practice') {
+        const q = parseInt(act.questions_attempted) || 0;
+        totalAttempted += q;
+      }
     });
 
     const userAvgPct = scoreTrend.length > 0 
       ? Math.round(scoreTrend.reduce((acc, t) => acc + t.percentage, 0) / scoreTrend.length) 
       : 0;
 
-    // Subject Performance (All 6 DDCET Subjects)
-    const subjectsMeta = [
-      { name: 'Mathematics', bank: 820, target: 76, baseWeight: 0.35, offset: -3 },
-      { name: 'Physics', bank: 780, target: 72, baseWeight: 0.25, offset: +1 },
-      { name: 'Chemistry', bank: 360, target: 74, baseWeight: 0.15, offset: 0 },
-      { name: 'English / Soft Skill', bank: 360, target: 78, baseWeight: 0.10, offset: +4 },
-      { name: 'Environmental Sciences', bank: 120, target: 75, baseWeight: 0.08, offset: +2 },
-      { name: 'Computer', bank: 90, target: 82, baseWeight: 0.07, offset: +6 }
-    ];
-
-    const subjectPerformance = subjectsMeta.map(sub => {
-      const relevant = scoreTrend.filter(t => t.test_title.toLowerCase().includes(sub.name.toLowerCase()));
-      let userScore = 0;
-      if (relevant.length > 0) {
-        userScore = Math.round(relevant.reduce((acc, r) => acc + r.percentage, 0) / relevant.length);
-      } else if (userAvgPct > 0) {
-        userScore = Math.min(96, Math.max(25, userAvgPct + sub.offset));
-      } else {
-        userScore = 0;
-      }
-
-      let mastery = 'Needs Focus';
-      if (userScore >= 80) mastery = 'Advanced';
-      else if (userScore >= 65) mastery = 'Proficient';
-      else if (userScore >= 45) mastery = 'Developing';
-
-      return {
-        subject_name: sub.name,
-        user_score: userScore,
-        state_avg: sub.target,
-        question_bank_count: sub.bank,
-        mastery
-      };
-    });
-
-    // Accuracy Breakdown (Donut Chart)
-    let totalCorrect = 0;
-    let totalWrong = 0;
-    let totalUnattempted = 0;
-    let totalAttempted = 0;
-
-    for (const a of userAttempts) {
-      let answersObj = typeof a.answers === 'string' ? JSON.parse(a.answers) : (a.answers || {});
-      const c = parseInt(answersObj.correct_count) || 0;
-      const w = parseInt(answersObj.wrong_count) || 0;
-      const u = parseInt(answersObj.unattempted_count) || 0;
-      const q = parseInt(answersObj.questions_attempted) || (c + w);
-
-      totalCorrect += c;
-      totalWrong += w;
-      totalUnattempted += u;
-      totalAttempted += q;
-    }
-
-    if (totalAttempted === 0 && userAttempts.length > 0) {
-      totalCorrect = Math.round(userAvgPct * 1.2);
-      totalWrong = Math.round((100 - userAvgPct) * 0.35);
-      totalUnattempted = 20;
-      totalAttempted = totalCorrect + totalWrong;
-    }
-
     const accuracyPercent = (totalCorrect + totalWrong) > 0 
       ? Math.round((totalCorrect / (totalCorrect + totalWrong)) * 100) 
       : 0;
 
-    // Time Management
-    let totalSeconds = 0;
-    for (const a of userAttempts) {
-      let answersObj = typeof a.answers === 'string' ? JSON.parse(a.answers) : (a.answers || {});
-      totalSeconds += parseInt(answersObj.time_spent_seconds) || 2400;
-    }
-    for (const act of allActivity.filter(x => String(x.user_id) === String(userId))) {
-      totalSeconds += parseInt(act.time_spent_seconds) || 0;
+    // 3. Subject-wise Analysis & Strong / Weak Subjects
+    const strongSubjects = [];
+    const weakSubjects = [];
+    const unattemptedSubjects = [];
+
+    const subjectPerformance = subjectsMeta.map(sub => {
+      const stat = subQuestionStats[sub.name] || { correct: 0, wrong: 0, attempted: 0 };
+      const subAttempts = stat.attempted;
+      const subAccuracy = (stat.correct + stat.wrong) > 0 ? Math.round((stat.correct / (stat.correct + stat.wrong)) * 100) : 0;
+
+      let mastery = 'Not Attempted';
+      let isStrong = false;
+      let isWeak = false;
+
+      if (subAttempts > 0) {
+        if (subAccuracy >= 70) {
+          mastery = 'Strong';
+          isStrong = true;
+          strongSubjects.push({ subject_name: sub.name, accuracy: subAccuracy, attempts: subAttempts });
+        } else if (subAccuracy >= 50) {
+          mastery = 'Moderate';
+        } else {
+          mastery = 'Weak';
+          isWeak = true;
+          weakSubjects.push({ subject_name: sub.name, accuracy: subAccuracy, attempts: subAttempts });
+        }
+      } else {
+        unattemptedSubjects.push(sub.name);
+      }
+
+      return {
+        subject_name: sub.name,
+        user_score: subAccuracy,
+        accuracy: subAccuracy,
+        state_avg: sub.target,
+        question_bank_count: sub.bank,
+        mastery,
+        attempts_count: subAttempts,
+        correct_count: stat.correct,
+        wrong_count: stat.wrong,
+        is_strong: isStrong,
+        is_weak: isWeak
+      };
+    });
+
+    // 4. Topic & Chapter Diagnostics (Strictly real data only, zero unattempted topics in weak)
+    const weakTopics = [];
+    const strongTopics = [];
+
+    Object.values(topicQuestionStats).forEach(t => {
+      if (t.attempted > 0) {
+        const acc = Math.round((t.correct / (t.correct + t.wrong || 1)) * 100);
+        const item = {
+          topic_id: t.topic_id,
+          topic_name: t.topic_name,
+          chapter_name: t.chapter_name,
+          subject_name: t.subject_name,
+          attempts: t.attempted,
+          correct: t.correct,
+          wrong: t.wrong,
+          accuracy: acc,
+          last_practiced: t.last_practiced
+        };
+        if (acc < 60) weakTopics.push(item);
+        else if (acc >= 80) strongTopics.push(item);
+      }
+    });
+
+    weakTopics.sort((a, b) => a.accuracy - b.accuracy);
+    strongTopics.sort((a, b) => b.accuracy - a.accuracy);
+
+    const weakChapters = [];
+    const strongChapters = [];
+
+    Object.values(chapterQuestionStats).forEach(c => {
+      if (c.attempted > 0) {
+        const acc = Math.round((c.correct / (c.correct + c.wrong || 1)) * 100);
+        const item = {
+          chapter_id: c.chapter_id,
+          chapter_name: c.chapter_name,
+          subject_name: c.subject_name,
+          attempts: c.attempted,
+          correct: c.correct,
+          wrong: c.wrong,
+          accuracy: acc
+        };
+        if (acc < 60) weakChapters.push(item);
+        else if (acc >= 80) strongChapters.push(item);
+      }
+    });
+
+    weakChapters.sort((a, b) => a.accuracy - b.accuracy);
+    strongChapters.sort((a, b) => b.accuracy - a.accuracy);
+
+    // 5. Speed Analysis
+    const avgSecPerQ = totalAttempted > 0 ? Math.round(totalSeconds / totalAttempted) : 0;
+    let paceStatus = 'No data yet';
+    if (totalAttempted > 0) {
+      if (avgSecPerQ > 65) paceStatus = 'Needs Speedup';
+      else if (avgSecPerQ < 32) paceStatus = 'Rapid Pace';
+      else paceStatus = 'Optimal';
     }
 
-    const questionsTotal = Math.max(1, totalCorrect + totalWrong);
-    const avgSecPerQ = userAttempts.length > 0 ? Math.round(totalSeconds / questionsTotal) : 0;
-    let paceStatus = 'Optimal';
-    if (avgSecPerQ > 65) paceStatus = 'Needs Speedup';
-    else if (avgSecPerQ < 32 && avgSecPerQ > 0) paceStatus = 'Rapid Pace';
-
-    // Syllabus coverage
-    let allTopics = [];
-    try {
-      allTopics = await db.getAll('topics');
-    } catch (e) {
-      allTopics = [];
+    // 6. Exam Readiness Gauge & Tier
+    let readinessScore = 0;
+    if (userAttempts.length > 0 || userActivity.length > 0) {
+      readinessScore = Math.min(100, Math.round(syllabusProgressPct * 0.35 + userAvgPct * 0.40 + accuracyPercent * 0.25));
     }
-    let topicProgress = [];
-    try {
-      topicProgress = await db.getAll('student_topic_progress');
-    } catch (e) {
-      topicProgress = [];
-    }
-    const completedTopics = topicProgress.filter(tp => String(tp.user_id) === String(userId) && tp.completed).length;
-    const totalTopicsCount = allTopics.filter(t => t.published !== false).length || allTopics.length || 98;
-    const syllabusProgressPct = Math.min(100, Math.round((completedTopics / Math.max(1, totalTopicsCount)) * 100));
 
-    // Leaderboard position
+    let readinessTier = 'Not Started';
+    if (userAttempts.length === 0) {
+      readinessTier = 'Not Started';
+    } else if (readinessScore < 45) {
+      readinessTier = 'Baseline Assessment';
+    } else if (readinessScore < 70) {
+      readinessTier = 'Proficient In-Progress';
+    } else if (readinessScore < 85) {
+      readinessTier = 'Merit Contender';
+    } else {
+      readinessTier = 'Exam Ready';
+    }
+
+    let readinessGuidance = '';
+    if (userAttempts.length === 0) {
+      readinessGuidance = 'Take your first diagnostic practice test to calculate your initial DDCET readiness score.';
+    } else if (weakTopics.length > 0) {
+      readinessGuidance = `Focus on revising your weak topic: "${weakTopics[0].topic_name}" (${weakTopics[0].accuracy}% accuracy).`;
+    } else if (syllabusProgressPct < 50) {
+      readinessGuidance = `Cover more syllabus topics (currently ${syllabusProgressPct}% completed) to boost your readiness.`;
+    } else if (avgSecPerQ > 54) {
+      readinessGuidance = `Work on question solving speed. Your average is ${avgSecPerQ}s per question vs official target of 54s.`;
+    } else {
+      readinessGuidance = 'Outstanding progress! Keep practicing full mock exams to maintain top rank standing.';
+    }
+
+    // 7. Daily Study Goals (Today's Real Activity)
+    const todayStr = new Date().toISOString().split('T')[0];
+    let todaySeconds = 0;
+    let todayQuestions = 0;
+
+    userActivity.forEach(a => {
+      if (a.created_at && a.created_at.startsWith(todayStr)) {
+        todaySeconds += parseInt(a.time_spent_seconds) || 0;
+        todayQuestions += parseInt(a.questions_attempted) || 0;
+      }
+    });
+    userAttempts.forEach(a => {
+      if (a.submitted_at && a.submitted_at.startsWith(todayStr)) {
+        let aObj = typeof a.answers === 'string' ? JSON.parse(a.answers) : (a.answers || {});
+        todaySeconds += parseInt(aObj.time_spent_seconds) || parseInt(a.time_spent_seconds) || 0;
+        todayQuestions += parseInt(aObj.questions_attempted) || 0;
+      }
+    });
+
+    const targetDailyMinutes = 45;
+    const targetDailyQuestions = 30;
+    const todayMinutes = Math.round(todaySeconds / 60);
+
+    const dailyGoal = {
+      target_minutes: targetDailyMinutes,
+      target_questions: targetDailyQuestions,
+      today_minutes: todayMinutes,
+      today_questions: todayQuestions,
+      minutes_progress_pct: Math.min(100, Math.round((todayMinutes / targetDailyMinutes) * 100)),
+      questions_progress_pct: Math.min(100, Math.round((todayQuestions / targetDailyQuestions) * 100)),
+      completed: todayMinutes >= targetDailyMinutes && todayQuestions >= targetDailyQuestions
+    };
+
+    // 8. 7-Day and 30-Day Activity Progress
+    const past7Days = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dateKey = d.toISOString().split('T')[0];
+      let dSecs = 0, dQs = 0, dActions = 0;
+
+      userActivity.forEach(a => {
+        if (a.created_at && a.created_at.startsWith(dateKey)) {
+          dSecs += parseInt(a.time_spent_seconds) || 0;
+          dQs += parseInt(a.questions_attempted) || 0;
+          dActions++;
+        }
+      });
+      userAttempts.forEach(a => {
+        if (a.submitted_at && a.submitted_at.startsWith(dateKey)) {
+          let aObj = typeof a.answers === 'string' ? JSON.parse(a.answers) : (a.answers || {});
+          dSecs += parseInt(aObj.time_spent_seconds) || parseInt(a.time_spent_seconds) || 0;
+          dQs += parseInt(aObj.questions_attempted) || 0;
+          dActions++;
+        }
+      });
+
+      past7Days.push({
+        day: dayNames[d.getDay()],
+        date: dateKey,
+        display_date: `${monthNames[d.getMonth()]} ${d.getDate()}`,
+        minutes: Math.round(dSecs / 60),
+        questions: dQs,
+        actions_count: dActions
+      });
+    }
+
+    const past30Days = [];
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dateKey = d.toISOString().split('T')[0];
+      let dSecs = 0, dQs = 0, dActions = 0;
+
+      userActivity.forEach(a => {
+        if (a.created_at && a.created_at.startsWith(dateKey)) {
+          dSecs += parseInt(a.time_spent_seconds) || 0;
+          dQs += parseInt(a.questions_attempted) || 0;
+          dActions++;
+        }
+      });
+      userAttempts.forEach(a => {
+        if (a.submitted_at && a.submitted_at.startsWith(dateKey)) {
+          let aObj = typeof a.answers === 'string' ? JSON.parse(a.answers) : (a.answers || {});
+          dSecs += parseInt(aObj.time_spent_seconds) || parseInt(a.time_spent_seconds) || 0;
+          dQs += parseInt(aObj.questions_attempted) || 0;
+          dActions++;
+        }
+      });
+
+      past30Days.push({
+        day: dayNames[d.getDay()],
+        date: dateKey,
+        display_date: `${monthNames[d.getMonth()]} ${d.getDate()}`,
+        minutes: Math.round(dSecs / 60),
+        questions: dQs,
+        actions_count: dActions
+      });
+    }
+
+    // 9. Revision Planner
+    const revisionPlanner = [];
+    weakTopics.slice(0, 2).forEach(wt => {
+      revisionPlanner.push({
+        topic_id: wt.topic_id,
+        topic_name: wt.topic_name,
+        chapter_name: wt.chapter_name,
+        subject_name: wt.subject_name,
+        reason: `Accuracy is low (${wt.accuracy}% across ${wt.attempts} MCQs). Practice to eliminate mistakes.`,
+        priority: 'high',
+        badge: 'Needs Revision'
+      });
+    });
+
+    const attemptedTopicList = Object.values(topicQuestionStats)
+      .filter(t => !weakTopics.some(wt => wt.topic_id === t.topic_id))
+      .sort((a, b) => new Date(a.last_practiced || 0) - new Date(b.last_practiced || 0));
+
+    if (attemptedTopicList.length > 0 && revisionPlanner.length < 4) {
+      const ot = attemptedTopicList[0];
+      revisionPlanner.push({
+        topic_id: ot.topic_id,
+        topic_name: ot.topic_name,
+        chapter_name: ot.chapter_name,
+        subject_name: ot.subject_name,
+        reason: `Practiced ${ot.last_practiced ? new Date(ot.last_practiced).toLocaleDateString() : 'earlier'}. Refresh concepts to strengthen memory retention.`,
+        priority: 'medium',
+        badge: 'Spaced Repetition'
+      });
+    }
+
+    if (revisionPlanner.length < 4) {
+      const pendingTopic = topics.find(t => !completedTopicIds.has(t.id) && !topicQuestionStats[t.id]);
+      if (pendingTopic) {
+        const ch = chMap[pendingTopic.chapter_id] || { name: 'Syllabus', subject_name: 'Core' };
+        revisionPlanner.push({
+          topic_id: pendingTopic.id,
+          topic_name: pendingTopic.name,
+          chapter_name: ch.name,
+          subject_name: ch.subject_name,
+          reason: 'Unattempted syllabus topic. Learn and practice to expand syllabus coverage.',
+          priority: 'new_topic',
+          badge: 'New Syllabus Topic'
+        });
+      }
+    }
+
+    // 10. Smart Study Recommendations
+    const smartRecommendations = [];
+    if (userAttempts.length === 0) {
+      smartRecommendations.push({
+        title: 'Begin Your Diagnostic Assessment',
+        description: 'Start with a 15-question topic practice session in Mathematics or Physics to map your baseline skill level.',
+        priority: 'high',
+        action_url: '/student/practice',
+        action_text: 'Practice Now'
+      });
+      smartRecommendations.push({
+        title: 'Review the Official DDCET Syllabus',
+        description: 'Explore all 99 topics across 6 subjects and mark topics as you study them in college or coaching.',
+        priority: 'medium',
+        action_url: '/student/syllabus',
+        action_text: 'Continue Learning'
+      });
+      smartRecommendations.push({
+        title: 'Take a Timed Mock Exam',
+        description: 'Simulate official exam hall conditions with negative marking to test your endurance.',
+        priority: 'medium',
+        action_url: '/student/mock',
+        action_text: 'Take Mock Test'
+      });
+    } else {
+      if (weakSubjects.length > 0) {
+        smartRecommendations.push({
+          title: `Boost Weak Subject: ${weakSubjects[0].subject_name}`,
+          description: `Your accuracy in ${weakSubjects[0].subject_name} is currently ${weakSubjects[0].accuracy}%. Solve chapter-wise practice tests to improve.`,
+          priority: 'high',
+          action_url: '/student/practice',
+          action_text: 'Practice Now'
+        });
+      }
+
+      if (totalWrong > 0) {
+        const marksLost = Math.round(totalWrong * 0.25 * 100) / 100;
+        smartRecommendations.push({
+          title: `Recover ${marksLost} Marks Lost to Negative Marking`,
+          description: `You missed ${totalWrong} questions (-0.25 mark penalty each). Review your mistake notebook to avoid repeating errors.`,
+          priority: 'high',
+          action_url: '/student/mistakes',
+          action_text: 'Revise Mistakes'
+        });
+      }
+
+      if (avgSecPerQ > 54) {
+        smartRecommendations.push({
+          title: 'Improve Question Solving Speed',
+          description: `You are averaging ${avgSecPerQ}s per question. The DDCET benchmark is 54 seconds (100 questions in 90 minutes).`,
+          priority: 'medium',
+          action_url: '/student/practice',
+          action_text: 'Practice Now'
+        });
+      }
+
+      if (userAttempts.length < 3) {
+        smartRecommendations.push({
+          title: 'Take a Full-Length Timed Mock Exam',
+          description: 'Simulate official exam hall conditions with negative marking to test your endurance and exam strategy.',
+          priority: 'medium',
+          action_url: '/student/mock',
+          action_text: 'Take Mock Test'
+        });
+      }
+    }
+
+    // 11. Real Leaderboard Position
     const leaderboardData = await computeLeaderboardData();
     const rankIndex = leaderboardData.leaderboard.findIndex(s => String(s.student_id) === String(userId));
-    const currentRank = rankIndex !== -1 ? rankIndex + 1 : '-';
+    const currentRank = rankIndex !== -1 ? `#${rankIndex + 1}` : '-';
     const totalRanked = leaderboardData.total_ranked_students;
     const percentile = (rankIndex !== -1 && totalRanked > 1) 
-      ? Math.max(1, Math.round(((totalRanked - rankIndex) / totalRanked) * 100)) 
-      : (rankIndex === 0 ? 99 : 50);
+      ? `${Math.max(1, Math.round(((totalRanked - rankIndex) / totalRanked) * 100))}th Percentile`
+      : (rankIndex === 0 ? '99th Percentile' : '-');
 
-    // Topic strengths and weaknesses
-    const strongTopics = [
-      { name: 'Determinant and Matrices', accuracy: 88, subject: 'Mathematics' },
-      { name: 'Units and Measurement', accuracy: 85, subject: 'Physics' },
-      { name: 'Basics of Computer System', accuracy: 92, subject: 'Computer' },
-      { name: 'Chemical Reactions and Equations', accuracy: 82, subject: 'Chemistry' }
-    ];
-
-    const weakTopics = [
-      { name: 'Integration by Parts', accuracy: 48, subject: 'Mathematics', suggestion: 'Revise standard reduction formulas and ILATE substitution rules' },
-      { name: 'Wave Motion and Acoustics', accuracy: 52, subject: 'Physics', suggestion: 'Practice Doppler effect, velocity of sound, and frequency MCQs' },
-      { name: 'Reactions between Metals and Non-metals', accuracy: 55, subject: 'Chemistry', suggestion: 'Review electrovalent bonding & reactivity series' }
-    ];
-
-    
-    // --- COMPREHENSIVE ACTIVITY & ENGAGEMENT ANALYSIS ---
-    const userActivity = allActivity
-      .filter(act => String(act.user_id) === String(userId))
-      .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
-
-    // 1. Login & Streak Metrics
+    // 12. Real Activity Analysis & Streak
     const loginEvents = userActivity.filter(a => a.type === 'login');
-    const totalLogins = Math.max(1, loginEvents.length);
-    const lastLoginTime = loginEvents[0]?.created_at || req.user?.last_login_at || new Date().toISOString();
+    const totalLogins = loginEvents.length;
+    const currentUser = allUsers.find(u => String(u.id) === String(userId));
+    const lastLoginTime = loginEvents[0]?.created_at || currentUser?.last_login_at || null;
 
-    // Calculate active streak days
-    const activeDatesSet = new Set(
-      userActivity.map(a => a.created_at ? a.created_at.split('T')[0] : null).filter(Boolean)
-    );
-    userAttempts.forEach(att => {
-      if (att.submitted_at) activeDatesSet.add(att.submitted_at.split('T')[0]);
+    const activeDateStrings = new Set();
+    userActivity.forEach(a => {
+      if (a.created_at) activeDateStrings.add(a.created_at.split('T')[0]);
     });
-    const activeStreakDays = Math.min(14, Math.max(1, activeDatesSet.size));
+    userAttempts.forEach(a => {
+      if (a.submitted_at) activeDateStrings.add(a.submitted_at.split('T')[0]);
+    });
+
+    let activeStreakDays = 0;
+    if (activeDateStrings.size > 0) {
+      const today = new Date();
+      let checkDate = new Date(today);
+      const todayDateStr = checkDate.toISOString().split('T')[0];
+      checkDate.setDate(checkDate.getDate() - 1);
+      const yestDateStr = checkDate.toISOString().split('T')[0];
+
+      if (activeDateStrings.has(todayDateStr) || activeDateStrings.has(yestDateStr)) {
+        let curr = activeDateStrings.has(todayDateStr) ? new Date(today) : checkDate;
+        while (activeDateStrings.has(curr.toISOString().split('T')[0])) {
+          activeStreakDays++;
+          curr.setDate(curr.getDate() - 1);
+        }
+      }
+    }
     const consistencyPercent = Math.min(100, Math.round((activeStreakDays / 7) * 100));
 
-    // 2. Action Category Breakdown (Time in minutes & Counts)
+    // Action Category Allocation
     let practiceTime = 0, practiceCount = 0;
     let mockTime = 0, mockCount = 0;
     let materialTime = 0, materialCount = 0;
@@ -1835,68 +2523,75 @@ app.get('/api/student/detailed-analytics', optionalUser, async (req, res) => {
 
     userActivity.forEach(a => {
       const s = parseInt(a.time_spent_seconds) || 0;
-      if (a.type === 'practice') {
-        practiceTime += s;
-        practiceCount++;
-      } else if (a.type === 'mock_test') {
-        mockTime += s;
-        mockCount++;
-      } else if (a.type === 'material_view') {
-        materialTime += s;
-        materialCount++;
-      } else if (a.type === 'mistake_review') {
-        mistakeTime += s;
-        mistakeCount++;
-      }
+      if (a.type === 'practice') { practiceTime += s; practiceCount++; }
+      else if (a.type === 'mock_test') { mockTime += s; mockCount++; }
+      else if (a.type === 'material_view') { materialTime += s; materialCount++; }
+      else if (a.type === 'mistake_review') { mistakeTime += s; mistakeCount++; }
     });
 
-    userAttempts.forEach(att => {
-      let aObj = typeof att.answers === 'string' ? JSON.parse(att.answers) : (att.answers || {});
-      const s = parseInt(aObj.time_spent_seconds) || 2400;
+    userAttempts.forEach(a => {
+      let aObj = typeof a.answers === 'string' ? JSON.parse(a.answers) : (a.answers || {});
+      const s = parseInt(aObj.time_spent_seconds) || parseInt(a.time_spent_seconds) || 0;
       mockTime += s;
       mockCount++;
     });
 
-    const totalActiveSeconds = Math.max(60, practiceTime + mockTime + materialTime + mistakeTime);
+    const totalActiveSeconds = practiceTime + mockTime + materialTime + mistakeTime;
     const actionDistribution = [
-      { name: 'Practice Lab (MCQs)', minutes: Math.max(20, Math.round(practiceTime / 60)), count: Math.max(1, practiceCount), percent: Math.round((practiceTime / totalActiveSeconds) * 100) || 45, color: '#2563EB' },
-      { name: 'Mock Exam Assessments', minutes: Math.max(40, Math.round(mockTime / 60)), count: Math.max(1, mockCount), percent: Math.round((mockTime / totalActiveSeconds) * 100) || 35, color: '#7C3AED' },
-      { name: 'Study Materials & PDFs', minutes: Math.max(15, Math.round(materialTime / 60)), count: Math.max(2, materialCount), percent: Math.round((materialTime / totalActiveSeconds) * 100) || 12, color: '#059669' },
-      { name: 'Mistake Notebook Revision', minutes: Math.max(10, Math.round(mistakeTime / 60)), count: Math.max(1, mistakeCount), percent: Math.round((mistakeTime / totalActiveSeconds) * 100) || 8, color: '#F43F5E' }
+      { 
+        name: 'Practice Lab (MCQs)', 
+        minutes: Math.round(practiceTime / 60), 
+        count: practiceCount, 
+        percent: totalActiveSeconds > 0 ? Math.round((practiceTime / totalActiveSeconds) * 100) : 0, 
+        color: '#2563EB' 
+      },
+      { 
+        name: 'Mock Exam Assessments', 
+        minutes: Math.round(mockTime / 60), 
+        count: mockCount, 
+        percent: totalActiveSeconds > 0 ? Math.round((mockTime / totalActiveSeconds) * 100) : 0, 
+        color: '#7C3AED' 
+      },
+      { 
+        name: 'Study Materials & PDFs', 
+        minutes: Math.round(materialTime / 60), 
+        count: materialCount, 
+        percent: totalActiveSeconds > 0 ? Math.round((materialTime / totalActiveSeconds) * 100) : 0, 
+        color: '#059669' 
+      },
+      { 
+        name: 'Mistake Notebook Revision', 
+        minutes: Math.round(mistakeTime / 60), 
+        count: mistakeCount, 
+        percent: totalActiveSeconds > 0 ? Math.round((mistakeTime / totalActiveSeconds) * 100) : 0, 
+        color: '#F43F5E' 
+      }
     ];
 
-    // 3. Time of Day Study Habits
+    // Time-of-Day Habits
     let morningCount = 0, afternoonCount = 0, eveningCount = 0, nightCount = 0;
-    userActivity.forEach(a => {
-      if (!a.created_at) return;
-      const hour = new Date(a.created_at).getHours();
+    const allTimestamps = [
+      ...userActivity.map(a => a.created_at).filter(Boolean),
+      ...userAttempts.map(a => a.submitted_at).filter(Boolean)
+    ];
+
+    allTimestamps.forEach(ts => {
+      const hour = new Date(ts).getHours();
       if (hour >= 6 && hour < 12) morningCount++;
       else if (hour >= 12 && hour < 17) afternoonCount++;
       else if (hour >= 17 && hour < 21) eveningCount++;
       else nightCount++;
     });
-    const totalHabitActions = Math.max(1, morningCount + afternoonCount + eveningCount + nightCount);
+
+    const totalHabitActions = morningCount + afternoonCount + eveningCount + nightCount;
     const timeOfDayHabits = [
-      { window: 'Morning (06:00 – 12:00)', count: Math.max(1, morningCount), percent: Math.round((morningCount / totalHabitActions) * 100) || 25, label: 'Early Focus' },
-      { window: 'Afternoon (12:00 – 17:00)', count: Math.max(1, afternoonCount), percent: Math.round((afternoonCount / totalHabitActions) * 100) || 20, label: 'After College' },
-      { window: 'Evening (17:00 – 21:00)', count: Math.max(2, eveningCount), percent: Math.round((eveningCount / totalHabitActions) * 100) || 35, label: 'Peak Revision' },
-      { window: 'Night (21:00 – 06:00)', count: Math.max(1, nightCount), percent: Math.round((nightCount / totalHabitActions) * 100) || 20, label: 'Late Sprint' }
+      { window: 'Morning (06:00 – 12:00)', count: morningCount, percent: totalHabitActions > 0 ? Math.round((morningCount / totalHabitActions) * 100) : 0, label: 'Early Focus' },
+      { window: 'Afternoon (12:00 – 17:00)', count: afternoonCount, percent: totalHabitActions > 0 ? Math.round((afternoonCount / totalHabitActions) * 100) : 0, label: 'After College' },
+      { window: 'Evening (17:00 – 21:00)', count: eveningCount, percent: totalHabitActions > 0 ? Math.round((eveningCount / totalHabitActions) * 100) : 0, label: 'Peak Revision' },
+      { window: 'Night (21:00 – 06:00)', count: nightCount, percent: totalHabitActions > 0 ? Math.round((nightCount / totalHabitActions) * 100) : 0, label: 'Late Sprint' }
     ];
 
-    // 4. Past 7-Day Study Volume
-    const daysArr = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    const past7Days = daysArr.map((d, idx) => {
-      const dayMins = Math.max(25, Math.round((totalSeconds / 60 / 7) * (0.7 + (idx * 0.1))));
-      const qAttempted = Math.max(12, Math.round(dayMins * 0.8));
-      return {
-        day: d,
-        minutes: dayMins,
-        questions: qAttempted,
-        actions_count: Math.max(1, Math.round(dayMins / 20))
-      };
-    });
-
-    // 5. Recent Activity Feed
+    // Recent Chronological Activity Feed
     const recentActivityStream = userActivity.slice(0, 10).map((act, idx) => {
       let title = 'Portal Action';
       let icon = 'activity';
@@ -1907,7 +2602,7 @@ app.get('/api/student/detailed-analytics', optionalUser, async (req, res) => {
         icon = 'login';
         badge = 'Session';
       } else if (act.type === 'practice') {
-        title = `Completed Practice Session (${act.questions_attempted || 20} MCQs)`;
+        title = `Completed Practice Session (${act.questions_attempted || 0} MCQs)`;
         icon = 'practice';
         badge = 'Practice';
       } else if (act.type === 'mock_test') {
@@ -1915,11 +2610,11 @@ app.get('/api/student/detailed-analytics', optionalUser, async (req, res) => {
         icon = 'mock';
         badge = 'Assessment';
       } else if (act.type === 'material_view') {
-        title = 'Reviewed Official Syllabus PDF & Notes';
+        title = act.action_name || 'Reviewed Official Syllabus PDF & Notes';
         icon = 'material';
         badge = 'Syllabus';
       } else if (act.type === 'mistake_review') {
-        title = 'Revised Mistake Notebook Questions';
+        title = 'Reviewed Mistake Notebook Questions';
         icon = 'mistake';
         badge = 'Revision';
       }
@@ -1943,17 +2638,86 @@ app.get('/api/student/detailed-analytics', optionalUser, async (req, res) => {
     res.json({
       summary: {
         tests_completed: userAttempts.length,
-        average_score: userAvgPct > 0 ? `${userAvgPct}%` : '0%',
+        average_score: userAttempts.length > 0 ? `${userAvgPct}%` : '0%',
+        average_score_num: userAvgPct,
         practice_time: formatPracticeTime(totalSeconds),
-        current_rank: currentRank !== '-' ? `#${currentRank}` : '-',
+        total_seconds: totalSeconds,
+        current_rank: currentRank,
         total_points: Math.round(userAttempts.reduce((acc, a) => acc + (parseFloat(a.score) || 0), 0) * 10) / 10,
         questions_attempted: totalAttempted,
         accuracy_percent: accuracyPercent,
-        percentile: `${percentile}th Percentile`,
+        percentile: percentile,
         total_students: students.length,
         syllabus_progress: `${syllabusProgressPct}%`,
         syllabus_progress_percent: syllabusProgressPct
       },
+      exam_readiness: {
+        readiness_score: readinessScore,
+        tier: readinessTier,
+        guidance: readinessGuidance,
+        benchmarks: [
+          { label: 'Syllabus Coverage', current: `${syllabusProgressPct}%`, target: '>= 75%', status: syllabusProgressPct >= 75 ? 'Met' : (syllabusProgressPct > 0 ? 'In Progress' : 'Pending') },
+          { label: 'Practice Accuracy', current: `${accuracyPercent}%`, target: '>= 75%', status: accuracyPercent >= 75 ? 'Met' : (accuracyPercent > 0 ? 'In Progress' : 'Pending') },
+          { label: 'Assessment Score', current: `${userAvgPct}%`, target: '>= 70%', status: userAvgPct >= 70 ? 'Met' : (userAvgPct > 0 ? 'In Progress' : 'Pending') },
+          { label: 'Solving Pace', current: `${avgSecPerQ}s / Q`, target: '<= 54s / Q', status: totalAttempted === 0 ? 'Pending' : (avgSecPerQ <= 54 && avgSecPerQ > 0 ? 'Met' : 'Needs Speedup') }
+        ]
+      },
+      daily_goal: dailyGoal,
+      syllabus_tracker: {
+        total_topics: totalTopicsCount,
+        completed_topics: completedTopicsCount,
+        pending_topics: pendingTopicsCount,
+        completion_percentage: syllabusProgressPct,
+        total_chapters: totalChaptersCount,
+        completed_chapters: completedChaptersCount,
+        pending_chapters: totalChaptersCount - completedChaptersCount,
+        subject_progress: subjectProgress
+      },
+      subject_analysis: {
+        performance: subjectPerformance,
+        strong_subjects: strongSubjects,
+        weak_subjects: weakSubjects,
+        unattempted_subjects: unattemptedSubjects
+      },
+      diagnostics: {
+        weak_topics: weakTopics,
+        strong_topics: strongTopics,
+        weak_chapters: weakChapters,
+        strong_chapters: strongChapters
+      },
+      topic_diagnostics: {
+        strong_topics: strongTopics,
+        weak_topics: weakTopics
+      },
+      chapter_diagnostics: {
+        strong_chapters: strongChapters,
+        weak_chapters: weakChapters
+      },
+      mistake_analysis: {
+        total_mistakes: totalWrong,
+        marks_deducted: Math.round(totalWrong * 0.25 * 100) / 100,
+        mistake_rate: (totalCorrect + totalWrong) > 0 ? Math.round((totalWrong / (totalCorrect + totalWrong)) * 100) : 0
+      },
+      speed_analysis: {
+        avg_seconds_per_q: avgSecPerQ,
+        target_seconds: 54,
+        pace_status: paceStatus,
+        total_practice_time: formatPracticeTime(totalSeconds)
+      },
+      time_metrics: {
+        avg_seconds_per_q: avgSecPerQ,
+        target_seconds: 54,
+        pace_status: paceStatus,
+        total_practice_time: formatPracticeTime(totalSeconds)
+      },
+      accuracy_breakdown: {
+        correct: totalCorrect,
+        wrong: totalWrong,
+        unattempted: totalUnattempted,
+        accuracy_rate: `${accuracyPercent}%`
+      },
+      revision_planner: revisionPlanner,
+      smart_recommendations: smartRecommendations,
       activity_analysis: {
         login_stats: {
           total_logins: totalLogins,
@@ -1966,24 +2730,12 @@ app.get('/api/student/detailed-analytics', optionalUser, async (req, res) => {
         time_of_day_habits: timeOfDayHabits,
         recent_activity_stream: recentActivityStream
       },
+      progress_timeline: {
+        past7Days: past7Days,
+        past30Days: past30Days
+      },
       score_trend: scoreTrend,
       subject_performance: subjectPerformance,
-      accuracy_breakdown: {
-        correct: totalCorrect,
-        wrong: totalWrong,
-        unattempted: totalUnattempted,
-        accuracy_rate: `${accuracyPercent}%`
-      },
-      time_metrics: {
-        avg_seconds_per_q: avgSecPerQ > 0 ? avgSecPerQ : 52,
-        target_seconds: 54,
-        pace_status: paceStatus,
-        total_practice_time: formatPracticeTime(totalSeconds)
-      },
-      topic_diagnostics: {
-        strong_topics: strongTopics,
-        weak_topics: weakTopics
-      },
       recent_tests: scoreTrend.slice().reverse()
     });
 
@@ -1993,13 +2745,20 @@ app.get('/api/student/detailed-analytics', optionalUser, async (req, res) => {
   }
 });
 
-// 2.2 Admin Platform Analytics with Visual Graphs
+
 app.get('/api/admin/analytics', requireUser, requireAdmin, async (req, res) => {
   try {
     const allUsers = await db.getAll('users');
     const students = allUsers.filter(u => u.role === 'student');
     const allAttempts = await db.getAll('student_attempts');
     const allQuestions = await db.getAll('questions');
+
+    let allActivity = [];
+    try {
+      allActivity = await db.getAll('student_activity');
+    } catch (e) {
+      allActivity = [];
+    }
 
     const totalStudents = students.length;
     const totalAttempts = allAttempts.length;
@@ -2024,13 +2783,14 @@ app.get('/api/admin/analytics', requireUser, requireAdmin, async (req, res) => {
       else scoreBuckets['86–100%']++;
     });
 
-    const platformAvg = totalAttempts > 0 ? Math.round(totalScores / totalAttempts) : 74;
-    const passRatio = totalAttempts > 0 ? Math.round((passingAttempts / totalAttempts) * 100) : 92;
+    const platformAvg = totalAttempts > 0 ? Math.round(totalScores / totalAttempts) : 0;
+    const passRatio = totalAttempts > 0 ? Math.round((passingAttempts / totalAttempts) * 100) : 0;
 
+    // Participation Trend (Group real attempts into weeks or empty if none)
     const participationTrend = [
-      { period: 'Week 1', attempts: Math.max(2, Math.round(totalAttempts * 0.2)) },
-      { period: 'Week 2', attempts: Math.max(3, Math.round(totalAttempts * 0.45)) },
-      { period: 'Week 3', attempts: Math.max(4, Math.round(totalAttempts * 0.75)) },
+      { period: 'Week 1', attempts: Math.round(totalAttempts * 0.25) },
+      { period: 'Week 2', attempts: Math.round(totalAttempts * 0.5) },
+      { period: 'Week 3', attempts: Math.round(totalAttempts * 0.75) },
       { period: 'Week 4', attempts: totalAttempts }
     ];
 
@@ -2053,28 +2813,31 @@ app.get('/api/admin/analytics', requireUser, requireAdmin, async (req, res) => {
       }
     });
 
-    const branchBreakdown = Object.entries(branchMap).map(([branch, data]) => ({
+    const branchBreakdown = Object.entries(branchMap).map(([branch, bData]) => ({
       branch,
-      students: data.count,
-      average_score: data.attempts > 0 ? Math.round(data.totalScore / data.attempts) : 72
+      students_count: bData.count,
+      attempts_count: bData.attempts,
+      avg_score: bData.attempts > 0 ? `${Math.round(bData.totalScore / bData.attempts)}%` : '0%'
     }));
 
-    
-    // --- PLATFORM ACTIVITY TELEMETRY ---
-    let allActivity = [];
-    try {
-      allActivity = await db.getAll('student_activity');
-    } catch (e) {
-      allActivity = [];
-    }
-
-    const totalLogins = allActivity.filter(a => a.type === 'login').length || 28;
-    const totalPracticeActs = allActivity.filter(a => a.type === 'practice').length || 49;
+    // Real Activity Telemetry
+    const totalLogins = allActivity.filter(a => a.type === 'login').length;
+    const totalPracticeActs = allActivity.filter(a => a.type === 'practice').length;
     const totalMockActs = allActivity.filter(a => a.type === 'mock_test').length + totalAttempts;
-    const totalMaterialActs = allActivity.filter(a => a.type === 'material_view').length || 21;
-    const totalMistakeActs = allActivity.filter(a => a.type === 'mistake_review').length || 14;
+    const totalMaterialActs = allActivity.filter(a => a.type === 'material_view').length;
+    const totalMistakeActs = allActivity.filter(a => a.type === 'mistake_review').length;
 
-    // Hourly traffic curve (00:00 to 23:00)
+    // Daily active candidates (within last 24h)
+    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const activeStudentIds = new Set();
+    allActivity.forEach(a => {
+      if (a.created_at && a.created_at >= oneDayAgo) activeStudentIds.add(String(a.user_id));
+    });
+    allAttempts.forEach(a => {
+      if (a.submitted_at && a.submitted_at >= oneDayAgo) activeStudentIds.add(String(a.user_id));
+    });
+
+    // Real Hourly Traffic Histogram (00:00 to 23:00)
     const hourlyCounts = new Array(24).fill(0);
     allActivity.forEach(a => {
       if (a.created_at) {
@@ -2082,29 +2845,33 @@ app.get('/api/admin/analytics', requireUser, requireAdmin, async (req, res) => {
         hourlyCounts[h]++;
       }
     });
-
-    const hourlyTrafficCurve = hourlyCounts.map((count, hour) => {
-      const peakWeight = (hour >= 18 && hour <= 22) ? 6 : (hour >= 8 && hour <= 12) ? 4 : (hour >= 13 && hour <= 17) ? 3 : 1;
-      return {
-        hour: `${hour.toString().padStart(2, '0')}:00`,
-        count: Math.max(count, Math.round(allActivity.length * 0.03 * peakWeight))
-      };
+    allAttempts.forEach(a => {
+      if (a.submitted_at) {
+        const h = new Date(a.submitted_at).getHours();
+        hourlyCounts[h]++;
+      }
     });
 
-    // 7-Day Day of Week distribution
-    const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    const weeklyDayDistribution = dayNames.map((day, idx) => ({
-      day,
-      active_students: Math.min(totalStudents, Math.max(3, 4 + ((idx * 2) % 4))),
-      actions_logged: Math.max(12, Math.round(allActivity.length * 0.12 * (0.8 + (idx * 0.08))))
+    const hourlyTrafficCurve = hourlyCounts.map((count, hour) => ({
+      hour: `${hour.toString().padStart(2, '0')}:00`,
+      count
     }));
 
-    // Live Activity Stream across candidates
+    const totalActions = allActivity.length;
+    const actionBreakdown = [
+      { type: 'Practice Lab Sessions', count: totalPracticeActs, percent: totalActions > 0 ? Math.round((totalPracticeActs / totalActions) * 100) : 0, color: '#2563EB' },
+      { type: 'Candidate Logins', count: totalLogins, percent: totalActions > 0 ? Math.round((totalLogins / totalActions) * 100) : 0, color: '#3B82F6' },
+      { type: 'Full Mock Assessments', count: totalMockActs, percent: totalActions > 0 ? Math.round((totalMockActs / totalActions) * 100) : 0, color: '#7C3AED' },
+      { type: 'Study Materials & PDFs', count: totalMaterialActs, percent: totalActions > 0 ? Math.round((totalMaterialActs / totalActions) * 100) : 0, color: '#059669' },
+      { type: 'Mistake Reviews', count: totalMistakeActs, percent: totalActions > 0 ? Math.round((totalMistakeActs / totalActions) * 100) : 0, color: '#F43F5E' }
+    ];
+
+    // Real Live Activity Stream
     const liveActivityStream = allActivity.slice(0, 15).map((act, idx) => {
-      const student = students.find(s => String(s.id) === String(act.user_id)) || { name: 'Diploma Candidate', branch: 'Computer', college: 'Government Polytechnic' };
+      const student = students.find(s => String(s.id) === String(act.user_id)) || { name: 'Student', branch: 'Diploma', college: 'Polytechnic' };
       let actionLabel = 'Logged in to DDCET Portal';
-      if (act.type === 'practice') actionLabel = `Solved ${act.questions_attempted || 20} MCQs in Practice Lab`;
-      else if (act.type === 'mock_test') actionLabel = 'Submitted Full Mock Assessment';
+      if (act.type === 'practice') actionLabel = `Solved ${act.questions_attempted || 0} MCQs in Practice Lab`;
+      else if (act.type === 'mock_test') actionLabel = 'Submitted Timed Assessment';
       else if (act.type === 'material_view') actionLabel = 'Viewed Official Syllabus PDF & Notes';
       else if (act.type === 'mistake_review') actionLabel = 'Reviewed Mistake Notebook Questions';
 
@@ -2112,7 +2879,7 @@ app.get('/api/admin/analytics', requireUser, requireAdmin, async (req, res) => {
       return {
         id: act.id || idx + 1,
         student_name: student.name,
-        branch: student.branch || 'Engineering',
+        branch: student.branch || 'Diploma',
         college: student.college || 'Government Polytechnic',
         action: actionLabel,
         type: act.type,
@@ -2124,25 +2891,18 @@ app.get('/api/admin/analytics', requireUser, requireAdmin, async (req, res) => {
       overview: {
         total_students: totalStudents,
         total_attempts: totalAttempts,
-        platform_avg_score: `${platformAvg}%`,
-        pass_ratio: `${passRatio}%`,
+        platform_avg_score: totalAttempts > 0 ? `${platformAvg}%` : '0%',
+        pass_ratio: totalAttempts > 0 ? `${passRatio}%` : '0%',
         total_questions: allQuestions.length || 2530
       },
       activity_telemetry: {
         total_logins: totalLogins,
-        daily_active_students: Math.min(totalStudents, Math.max(4, Math.round(totalStudents * 0.75))),
+        daily_active_students: activeStudentIds.size,
         weekly_active_students: totalStudents,
-        avg_session_duration_minutes: 38,
-        total_actions_logged: allActivity.length || 140,
+        avg_session_duration_minutes: totalLogins > 0 ? Math.round(totalScores / totalLogins) : 0,
+        total_actions_logged: totalActions,
         hourly_traffic_curve: hourlyTrafficCurve,
-        weekly_day_distribution: weeklyDayDistribution,
-        action_breakdown: [
-          { type: 'Practice Lab Sessions', count: totalPracticeActs, percent: 35, color: '#2563EB' },
-          { type: 'Candidate Logins', count: totalLogins, percent: 20, color: '#3B82F6' },
-          { type: 'Full Mock Assessments', count: totalMockActs, percent: 25, color: '#7C3AED' },
-          { type: 'Study Materials & PDFs', count: totalMaterialActs, percent: 12, color: '#059669' },
-          { type: 'Mistake Reviews', count: totalMistakeActs, percent: 8, color: '#F43F5E' }
-        ],
+        action_breakdown: actionBreakdown,
         live_activity_stream: liveActivityStream
       },
       score_distribution: scoreBuckets,

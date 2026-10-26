@@ -6,7 +6,8 @@ import {
   TrendingUp, Target, Clock, Trophy, BookOpen, AlertTriangle, 
   ArrowRight, CheckCircle2, BarChart2, Zap, HelpCircle, RefreshCw,
   Sparkles, Award, ShieldAlert, ArrowUpRight, Flame, Layers,
-  LogIn, Activity, Calendar, Compass, FileText, CheckCircle
+  Activity, Calendar, Compass, FileText, CheckCircle, Info,
+  AlertCircle, XCircle, ChevronRight, Play, BookCheck, Timer
 } from 'lucide-react';
 
 export default function StudentAnalytics() {
@@ -14,7 +15,7 @@ export default function StudentAnalytics() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [lastUpdated, setLastUpdated] = useState(new Date());
+  const [activityWindow, setActivityWindow] = useState('7d'); // '7d' or '30d'
   const [hoveredPoint, setHoveredPoint] = useState(null);
   const [hoveredSubject, setHoveredSubject] = useState(null);
   const [hoveredDay, setHoveredDay] = useState(null);
@@ -28,7 +29,6 @@ export default function StudentAnalytics() {
       if (res.ok) {
         const json = await res.json();
         setData(json);
-        setLastUpdated(new Date());
       }
     } catch (err) {
       console.error('Error fetching detailed analytics:', err);
@@ -42,85 +42,137 @@ export default function StudentAnalytics() {
     fetchAnalytics();
   }, [token]);
 
+  // Clean Zero-State Default: strictly starts from zero, no fake data
   const summary = data?.summary || {
     tests_completed: 0,
     average_score: '0%',
-    practice_time: '0 hours',
+    average_score_num: 0,
+    practice_time: '0h 0m',
+    total_seconds: 0,
     current_rank: '-',
     total_points: 0,
     questions_attempted: 0,
     accuracy_percent: 0,
-    percentile: '50th Percentile',
+    percentile: '-',
+    total_students: 0,
     syllabus_progress: '0%',
     syllabus_progress_percent: 0
   };
 
-  const activityAnalysis = data?.activity_analysis || {
-    login_stats: {
-      total_logins: 7,
-      last_login_at: new Date().toISOString(),
-      active_streak_days: 5,
-      consistency_percent: 86
-    },
-    weekly_activity: [
-      { day: 'Mon', minutes: 45, questions: 35, actions_count: 3 },
-      { day: 'Tue', minutes: 55, questions: 42, actions_count: 3 },
-      { day: 'Wed', minutes: 65, questions: 50, actions_count: 4 },
-      { day: 'Thu', minutes: 70, questions: 58, actions_count: 4 },
-      { day: 'Fri', minutes: 80, questions: 65, actions_count: 5 },
-      { day: 'Sat', minutes: 95, questions: 78, actions_count: 6 },
-      { day: 'Sun', minutes: 85, questions: 68, actions_count: 5 }
-    ],
-    action_distribution: [
-      { name: 'Practice Lab (MCQs)', minutes: 140, count: 7, percent: 45, color: '#2563EB' },
-      { name: 'Mock Exam Assessments', minutes: 105, count: 3, percent: 34, color: '#7C3AED' },
-      { name: 'Study Materials & PDFs', minutes: 40, count: 4, percent: 13, color: '#059669' },
-      { name: 'Mistake Notebook Revision', minutes: 25, count: 2, percent: 8, color: '#F43F5E' }
-    ],
-    time_of_day_habits: [
-      { window: 'Morning (06:00 – 12:00)', count: 3, percent: 23, label: 'Early Focus' },
-      { window: 'Afternoon (12:00 – 17:00)', count: 2, percent: 15, label: 'After College' },
-      { window: 'Evening (17:00 – 21:00)', count: 6, percent: 46, label: 'Peak Revision' },
-      { window: 'Night (21:00 – 06:00)', count: 2, percent: 16, label: 'Late Sprint' }
-    ],
-    recent_activity_stream: []
+  const examReadiness = data?.exam_readiness || {
+    readiness_score: 0,
+    tier: 'Not Started',
+    guidance: 'Take your first diagnostic practice test to calculate your initial DDCET readiness score.',
+    benchmarks: [
+      { label: 'Syllabus Coverage', current: '0%', target: '>= 75%', status: 'Pending' },
+      { label: 'Practice Accuracy', current: '0%', target: '>= 75%', status: 'Pending' },
+      { label: 'Assessment Score', current: '0%', target: '>= 70%', status: 'Pending' },
+      { label: 'Solving Pace', current: '0s / Q', target: '<= 54s / Q', status: 'Pending' }
+    ]
   };
 
-  const scoreTrend = useMemo(() => data?.score_trend || [], [data]);
-  const subjectPerf = useMemo(() => data?.subject_performance || [], [data]);
+  const dailyGoal = data?.daily_goal || {
+    target_minutes: 45,
+    target_questions: 30,
+    today_minutes: 0,
+    today_questions: 0,
+    minutes_progress_pct: 0,
+    questions_progress_pct: 0,
+    completed: false
+  };
+
+  const syllabusTracker = data?.syllabus_tracker || {
+    total_topics: 99,
+    completed_topics: 0,
+    pending_topics: 99,
+    completion_percentage: 0,
+    total_chapters: 24,
+    completed_chapters: 0,
+    pending_chapters: 24,
+    subject_progress: []
+  };
+
+  const subjectAnalysis = data?.subject_analysis || {
+    performance: data?.subject_performance || [],
+    strong_subjects: [],
+    weak_subjects: [],
+    unattempted_subjects: []
+  };
+
+  const subjectPerf = useMemo(() => {
+    return subjectAnalysis.performance?.length > 0 ? subjectAnalysis.performance : (data?.subject_performance || []);
+  }, [subjectAnalysis, data]);
+
+  const diagnostics = data?.diagnostics || {
+    weak_topics: data?.topic_diagnostics?.weak_topics || [],
+    strong_topics: data?.topic_diagnostics?.strong_topics || [],
+    weak_chapters: data?.chapter_diagnostics?.weak_chapters || [],
+    strong_chapters: data?.chapter_diagnostics?.strong_chapters || []
+  };
+
+  const mistakeAnalysis = data?.mistake_analysis || {
+    total_mistakes: 0,
+    marks_deducted: 0,
+    mistake_rate: 0
+  };
+
+  const speedAnalysis = data?.speed_analysis || data?.time_metrics || {
+    avg_seconds_per_q: 0,
+    target_seconds: 54,
+    pace_status: 'No data yet',
+    total_practice_time: '0h 0m'
+  };
+
   const accuracyBreakdown = data?.accuracy_breakdown || {
     correct: 0,
     wrong: 0,
     unattempted: 0,
     accuracy_rate: '0%'
   };
-  const timeMetrics = data?.time_metrics || {
-    avg_seconds_per_q: 52,
-    target_seconds: 54,
-    pace_status: 'Optimal',
-    total_practice_time: '0h'
-  };
-  const topicDiagnostics = data?.topic_diagnostics || {
-    strong_topics: [],
-    weak_topics: []
-  };
+
+  const smartRecommendations = data?.smart_recommendations || [];
+  const revisionPlanner = data?.revision_planner || [];
+  const scoreTrend = useMemo(() => data?.score_trend || [], [data]);
   const recentTests = data?.recent_tests || [];
 
-  const avgNum = parseFloat(summary.average_score) || 0;
-  const syllabusNum = summary.syllabus_progress_percent || 0;
+  const activityAnalysis = data?.activity_analysis || {
+    login_stats: {
+      total_logins: 0,
+      last_login_at: null,
+      active_streak_days: 0,
+      consistency_percent: 0
+    },
+    weekly_activity: [],
+    action_distribution: [],
+    time_of_day_habits: [],
+    recent_activity_stream: []
+  };
 
-  // Determine readiness status based on actual performance
-  let readinessTier = 'Baseline Assessment';
-  let tierColor = 'text-slate-600 bg-slate-100 border-slate-200';
-  if (summary.tests_completed >= 3 && avgNum >= 75) {
-    readinessTier = 'Merit Contender (Top Tier)';
-    tierColor = 'text-emerald-700 bg-emerald-50 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800';
-  } else if (summary.tests_completed >= 1 && avgNum >= 50) {
-    readinessTier = 'Proficient In-Progress';
-    tierColor = 'text-blue-700 bg-blue-50 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800';
-  }
+  const progressTimeline = data?.progress_timeline || {
+    past7Days: activityAnalysis.weekly_activity || [],
+    past30Days: []
+  };
 
-  // Calculate score improvement delta
+  // Determine active timeline data based on selected window
+  const activeTimelineDays = useMemo(() => {
+    if (activityWindow === '30d' && progressTimeline.past30Days?.length > 0) {
+      return progressTimeline.past30Days;
+    }
+    return progressTimeline.past7Days?.length > 0 ? progressTimeline.past7Days : (activityAnalysis.weekly_activity || []);
+  }, [activityWindow, progressTimeline, activityAnalysis.weekly_activity]);
+
+  // Check if student has performed any portal actions
+  const totalTimelineMinutes = useMemo(() => {
+    return activeTimelineDays.reduce((acc, d) => acc + (d.minutes || 0), 0);
+  }, [activeTimelineDays]);
+
+  const hasAnyActivity = activityAnalysis.login_stats.total_logins > 0 || 
+                         summary.tests_completed > 0 || 
+                         summary.questions_attempted > 0 ||
+                         totalTimelineMinutes > 0 ||
+                         syllabusTracker.completed_topics > 0;
+
+  // Score improvement calculation
   const scoreImprovement = useMemo(() => {
     if (scoreTrend.length < 2) return null;
     const first = scoreTrend[0].percentage;
@@ -128,13 +180,51 @@ export default function StudentAnalytics() {
     return last - first;
   }, [scoreTrend]);
 
+  // Color helper for exam readiness tiers
+  const getReadinessTheme = (tier) => {
+    switch (tier) {
+      case 'Exam Ready':
+        return {
+          pill: 'bg-emerald-50 text-emerald-700 border-emerald-300 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800',
+          accent: 'text-emerald-600',
+          ring: '#059669'
+        };
+      case 'Merit Contender':
+        return {
+          pill: 'bg-indigo-50 text-indigo-700 border-indigo-300 dark:bg-indigo-950/50 dark:text-indigo-300 dark:border-indigo-800',
+          accent: 'text-indigo-600',
+          ring: '#4F46E5'
+        };
+      case 'Proficient In-Progress':
+        return {
+          pill: 'bg-blue-50 text-blue-700 border-blue-300 dark:bg-blue-950/50 dark:text-blue-300 dark:border-blue-800',
+          accent: 'text-blue-600',
+          ring: '#2563EB'
+        };
+      case 'Baseline Assessment':
+        return {
+          pill: 'bg-amber-50 text-amber-700 border-amber-300 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800',
+          accent: 'text-amber-600',
+          ring: '#D97706'
+        };
+      default:
+        return {
+          pill: 'bg-slate-100 text-slate-600 border-slate-300 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700',
+          accent: 'text-slate-500',
+          ring: '#94A3B8'
+        };
+    }
+  };
+
+  const readinessTheme = getReadinessTheme(examReadiness.tier);
+
   if (loading) {
     return (
       <div className="p-8 text-center text-slate-500 flex items-center justify-center min-h-[50vh]">
         <div className="flex items-center gap-2.5">
           <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
           <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-            Synthesizing performance analytics & activity diagnostics...
+            Fetching verified student analytics...
           </span>
         </div>
       </div>
@@ -144,722 +234,1096 @@ export default function StudentAnalytics() {
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto space-y-6 font-sans">
       
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs">
-        <div className="space-y-1">
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-blue-50 dark:bg-blue-950/50 text-[#1E3A8A] dark:text-blue-300 text-xs font-semibold border border-blue-200 dark:border-blue-900">
-            <TrendingUp size={13} className="text-[#2563EB]" />
-            <span>Learning & Exam Diagnostics</span>
+      {/* 1. Header & Quick Interactive Action Bar */}
+      <div className="bg-white dark:bg-slate-800 p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs space-y-4">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-blue-50 dark:bg-blue-950/50 text-[#1E3A8A] dark:text-blue-300 text-xs font-semibold border border-blue-200 dark:border-blue-900">
+              <TrendingUp size={13} className="text-[#2563EB]" />
+              <span>Real Performance Diagnostics & Readiness</span>
+            </div>
+            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+              <span>DDCET Student Performance Dashboard</span>
+              {user?.name && (
+                <span className="text-sm font-normal text-slate-500 dark:text-slate-400">
+                  • {user.name}
+                </span>
+              )}
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+              Accurate analytics calculated strictly from real practice tests, timed mock exams, mistakes, and syllabus progress.
+            </p>
           </div>
-          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
-            <span>DDCET Performance & Activity Analytics</span>
-            {user?.name && (
-              <span className="text-sm font-normal text-slate-500 dark:text-slate-400">
-                • {user.name}
-              </span>
-            )}
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-            Real data from your actual login history, portal actions, practice tests, speed benchmarks, and syllabus coverage.
-          </p>
+
+          <div className="flex items-center gap-2.5 self-start lg:self-center">
+            <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${readinessTheme.pill}`}>
+              Status: {examReadiness.tier}
+            </span>
+            <button
+              onClick={() => fetchAnalytics(true)}
+              disabled={isRefreshing}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-650 transition cursor-pointer"
+              title="Refresh analytics data"
+            >
+              <RefreshCw size={13} className={isRefreshing ? "animate-spin text-blue-600" : "text-slate-500"} />
+              <span className="hidden sm:inline">Refresh</span>
+            </button>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2.5 self-start sm:self-center">
-          <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${tierColor}`}>
-            Status: {readinessTier}
-          </span>
-          <button
-            onClick={() => fetchAnalytics(true)}
-            disabled={isRefreshing}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-650 transition cursor-pointer"
-            title="Refresh analytics data"
+        {/* 4 Primary Interactive Action Buttons */}
+        <div className="pt-2 border-t border-slate-100 dark:border-slate-750 grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+          <Link
+            to="/student/practice"
+            className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition shadow-xs group"
           >
-            <RefreshCw size={13} className={isRefreshing ? "animate-spin text-blue-600" : "text-slate-500"} />
-            <span className="hidden sm:inline">Refresh</span>
-          </button>
+            <div className="flex items-center gap-2">
+              <Play size={14} className="group-hover:translate-x-0.5 transition-transform" />
+              <span>Practice Now</span>
+            </div>
+            <ArrowRight size={13} className="text-blue-200" />
+          </Link>
+
+          <Link
+            to="/student/mistakes"
+            className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-900 text-xs font-bold transition group"
+          >
+            <div className="flex items-center gap-2">
+              <AlertCircle size={14} />
+              <span>Revise Mistakes</span>
+            </div>
+            <ArrowRight size={13} className="text-rose-400" />
+          </Link>
+
+          <Link
+            to="/student/syllabus"
+            className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 dark:bg-slate-700 dark:text-slate-200 dark:border-slate-600 text-xs font-bold transition group"
+          >
+            <div className="flex items-center gap-2">
+              <BookOpen size={14} />
+              <span>Continue Learning</span>
+            </div>
+            <ArrowRight size={13} className="text-slate-400" />
+          </Link>
+
+          <Link
+            to="/student/mock"
+            className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-300 dark:border-indigo-900 text-xs font-bold transition group"
+          >
+            <div className="flex items-center gap-2">
+              <Timer size={14} />
+              <span>Take Mock Test</span>
+            </div>
+            <ArrowRight size={13} className="text-indigo-400" />
+          </Link>
         </div>
       </div>
 
-      {/* 6 Core KPI Summary Cards */}
+      {/* 2. DDCET Exam Readiness Indicator & Hall Benchmarks */}
+      <div className="bg-white dark:bg-slate-800 p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs space-y-4">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5">
+          {/* Readiness Score Dial & Tier */}
+          <div className="flex items-center gap-4">
+            <div className="relative w-20 h-20 shrink-0 flex items-center justify-center">
+              <svg className="w-20 h-20 -rotate-90">
+                <circle
+                  cx="40"
+                  cy="40"
+                  r="34"
+                  stroke="currentColor"
+                  strokeWidth="7"
+                  className="text-slate-100 dark:text-slate-700"
+                  fill="transparent"
+                />
+                <circle
+                  cx="40"
+                  cy="40"
+                  r="34"
+                  stroke={readinessTheme.ring}
+                  strokeWidth="7"
+                  strokeDasharray={213.6}
+                  strokeDashoffset={213.6 - (213.6 * (examReadiness.readiness_score || 0)) / 100}
+                  strokeLinecap="round"
+                  fill="transparent"
+                  className="transition-all duration-1000 ease-out"
+                />
+              </svg>
+              <div className="absolute flex flex-col items-center justify-center text-center">
+                <span className="text-lg font-black text-slate-900 dark:text-white leading-none">
+                  {examReadiness.readiness_score}%
+                </span>
+                <span className="text-[9px] uppercase tracking-wider font-bold text-slate-400 mt-0.5">
+                  Ready
+                </span>
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                  DDCET Exam Readiness Indicator
+                </h3>
+                <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${readinessTheme.pill}`}>
+                  {examReadiness.tier}
+                </span>
+              </div>
+              <p className="text-xs text-slate-600 dark:text-slate-300 max-w-xl leading-relaxed">
+                {examReadiness.guidance}
+              </p>
+            </div>
+          </div>
+
+          {/* Action quick links */}
+          <div className="flex items-center gap-2 shrink-0 self-end lg:self-center">
+            <Link
+              to="/student/mock"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 text-xs font-semibold border border-blue-200 dark:border-blue-900 hover:bg-blue-100 transition"
+            >
+              <span>Test Readiness</span>
+              <ArrowUpRight size={13} />
+            </Link>
+          </div>
+        </div>
+
+        {/* 4 DDCET Exam Hall Benchmarks */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-slate-100 dark:border-slate-750">
+          {(examReadiness.benchmarks || []).map((b, idx) => (
+            <div key={idx} className="p-3 rounded-xl bg-slate-50 dark:bg-slate-750/50 border border-slate-200/70 dark:border-slate-700">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">{b.label}</span>
+                <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded ${
+                  b.status === 'Met' 
+                    ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' 
+                    : (b.status === 'In Progress' ? 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300' : 'bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-400')
+                }`}>
+                  {b.status}
+                </span>
+              </div>
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-sm font-bold text-slate-900 dark:text-white">{b.current}</span>
+                <span className="text-[10px] text-slate-400">Target: {b.target}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 3. 6 Core Performance KPIs (Real metrics only) */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
         {/* State Rank */}
         <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xs">
           <div className="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-2.5 border border-amber-100 dark:border-amber-900">
             <Trophy size={16} />
           </div>
-          <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">State Rank</span>
+          <p className="text-[11px] font-medium text-slate-400">Current Rank</p>
           <div className="flex items-baseline gap-1 mt-0.5">
-            <p className="text-xl font-bold text-slate-900 dark:text-white">{summary.current_rank}</p>
-            <span className="text-[10px] text-amber-600 font-medium">({summary.percentile})</span>
+            <span className="text-xl font-bold text-slate-900 dark:text-white">
+              {summary.current_rank}
+            </span>
           </div>
+          <span className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 block">
+            {summary.percentile !== '-' ? summary.percentile : (summary.tests_completed > 0 ? 'Ranked' : 'Unranked')}
+          </span>
         </div>
 
         {/* Average Score */}
         <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xs">
-          <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-[#1E3A8A] dark:text-blue-400 flex items-center justify-center mb-2.5 border border-blue-100 dark:border-blue-900">
-            <TrendingUp size={16} />
+          <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-2.5 border border-blue-100 dark:border-blue-900">
+            <Target size={16} />
           </div>
-          <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">Average Score</span>
+          <p className="text-[11px] font-medium text-slate-400">Average Score</p>
           <div className="flex items-baseline gap-1 mt-0.5">
-            <p className="text-xl font-bold text-slate-900 dark:text-white">{summary.average_score}</p>
-            {scoreImprovement !== null && (
-              <span className={`text-[10px] font-semibold ${scoreImprovement >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-                {scoreImprovement >= 0 ? `+${scoreImprovement}%` : `${scoreImprovement}%`}
-              </span>
-            )}
+            <span className="text-xl font-bold text-slate-900 dark:text-white">
+              {summary.average_score}
+            </span>
           </div>
+          <span className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 block">
+            {summary.tests_completed} {summary.tests_completed === 1 ? 'test' : 'tests'} submitted
+          </span>
         </div>
 
         {/* Accuracy Rate */}
         <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xs">
           <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-2.5 border border-emerald-100 dark:border-emerald-900">
-            <Target size={16} />
+            <Zap size={16} />
           </div>
-          <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">Accuracy Rate</span>
-          <p className="text-xl font-bold text-slate-900 dark:text-white mt-0.5">
-            {summary.accuracy_percent > 0 ? `${summary.accuracy_percent}%` : '85%'}
-          </p>
-        </div>
-
-        {/* Tests Completed */}
-        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xs">
-          <div className="w-8 h-8 rounded-lg bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400 flex items-center justify-center mb-2.5 border border-purple-100 dark:border-purple-900">
-            <Award size={16} />
+          <p className="text-[11px] font-medium text-slate-400">Accuracy Rate</p>
+          <div className="flex items-baseline gap-1 mt-0.5">
+            <span className="text-xl font-bold text-slate-900 dark:text-white">
+              {summary.accuracy_percent}%
+            </span>
           </div>
-          <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">Tests Taken</span>
-          <p className="text-xl font-bold text-slate-900 dark:text-white mt-0.5">{summary.tests_completed}</p>
+          <span className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 block">
+            {summary.questions_attempted} MCQs attempted
+          </span>
         </div>
 
         {/* Active Study Streak */}
         <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xs">
-          <div className="w-8 h-8 rounded-lg bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 flex items-center justify-center mb-2.5 border border-orange-100 dark:border-orange-900">
+          <div className="w-8 h-8 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 flex items-center justify-center mb-2.5 border border-rose-100 dark:border-rose-900">
             <Flame size={16} />
           </div>
-          <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">Study Streak</span>
+          <p className="text-[11px] font-medium text-slate-400">Study Streak</p>
           <div className="flex items-baseline gap-1 mt-0.5">
-            <p className="text-xl font-bold text-slate-900 dark:text-white">
-              {activityAnalysis.login_stats.active_streak_days} Days
-            </p>
-            <span className="text-[10px] text-orange-600 font-bold">🔥</span>
-          </div>
-        </div>
-
-        {/* Total Logins / Sessions */}
-        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xs">
-          <div className="w-8 h-8 rounded-lg bg-teal-50 dark:bg-teal-950/40 text-teal-600 dark:text-teal-400 flex items-center justify-center mb-2.5 border border-teal-100 dark:border-teal-900">
-            <LogIn size={16} />
-          </div>
-          <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">Portal Logins</span>
-          <p className="text-xl font-bold text-slate-900 dark:text-white mt-0.5">
-            {activityAnalysis.login_stats.total_logins} Sessions
-          </p>
-        </div>
-      </div>
-
-      {/* NEW: Portal Activity & Engagement Analysis Section */}
-      <div className="bg-white dark:bg-slate-800 p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-700 pb-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <Activity size={18} className="text-blue-600" />
-              <h2 className="text-base font-bold text-slate-900 dark:text-white">
-                Student Portal Activity & Engagement Telemetry
-              </h2>
-            </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Deep analytics capturing every login event, practice session, mock test, and study material accessed within the portal.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3 text-xs">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 font-semibold border border-emerald-200 dark:border-emerald-800">
-              <CheckCircle size={13} />
-              <span>Consistency: {activityAnalysis.login_stats.consistency_percent}%</span>
+            <span className="text-xl font-bold text-slate-900 dark:text-white">
+              {activityAnalysis.login_stats.active_streak_days}
             </span>
+            <span className="text-xs text-slate-400 font-medium">days</span>
           </div>
-        </div>
-
-        {/* 2-Column Grid: Weekly Volume (SVG Bar Chart) + Action Time Allocation */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          
-          {/* Weekly Activity Volume Chart (7 cols) */}
-          <div className="lg:col-span-7 space-y-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                  Past 7-Day Study & Practice Volume
-                </h3>
-                <p className="text-xs text-slate-500">Minutes spent and questions attempted each day</p>
-              </div>
-              <span className="text-[11px] font-semibold text-slate-400">
-                Mon – Sun
-              </span>
-            </div>
-
-            <WeeklyActivityBarChart 
-              days={activityAnalysis.weekly_activity} 
-              hoveredDay={hoveredDay}
-              setHoveredDay={setHoveredDay}
-            />
-
-            <div className="flex justify-between items-center text-xs text-slate-500 pt-1">
-              <span>Average Daily Effort: <strong className="text-slate-800 dark:text-slate-200">68 mins/day</strong></span>
-              <span className="text-blue-600 font-semibold">Weekly Total: 475 mins</span>
-            </div>
-          </div>
-
-          {/* Action Allocation & Time Breakdown (5 cols) */}
-          <div className="lg:col-span-5 space-y-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                  Action & Time Allocation
-                </h3>
-                <p className="text-xs text-slate-500">Where study time is spent within the portal</p>
-              </div>
-            </div>
-
-            <div className="space-y-3 pt-1">
-              {activityAnalysis.action_distribution.map((act, idx) => (
-                <div key={idx} className="space-y-1">
-                  <div className="flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: act.color }} />
-                      <span className="font-semibold text-slate-800 dark:text-slate-200">{act.name}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-slate-900 dark:text-white">{act.minutes}m</span>
-                      <span className="text-[10px] text-slate-400">({act.percent}%)</span>
-                    </div>
-                  </div>
-
-                  <div className="w-full bg-slate-100 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full rounded-full transition-all duration-700"
-                      style={{ width: `${Math.max(5, act.percent)}%`, backgroundColor: act.color }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Time of Day Productivity Profile */}
-            <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-750 border border-slate-200 dark:border-slate-700 space-y-2 text-xs">
-              <div className="flex items-center justify-between font-bold text-slate-900 dark:text-white">
-                <span className="flex items-center gap-1.5">
-                  <Compass size={14} className="text-blue-600" />
-                  <span>Time-of-Day Study Habit</span>
-                </span>
-                <span className="text-blue-600 font-semibold text-[11px]">
-                  Prime Window: Evening
-                </span>
-              </div>
-              <div className="grid grid-cols-4 gap-2 text-center pt-1">
-                {activityAnalysis.time_of_day_habits.map((h, idx) => (
-                  <div key={idx} className="p-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700">
-                    <span className="text-[10px] text-slate-400 block">{h.label}</span>
-                    <span className="font-bold text-slate-900 dark:text-white block mt-0.5">{h.percent}%</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-        </div>
-
-        {/* Real-time Recent Activity Stream Feed */}
-        {activityAnalysis.recent_activity_stream?.length > 0 && (
-          <div className="space-y-3 pt-2 border-t border-slate-100 dark:border-slate-700">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <Clock size={15} className="text-blue-600" />
-                <span>Recent Chronological Activity Stream</span>
-              </h3>
-              <span className="text-[11px] text-slate-400">Actions logged across tests, practice, & materials</span>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
-              {activityAnalysis.recent_activity_stream.slice(0, 6).map((item) => (
-                <div 
-                  key={item.id}
-                  className="p-3 rounded-xl bg-slate-50/70 dark:bg-slate-750/50 border border-slate-200 dark:border-slate-700 flex items-center justify-between text-xs hover:bg-slate-100/70 dark:hover:bg-slate-700/50 transition"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-blue-600 shrink-0">
-                      {item.icon === 'login' ? <LogIn size={14} /> :
-                       item.icon === 'practice' ? <BookOpen size={14} /> :
-                       item.icon === 'mock' ? <Target size={14} /> :
-                       item.icon === 'material' ? <FileText size={14} /> :
-                       <AlertTriangle size={14} className="text-rose-500" />}
-                    </div>
-                    <div>
-                      <p className="font-semibold text-slate-900 dark:text-white line-clamp-1">{item.title}</p>
-                      <span className="text-[10px] text-slate-400">{item.timestamp}</span>
-                    </div>
-                  </div>
-
-                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold shrink-0 ${
-                    item.badge === 'Assessment' ? 'bg-purple-100 text-purple-800 dark:bg-purple-950/60 dark:text-purple-300' :
-                    item.badge === 'Practice' ? 'bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300' :
-                    item.badge === 'Revision' ? 'bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300' :
-                    'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200'
-                  }`}>
-                    {item.badge}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-      </div>
-
-      {/* Primary Graphs Row: Score Progression + Subject Mastery */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        
-        {/* Graph 1: Score Progression Line/Area Chart (7 cols) */}
-        <div className="lg:col-span-7 bg-white dark:bg-slate-800 p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-pulse" />
-                <h2 className="text-base font-bold text-slate-900 dark:text-white">
-                  Score Progression & Velocity
-                </h2>
-              </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Trajectory of mock test and practice scores vs Gujarat state target
-              </p>
-            </div>
-
-            <div className="flex items-center gap-3 text-xs">
-              <div className="flex items-center gap-1.5">
-                <span className="w-3 h-1 bg-[#2563EB] rounded-full inline-block" />
-                <span className="text-slate-600 dark:text-slate-300 font-medium">Your Score</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-3 h-0.5 border-t-2 border-dashed border-amber-500 inline-block" />
-                <span className="text-slate-600 dark:text-slate-300 font-medium">State Benchmark (74%)</span>
-              </div>
-            </div>
-          </div>
-
-          {/* SVG Score Progression Area Chart */}
-          <div className="relative pt-2">
-            {scoreTrend.length === 0 ? (
-              <div className="h-64 flex flex-col items-center justify-center text-slate-400 bg-slate-50 dark:bg-slate-750 rounded-xl border border-dashed border-slate-200 dark:border-slate-700 p-6 text-center">
-                <Target size={36} className="text-slate-300 dark:text-slate-600 mb-2" />
-                <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">No Assessment Attempts Logged Yet</p>
-                <p className="text-xs text-slate-500 max-w-xs mt-1">Take a timed mock exam or practice session to view your live score trajectory graph.</p>
-                <Link
-                  to="/student/mock"
-                  className="mt-3 px-4 py-2 bg-blue-600 text-white rounded-lg text-xs font-semibold hover:bg-blue-700 transition"
-                >
-                  Start Assessment
-                </Link>
-              </div>
-            ) : (
-              <ScoreProgressionChart 
-                trend={scoreTrend} 
-                hoveredPoint={hoveredPoint} 
-                setHoveredPoint={setHoveredPoint} 
-              />
-            )}
-          </div>
-
-          {/* Chart Insights Callout */}
-          {scoreTrend.length > 0 && (
-            <div className="flex items-center justify-between text-xs p-3 rounded-xl bg-blue-50/60 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/60 text-slate-700 dark:text-slate-300">
-              <div className="flex items-center gap-2">
-                <Sparkles size={15} className="text-blue-600 shrink-0" />
-                <span>
-                  <strong>Diagnostic Verdict:</strong>{' '}
-                  {avgNum >= 74 
-                    ? 'Performance is consistently tracking above the state qualifying cutoff.' 
-                    : 'Targeting a +6% lift on formula-heavy chapters will push you into top merit ranks.'}
-                </span>
-              </div>
-              <span className="font-bold text-blue-700 dark:text-blue-300 shrink-0 ml-2">
-                Peak: {Math.max(...scoreTrend.map(t => t.percentage))}%
-              </span>
-            </div>
-          )}
-        </div>
-
-        {/* Graph 2: Subject Mastery Dual Comparison (5 cols) */}
-        <div className="lg:col-span-5 bg-white dark:bg-slate-800 p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-base font-bold text-slate-900 dark:text-white">
-                Subject Mastery vs State
-              </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                All 6 DDCET curriculum subjects
-              </p>
-            </div>
-            <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
-              6 Subjects
-            </span>
-          </div>
-
-          {/* Dual Bar Charts */}
-          <div className="space-y-3.5 pt-1">
-            {subjectPerf.map((sub, idx) => {
-              const userPct = sub.user_score;
-              const targetPct = sub.state_avg;
-              const diff = userPct - targetPct;
-              const isAhead = diff >= 0;
-
-              return (
-                <div 
-                  key={idx} 
-                  className="space-y-1 group cursor-pointer"
-                  onMouseEnter={() => setHoveredSubject(sub.subject_name)}
-                  onMouseLeave={() => setHoveredSubject(null)}
-                >
-                  <div className="flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-slate-800 dark:text-slate-200">
-                        {sub.subject_name}
-                      </span>
-                      <span className="text-[10px] text-slate-400 bg-slate-100 dark:bg-slate-750 px-1.5 py-0.2 rounded">
-                        {sub.question_bank_count} MCQs
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <span className={`text-[10px] font-bold ${isAhead ? 'text-emerald-600' : 'text-amber-600'}`}>
-                        {userPct}% {isAhead ? `(+${diff}%)` : `(${diff}%)`}
-                      </span>
-                      <span className={`text-[10px] px-1.5 py-0.2 rounded font-medium ${
-                        sub.mastery === 'Advanced' 
-                          ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300' 
-                          : sub.mastery === 'Proficient' 
-                            ? 'bg-blue-100 dark:bg-blue-950/60 text-blue-800 dark:text-blue-300' 
-                            : 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300'
-                      }`}>
-                        {sub.mastery}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Paired Bar */}
-                  <div className="space-y-1">
-                    <div className="w-full bg-slate-100 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
-                      <div 
-                        className={`h-full rounded-full transition-all duration-700 ${
-                          userPct >= 80 ? 'bg-emerald-500' : userPct >= 65 ? 'bg-blue-600' : 'bg-amber-500'
-                        }`}
-                        style={{ width: `${Math.min(100, Math.max(5, userPct))}%` }}
-                      />
-                    </div>
-                    <div className="flex justify-between items-center text-[10px] text-slate-400 px-0.5">
-                      <span>State Cutoff: {targetPct}%</span>
-                      <span>Target: 100%</span>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-      </div>
-
-      {/* Secondary Graphs Row: Accuracy Donut + Time Management Gauge */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6">
-        
-        {/* Graph 3: Accuracy Breakdown Donut Chart (6 cols) */}
-        <div className="lg:col-span-6 bg-white dark:bg-slate-800 p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-base font-bold text-slate-900 dark:text-white">
-                Attempt Accuracy & Negative Mark Exposure
-              </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Breakdown of response precision and question selection
-              </p>
-            </div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-center gap-6 pt-2">
-            <div className="relative w-44 h-44 shrink-0 flex items-center justify-center">
-              <AccuracyDonutChart 
-                correct={accuracyBreakdown.correct} 
-                wrong={accuracyBreakdown.wrong} 
-                unattempted={accuracyBreakdown.unattempted} 
-              />
-              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                <span className="text-2xl font-extrabold text-slate-900 dark:text-white leading-none">
-                  {accuracyBreakdown.accuracy_rate}
-                </span>
-                <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mt-1">
-                  Accuracy
-                </span>
-              </div>
-            </div>
-
-            <div className="space-y-3 flex-1 w-full text-xs">
-              <div className="p-2.5 rounded-lg bg-emerald-50/70 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/40 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-full bg-emerald-500 inline-block" />
-                  <span className="font-semibold text-slate-800 dark:text-slate-200">Correct Answers</span>
-                </div>
-                <span className="font-bold text-emerald-700 dark:text-emerald-400">
-                  {accuracyBreakdown.correct} questions (+{accuracyBreakdown.correct} pts)
-                </span>
-              </div>
-
-              <div className="p-2.5 rounded-lg bg-rose-50/70 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/40 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-full bg-rose-500 inline-block" />
-                  <span className="font-semibold text-slate-800 dark:text-slate-200">Incorrect Attempts</span>
-                </div>
-                <span className="font-bold text-rose-700 dark:text-rose-400">
-                  {accuracyBreakdown.wrong} questions (-{(accuracyBreakdown.wrong * 0.25).toFixed(2)} pts)
-                </span>
-              </div>
-
-              <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-750 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-full bg-slate-400 inline-block" />
-                  <span className="font-semibold text-slate-800 dark:text-slate-200">Unattempted</span>
-                </div>
-                <span className="font-bold text-slate-600 dark:text-slate-400">
-                  {accuracyBreakdown.unattempted} questions (0 pts)
-                </span>
-              </div>
-
-              <p className="text-[11px] text-slate-400 italic">
-                * Note: In DDCET, each incorrect answer incurs a 0.25 penalty deduction. Skip unconfident questions to protect your aggregate rank.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Graph 4: Exam Speed & Time Management Dial (6 cols) */}
-        <div className="lg:col-span-6 bg-white dark:bg-slate-800 p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-base font-bold text-slate-900 dark:text-white">
-                Exam Speed & Time Management
-              </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Official Benchmark: 100 questions in 90 min (54 sec/question)
-              </p>
-            </div>
-            <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${
-              timeMetrics.pace_status === 'Optimal' 
-                ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800' 
-                : 'bg-amber-50 text-amber-700 border-amber-200'
-            }`}>
-              {timeMetrics.pace_status}
-            </span>
-          </div>
-
-          <div className="space-y-4 pt-1">
-            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-750 border border-slate-200 dark:border-slate-700 space-y-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <span className="text-xs text-slate-500 block">Average Question Solving Pace</span>
-                  <div className="flex items-baseline gap-2 mt-0.5">
-                    <span className="text-3xl font-extrabold text-slate-900 dark:text-white">
-                      {timeMetrics.avg_seconds_per_q}s
-                    </span>
-                    <span className="text-xs font-semibold text-slate-500">
-                      per question
-                    </span>
-                  </div>
-                </div>
-
-                <div className="text-right">
-                  <span className="text-xs text-slate-400 block">Exam Target Limit</span>
-                  <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
-                    54 seconds
-                  </span>
-                </div>
-              </div>
-
-              {/* Benchmark Slider Bar */}
-              <div className="relative pt-2">
-                <div className="w-full bg-slate-200 dark:bg-slate-650 h-3 rounded-full overflow-hidden flex">
-                  <div className="h-full bg-blue-500 rounded-l-full" style={{ width: '40%' }} title="Fast (<35s)" />
-                  <div className="h-full bg-emerald-500" style={{ width: '30%' }} title="Optimal (35s-54s)" />
-                  <div className="h-full bg-rose-400 rounded-r-full" style={{ width: '30%' }} title="Over-time (>54s)" />
-                </div>
-                
-                {/* Pointer marker for student's pace */}
-                <div 
-                  className="absolute top-0 transform -translate-x-1/2 flex flex-col items-center transition-all duration-700"
-                  style={{ left: `${Math.min(95, Math.max(5, (timeMetrics.avg_seconds_per_q / 80) * 100))}%` }}
-                >
-                  <div className="w-2.5 h-2.5 bg-slate-900 dark:bg-white rounded-full ring-2 ring-blue-500" />
-                  <span className="text-[10px] font-bold text-slate-800 dark:text-slate-200 mt-3 whitespace-nowrap">
-                    You ({timeMetrics.avg_seconds_per_q}s)
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex justify-between text-[10px] text-slate-400 pt-3">
-                <span>0s (Rapid)</span>
-                <span className="font-semibold text-emerald-600">35s-54s (Optimal Zone)</span>
-                <span>80s+ (Risk of Unattempted)</span>
-              </div>
-            </div>
-
-            {/* Quick Metrics Grid */}
-            <div className="grid grid-cols-2 gap-3 text-xs">
-              <div className="p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
-                <span className="text-slate-400 text-[10px] block">Total Study & Practice Time</span>
-                <span className="text-sm font-bold text-slate-900 dark:text-white mt-0.5 block">
-                  {summary.practice_time}
-                </span>
-              </div>
-              <div className="p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
-                <span className="text-slate-400 text-[10px] block">Questions Attempted</span>
-                <span className="text-sm font-bold text-slate-900 dark:text-white mt-0.5 block">
-                  {summary.questions_attempted} MCQs
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      {/* Curriculum Mastery Progress Bar */}
-      <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs space-y-3">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <div>
-            <div className="flex items-center gap-2">
-              <BookOpen size={16} className="text-[#2563EB]" />
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                DDCET Syllabus Coverage Milestones
-              </h3>
-            </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Verified chapters and topics practiced against the official 98 syllabus topics.
-            </p>
-          </div>
-          <span className="text-sm font-bold text-[#1E3A8A] dark:text-blue-400">
-            {summary.syllabus_progress} Completed
+          <span className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 block">
+            {activityAnalysis.login_stats.active_streak_days > 0 ? 'Consecutive streak' : 'Start streak today'}
           </span>
         </div>
 
-        <div className="w-full bg-slate-100 dark:bg-slate-700 h-3 rounded-full overflow-hidden">
-          <div 
-            className="bg-gradient-to-r from-blue-600 to-indigo-600 h-full rounded-full transition-all duration-700" 
-            style={{ width: `${Math.max(4, syllabusNum)}%` }}
+        {/* Total Study Time */}
+        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xs">
+          <div className="w-8 h-8 rounded-lg bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400 flex items-center justify-center mb-2.5 border border-purple-100 dark:border-purple-900">
+            <Clock size={16} />
+          </div>
+          <p className="text-[11px] font-medium text-slate-400">Total Practice</p>
+          <div className="flex items-baseline gap-1 mt-0.5">
+            <span className="text-xl font-bold text-slate-900 dark:text-white">
+              {summary.practice_time}
+            </span>
+          </div>
+          <span className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 block">
+            Actual time spent
+          </span>
+        </div>
+
+        {/* Net Points */}
+        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xs">
+          <div className="w-8 h-8 rounded-lg bg-teal-50 dark:bg-teal-950/40 text-teal-600 dark:text-teal-400 flex items-center justify-center mb-2.5 border border-teal-100 dark:border-teal-900">
+            <Award size={16} />
+          </div>
+          <p className="text-[11px] font-medium text-slate-400">Net Points</p>
+          <div className="flex items-baseline gap-1 mt-0.5">
+            <span className="text-xl font-bold text-slate-900 dark:text-white">
+              {summary.total_points}
+            </span>
+            <span className="text-xs text-slate-400 font-medium">pts</span>
+          </div>
+          <span className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 block">
+            Leaderboard score
+          </span>
+        </div>
+      </div>
+
+      {/* 4. Daily Study Goals Card & Progress Tracker */}
+      <div className="bg-white dark:bg-slate-800 p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                Daily Study Goals (Today's Real Activity)
+              </h3>
+              {dailyGoal.completed ? (
+                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                  Daily Goal Achieved! 🎉
+                </span>
+              ) : (
+                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300">
+                  In Progress
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              Daily target: 45 minutes of practice and 30 questions solved today.
+            </p>
+          </div>
+          <Link
+            to="/student/practice"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold transition self-start sm:self-center"
+          >
+            <span>Practice Today's Goal</span>
+            <ArrowRight size={13} />
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+          {/* Target 1: Study Time */}
+          <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-750/50 border border-slate-200/70 dark:border-slate-700 space-y-2">
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <Clock size={14} className="text-blue-600" />
+                <span>Today's Study Time</span>
+              </span>
+              <span className="font-bold text-slate-900 dark:text-white">
+                {dailyGoal.today_minutes} / {dailyGoal.target_minutes} mins ({dailyGoal.minutes_progress_pct}%)
+              </span>
+            </div>
+            <div className="w-full h-2.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-blue-600 rounded-full transition-all duration-500"
+                style={{ width: `${dailyGoal.minutes_progress_pct}%` }}
+              />
+            </div>
+            <p className="text-[11px] text-slate-400">
+              {dailyGoal.today_minutes >= dailyGoal.target_minutes 
+                ? 'Time target achieved for today!' 
+                : `${dailyGoal.target_minutes - dailyGoal.today_minutes} minutes remaining to reach your goal.`}
+            </p>
+          </div>
+
+          {/* Target 2: Questions Solved */}
+          <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-750/50 border border-slate-200/70 dark:border-slate-700 space-y-2">
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <Target size={14} className="text-emerald-600" />
+                <span>Today's MCQs Solved</span>
+              </span>
+              <span className="font-bold text-slate-900 dark:text-white">
+                {dailyGoal.today_questions} / {dailyGoal.target_questions} MCQs ({dailyGoal.questions_progress_pct}%)
+              </span>
+            </div>
+            <div className="w-full h-2.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-emerald-600 rounded-full transition-all duration-500"
+                style={{ width: `${dailyGoal.questions_progress_pct}%` }}
+              />
+            </div>
+            <p className="text-[11px] text-slate-400">
+              {dailyGoal.today_questions >= dailyGoal.target_questions 
+                ? 'Question target achieved for today!' 
+                : `${dailyGoal.target_questions - dailyGoal.today_questions} questions remaining to reach your goal.`}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* 5. 7-Day & 30-Day Activity Progress Chart */}
+      <div className="bg-white dark:bg-slate-800 p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <Calendar size={16} className="text-blue-600" />
+              <span>Study Time & Activity Progress</span>
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              Daily minutes studied and questions attempted across your selected timeline
+            </p>
+          </div>
+
+          {/* Toggle 7d / 30d */}
+          <div className="flex items-center p-1 bg-slate-100 dark:bg-slate-700 rounded-xl border border-slate-200 dark:border-slate-600 self-start sm:self-center">
+            <button
+              onClick={() => setActivityWindow('7d')}
+              className={`px-3 py-1 text-xs font-bold rounded-lg transition ${
+                activityWindow === '7d'
+                  ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-xs'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-700'
+              }`}
+            >
+              Last 7 Days
+            </button>
+            <button
+              onClick={() => setActivityWindow('30d')}
+              className={`px-3 py-1 text-xs font-bold rounded-lg transition ${
+                activityWindow === '30d'
+                  ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-xs'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-700'
+              }`}
+            >
+              Last 30 Days
+            </button>
+          </div>
+        </div>
+
+        {/* SVG Chart */}
+        <div className="w-full">
+          <ActivityTimelineChart 
+            days={activeTimelineDays}
+            windowType={activityWindow}
+            hoveredDay={hoveredDay}
+            setHoveredDay={setHoveredDay}
           />
         </div>
-      </div>
 
-      {/* Actionable Topic Diagnostics (Strengths vs Weaknesses) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        
-        {/* High Performing Topics */}
-        <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs space-y-4">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 flex items-center justify-center border border-emerald-100 dark:border-emerald-900">
-              <CheckCircle2 size={16} />
-            </div>
-            <div>
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                Strong Topics (High Accuracy)
-              </h3>
-              <p className="text-xs text-slate-500">Chapters where your precision exceeds 80%</p>
-            </div>
+        {/* Hovered day details indicator */}
+        <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-750 text-xs">
+          <div className="flex items-center gap-4">
+            <span className="flex items-center gap-1.5 text-slate-500">
+              <span className="w-2.5 h-2.5 rounded-sm bg-blue-600 inline-block" />
+              <span>Study Minutes</span>
+            </span>
+            <span className="flex items-center gap-1.5 text-slate-500">
+              <span className="w-2.5 h-2.5 rounded-sm bg-indigo-400 inline-block" />
+              <span>Questions Solved</span>
+            </span>
           </div>
 
-          <div className="space-y-2.5">
-            {topicDiagnostics.strong_topics.map((t, idx) => (
-              <div 
-                key={idx}
-                className="p-3 rounded-xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/40 flex items-center justify-between"
-              >
-                <div>
-                  <h4 className="text-xs font-bold text-slate-900 dark:text-white">{t.name}</h4>
-                  <span className="text-[10px] text-slate-500 dark:text-slate-400">{t.subject}</span>
-                </div>
-                <div className="flex items-center gap-1.5 bg-emerald-100 dark:bg-emerald-900/60 px-2 py-0.5 rounded text-xs font-bold text-emerald-800 dark:text-emerald-300">
-                  <span>{t.accuracy}%</span>
-                </div>
-              </div>
-            ))}
+          {hoveredDay ? (
+            <div className="text-slate-700 dark:text-slate-300 font-medium">
+              <span className="font-bold">{hoveredDay.display_date || hoveredDay.day}: </span>
+              <span>{hoveredDay.minutes} mins • {hoveredDay.questions} questions</span>
+            </div>
+          ) : (
+            <span className="text-[11px] text-slate-400">Hover over bars for daily breakdown</span>
+          )}
+        </div>
+      </div>
+
+      {/* 6. Completed / Pending Syllabus Tracker Card */}
+      <div className="bg-white dark:bg-slate-800 p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <BookCheck size={16} className="text-blue-600" />
+                <span>Completed vs Pending Syllabus Tracker</span>
+              </h3>
+              <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300">
+                {syllabusTracker.completion_percentage}% Covered
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              Tracks individual topic completions across all 6 DDCET subjects. (Chapters are marked complete only when all topics are done).
+            </p>
+          </div>
+          <Link
+            to="/student/syllabus"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 text-xs font-semibold border border-blue-200 dark:border-blue-900 hover:bg-blue-100 transition self-start sm:self-center"
+          >
+            <span>Continue Learning</span>
+            <ArrowRight size={13} />
+          </Link>
+        </div>
+
+        {/* Global Summary Counts */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-750/50 border border-slate-200/70 dark:border-slate-700">
+            <span className="text-[11px] font-medium text-slate-500">Completed Topics</span>
+            <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
+              {syllabusTracker.completed_topics} / {syllabusTracker.total_topics}
+            </p>
+          </div>
+          <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-750/50 border border-slate-200/70 dark:border-slate-700">
+            <span className="text-[11px] font-medium text-slate-500">Pending Topics</span>
+            <p className="text-lg font-bold text-amber-600 dark:text-amber-400 mt-0.5">
+              {syllabusTracker.pending_topics} Topics
+            </p>
+          </div>
+          <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-750/50 border border-slate-200/70 dark:border-slate-700">
+            <span className="text-[11px] font-medium text-slate-500">Completed Chapters</span>
+            <p className="text-lg font-bold text-blue-600 dark:text-blue-400 mt-0.5">
+              {syllabusTracker.completed_chapters} / {syllabusTracker.total_chapters}
+            </p>
+          </div>
+          <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-750/50 border border-slate-200/70 dark:border-slate-700">
+            <span className="text-[11px] font-medium text-slate-500">Pending Chapters</span>
+            <p className="text-lg font-bold text-slate-700 dark:text-slate-300 mt-0.5">
+              {syllabusTracker.pending_chapters} Chapters
+            </p>
           </div>
         </div>
 
-        {/* Priority Focus Areas */}
-        <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs space-y-4">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-600 flex items-center justify-center border border-rose-100 dark:border-rose-900">
-              <ShieldAlert size={16} />
-            </div>
-            <div>
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                Critical Revision Areas
-              </h3>
-              <p className="text-xs text-slate-500">Topics causing score drops or negative deductions</p>
-            </div>
+        {/* Overall Progress Bar */}
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between text-xs font-semibold">
+            <span className="text-slate-700 dark:text-slate-300">Overall DDCET Syllabus Progress</span>
+            <span className="text-blue-600 dark:text-blue-400">{syllabusTracker.completion_percentage}% Completed</span>
           </div>
+          <div className="w-full h-3 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full transition-all duration-700"
+              style={{ width: `${syllabusTracker.completion_percentage}%` }}
+            />
+          </div>
+        </div>
 
-          <div className="space-y-2.5">
-            {topicDiagnostics.weak_topics.map((t, idx) => (
-              <div 
-                key={idx}
-                className="p-3 rounded-xl bg-rose-50/40 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/40 space-y-1.5"
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="text-xs font-bold text-slate-900 dark:text-white">{t.name}</h4>
-                    <span className="text-[10px] text-slate-500 dark:text-slate-400">{t.subject}</span>
+        {/* Per-Subject Syllabus Progress Bars */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pt-2">
+          {(syllabusTracker.subject_progress || []).map((sp, idx) => (
+            <div key={idx} className="p-3 rounded-xl bg-slate-50 dark:bg-slate-750/50 border border-slate-200/70 dark:border-slate-700 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-900 dark:text-white truncate max-w-[150px]">
+                  {sp.subject_name}
+                </span>
+                <span className="text-[11px] font-bold text-blue-600 dark:text-blue-400">
+                  {sp.completion_percent}%
+                </span>
+              </div>
+              <div className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-blue-600 rounded-full transition-all duration-500"
+                  style={{ width: `${sp.completion_percent}%` }}
+                />
+              </div>
+              <div className="flex items-center justify-between text-[10px] text-slate-400">
+                <span>{sp.completed_topics} of {sp.total_topics} topics done</span>
+                <span>{sp.completed_chapters} / {sp.total_chapters} chapters done</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 7. Subject Mastery Matrix & Weak vs Strong Subjects */}
+      <div className="bg-white dark:bg-slate-800 p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <BarChart2 size={16} className="text-blue-600" />
+              <span>Subject-wise Accuracy & Mastery Matrix</span>
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              Strictly derived from your question answers. Unattempted subjects remain labeled "Not Attempted" (0%) and are never counted as weak.
+            </p>
+          </div>
+          <Link
+            to="/student/practice"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold transition self-start sm:self-center"
+          >
+            <span>Practice Subject MCQs</span>
+            <ArrowRight size={13} />
+          </Link>
+        </div>
+
+        {/* Strong vs Weak Subjects Callout Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Strong Subjects */}
+          <div className="p-4 rounded-xl bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/60 space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-300 font-bold text-xs">
+                <CheckCircle2 size={15} className="text-emerald-600" />
+                <span>Strong Subjects (Accuracy ≥ 70%)</span>
+              </div>
+              <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">
+                {subjectAnalysis.strong_subjects?.length || 0} Identified
+              </span>
+            </div>
+
+            {subjectAnalysis.strong_subjects?.length > 0 ? (
+              <div className="space-y-1.5 pt-1">
+                {subjectAnalysis.strong_subjects.map((s, idx) => (
+                  <div key={idx} className="flex items-center justify-between text-xs bg-white dark:bg-slate-800 p-2 rounded-lg border border-emerald-100 dark:border-emerald-900/40">
+                    <span className="font-semibold text-slate-900 dark:text-white">{s.subject_name}</span>
+                    <span className="font-bold text-emerald-600">{s.accuracy}% Accuracy ({s.attempts} MCQs)</span>
                   </div>
-                  <span className="text-xs font-bold text-rose-600 dark:text-rose-400 bg-rose-100 dark:bg-rose-900/50 px-2 py-0.5 rounded">
-                    {t.accuracy}% Acc
-                  </span>
-                </div>
-                {t.suggestion && (
-                  <p className="text-[11px] text-slate-600 dark:text-slate-300">
-                    💡 <em>{t.suggestion}</em>
-                  </p>
-                )}
-                <div className="pt-1 flex justify-end">
-                  <Link
-                    to="/student/practice"
-                    className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:underline"
-                  >
-                    <span>Practice topic MCQs</span>
-                    <ArrowRight size={12} />
-                  </Link>
-                </div>
+                ))}
               </div>
-            ))}
+            ) : (
+              <p className="text-xs text-slate-500 dark:text-slate-400 pt-1">
+                {summary.tests_completed > 0 
+                  ? 'Keep practicing! Score 70% or higher in a subject to mark it as strong.' 
+                  : 'No subjects attempted yet. Take practice tests to unlock your strong subject analysis.'}
+              </p>
+            )}
+          </div>
+
+          {/* Weak Subjects */}
+          <div className="p-4 rounded-xl bg-rose-50/60 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/60 space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-rose-800 dark:text-rose-300 font-bold text-xs">
+                <AlertTriangle size={15} className="text-rose-600" />
+                <span>Weak Subjects (Accuracy &lt; 60% with attempts)</span>
+              </div>
+              <span className="text-xs font-bold text-rose-700 dark:text-rose-400">
+                {subjectAnalysis.weak_subjects?.length || 0} Areas
+              </span>
+            </div>
+
+            {subjectAnalysis.weak_subjects?.length > 0 ? (
+              <div className="space-y-1.5 pt-1">
+                {subjectAnalysis.weak_subjects.map((s, idx) => (
+                  <div key={idx} className="flex items-center justify-between text-xs bg-white dark:bg-slate-800 p-2 rounded-lg border border-rose-100 dark:border-rose-900/40">
+                    <span className="font-semibold text-slate-900 dark:text-white">{s.subject_name}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-rose-600">{s.accuracy}% Accuracy</span>
+                      <Link
+                        to="/student/practice"
+                        className="text-[11px] text-blue-600 hover:underline font-bold"
+                      >
+                        Practice
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-slate-500 dark:text-slate-400 pt-1">
+                {summary.tests_completed > 0 
+                  ? 'No weak subjects detected! All your practiced subjects are performing at or above 60%.' 
+                  : 'No weak subjects yet. Unattempted subjects are never labeled as weak.'}
+              </p>
+            )}
           </div>
         </div>
 
+        {/* All 6 Subjects Comparison Table */}
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs">
+            <thead>
+              <tr className="border-b border-slate-200 dark:border-slate-700 text-slate-400 uppercase text-[10px] tracking-wider">
+                <th className="py-2.5 px-3">Subject Name</th>
+                <th className="py-2.5 px-3">Accuracy / Score</th>
+                <th className="py-2.5 px-3">DDCET Benchmark</th>
+                <th className="py-2.5 px-3">Questions Solved</th>
+                <th className="py-2.5 px-3">Mastery Status</th>
+                <th className="py-2.5 px-3 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-750">
+              {subjectPerf.map((sub, idx) => {
+                const isAttempted = (sub.attempts_count || 0) > 0;
+                let badgeClass = 'bg-slate-100 text-slate-600 dark:bg-slate-750 dark:text-slate-400';
+                if (sub.mastery === 'Strong') badgeClass = 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300';
+                else if (sub.mastery === 'Moderate') badgeClass = 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300';
+                else if (sub.mastery === 'Weak') badgeClass = 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300';
+
+                return (
+                  <tr key={idx} className="hover:bg-slate-50 dark:hover:bg-slate-750/50 transition">
+                    <td className="py-3 px-3 font-semibold text-slate-900 dark:text-white">
+                      {sub.subject_name}
+                    </td>
+                    <td className="py-3 px-3">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-slate-900 dark:text-white w-10">
+                          {isAttempted ? `${sub.user_score}%` : '0%'}
+                        </span>
+                        <div className="w-20 h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                          <div 
+                            className={`h-full rounded-full ${
+                              sub.user_score >= 70 ? 'bg-emerald-600' : (sub.user_score >= 50 ? 'bg-blue-600' : 'bg-rose-500')
+                            }`}
+                            style={{ width: `${sub.user_score || 0}%` }}
+                          />
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-3 px-3 text-slate-500">
+                      {sub.state_avg}% Target
+                    </td>
+                    <td className="py-3 px-3 text-slate-600 dark:text-slate-300">
+                      {sub.attempts_count || 0} MCQs
+                    </td>
+                    <td className="py-3 px-3">
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${badgeClass}`}>
+                        {sub.mastery || (isAttempted ? 'Practiced' : 'Not Attempted')}
+                      </span>
+                    </td>
+                    <td className="py-3 px-3 text-right">
+                      <Link
+                        to="/student/practice"
+                        className="inline-flex items-center gap-1 text-blue-600 dark:text-blue-400 font-semibold hover:underline"
+                      >
+                        <span>Practice</span>
+                        <ChevronRight size={13} />
+                      </Link>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      {/* Recent Assessment Attempts Log */}
-      {recentTests.length > 0 && (
+      {/* 8. Weak & Strong Chapters / Topics Diagnostics */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Priority Focus Areas (Weak Topics & Chapters) */}
         <div className="bg-white dark:bg-slate-800 p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                Recent Assessment Scorecards
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <AlertTriangle size={15} className="text-rose-500" />
+                <span>Weak Chapters & Topics Diagnostics</span>
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Completed tests and verified score submissions
+                Topics where your accuracy is under 60% with actual question attempts
               </p>
             </div>
             <Link
-              to="/student/mock"
+              to="/student/practice"
               className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
             >
-              <span>Take New Assessment</span>
+              <span>Practice Now</span>
               <ArrowRight size={13} />
             </Link>
           </div>
 
+          {diagnostics.weak_topics?.length === 0 && diagnostics.weak_chapters?.length === 0 ? (
+            <div className="p-8 text-center text-slate-400 bg-slate-50/50 dark:bg-slate-750/30 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
+              <CheckCircle size={28} className="text-emerald-500 mx-auto mb-1.5" />
+              <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">No weak topics recorded</p>
+              <p className="text-[11px] text-slate-400 mt-0.5">
+                {summary.tests_completed > 0 
+                  ? 'All attempted topics are performing above 60% accuracy!' 
+                  : 'Start practicing to identify and diagnose weak areas.'}
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-2.5">
+              {diagnostics.weak_topics.slice(0, 4).map((t, idx) => (
+                <div key={idx} className="p-3 rounded-xl bg-rose-50/50 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/50 flex items-center justify-between gap-3">
+                  <div className="space-y-0.5 min-w-0">
+                    <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                      {t.topic_name}
+                    </p>
+                    <p className="text-[10px] text-slate-500 truncate">
+                      {t.subject_name} • {t.chapter_name}
+                    </p>
+                    <div className="flex items-center gap-2 text-[10px] text-rose-600 dark:text-rose-400 font-semibold pt-0.5">
+                      <span>{t.accuracy}% Accuracy</span>
+                      <span>•</span>
+                      <span>{t.attempts} MCQs attempted ({t.wrong} mistakes)</span>
+                    </div>
+                  </div>
+                  <Link
+                    to="/student/practice"
+                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-bold transition shrink-0"
+                  >
+                    <span>Practice Now</span>
+                    <ArrowRight size={11} />
+                  </Link>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Strong Performing Topics & Chapters */}
+        <div className="bg-white dark:bg-slate-800 p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <CheckCircle2 size={15} className="text-emerald-500" />
+                <span>Strong Mastery Topics (≥ 80% Accuracy)</span>
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Concepts where you consistently score high accuracy
+              </p>
+            </div>
+            <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
+              {diagnostics.strong_topics?.length || 0} Strong Topics
+            </span>
+          </div>
+
+          {diagnostics.strong_topics?.length === 0 ? (
+            <div className="p-8 text-center text-slate-400 bg-slate-50/50 dark:bg-slate-750/30 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
+              <Sparkles size={28} className="text-slate-300 dark:text-slate-600 mx-auto mb-1.5" />
+              <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">No strong topics recorded yet</p>
+              <p className="text-[11px] text-slate-400 mt-0.5">
+                Score 80% or higher on topic practice sessions to validate strong mastery.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-2.5">
+              {diagnostics.strong_topics.slice(0, 4).map((t, idx) => (
+                <div key={idx} className="p-3 rounded-xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/50 flex items-center justify-between gap-3">
+                  <div className="space-y-0.5 min-w-0">
+                    <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                      {t.topic_name}
+                    </p>
+                    <p className="text-[10px] text-slate-500 truncate">
+                      {t.subject_name} • {t.chapter_name}
+                    </p>
+                    <div className="flex items-center gap-2 text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold pt-0.5">
+                      <span>{t.accuracy}% Accuracy</span>
+                      <span>•</span>
+                      <span>{t.attempts} MCQs solved</span>
+                    </div>
+                  </div>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 shrink-0">
+                    Strong
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* 9. Accuracy & Speed Analysis (Dual Visualizer) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Accuracy Breakdown & Negative Marking Penalty */}
+        <div className="bg-white dark:bg-slate-800 p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                Accuracy Breakdown & Mistake Penalty
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Includes -0.25 negative marking penalty calculation
+              </p>
+            </div>
+            <Link
+              to="/student/mistakes"
+              className="text-xs font-semibold text-rose-600 dark:text-rose-400 hover:underline flex items-center gap-1"
+            >
+              <span>Revise Mistakes</span>
+              <ArrowRight size={13} />
+            </Link>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center gap-6 pt-2">
+            <div className="w-36 h-36 shrink-0">
+              <AccuracyDonutChart 
+                correct={accuracyBreakdown.correct}
+                wrong={accuracyBreakdown.wrong}
+                unattempted={accuracyBreakdown.unattempted}
+              />
+            </div>
+
+            <div className="flex-1 space-y-2.5 w-full text-xs">
+              <div className="flex items-center justify-between p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900">
+                <span className="font-semibold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block" />
+                  <span>Correct Answers</span>
+                </span>
+                <span className="font-bold text-emerald-700 dark:text-emerald-300">
+                  {accuracyBreakdown.correct} MCQs
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between p-2 rounded-lg bg-rose-50 dark:bg-rose-950/30 border border-rose-100 dark:border-rose-900">
+                <span className="font-semibold text-rose-800 dark:text-rose-300 flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block" />
+                  <span>Wrong Answers (Mistakes)</span>
+                </span>
+                <span className="font-bold text-rose-700 dark:text-rose-300">
+                  {accuracyBreakdown.wrong} MCQs
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-750 border border-slate-200 dark:border-slate-700">
+                <span className="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-slate-400 inline-block" />
+                  <span>Skipped / Unattempted</span>
+                </span>
+                <span className="font-bold text-slate-600 dark:text-slate-400">
+                  {accuracyBreakdown.unattempted} MCQs
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Negative Marking Callout Banner */}
+          <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 flex items-start gap-2.5 text-xs">
+            <AlertCircle size={16} className="text-amber-600 shrink-0 mt-0.5" />
+            <div className="space-y-0.5">
+              <span className="font-bold text-amber-900 dark:text-amber-200">
+                DDCET Negative Marking Impact: -{mistakeAnalysis.marks_deducted} Marks Lost
+              </span>
+              <p className="text-[11px] text-amber-700 dark:text-amber-300 leading-relaxed">
+                Each wrong answer incurs a -0.25 mark penalty. Reviewing your mistake notebook regularly eliminates recurring mistakes and guards your state rank.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Exam Hall Speed & Time Management Dial */}
+        <div className="bg-white dark:bg-slate-800 p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                Exam Speed & Time Management
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Official DDCET benchmark: 54 seconds per question (100 Qs / 90 mins)
+              </p>
+            </div>
+            <span className="px-2.5 py-0.5 rounded text-[11px] font-bold bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300">
+              {speedAnalysis.pace_status}
+            </span>
+          </div>
+
+          <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-750/50 border border-slate-200/70 dark:border-slate-700 space-y-3">
+            <div className="flex items-baseline justify-between">
+              <div>
+                <span className="text-2xl font-black text-slate-900 dark:text-white">
+                  {speedAnalysis.avg_seconds_per_q}s
+                </span>
+                <span className="text-xs text-slate-400 ml-1.5">per question average</span>
+              </div>
+              <span className="text-xs font-semibold text-slate-500">
+                Target: {speedAnalysis.target_seconds}s
+              </span>
+            </div>
+
+            {/* Benchmark Slider Bar */}
+            <div className="space-y-1">
+              <div className="relative w-full h-3 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                <div 
+                  className={`h-full rounded-full transition-all duration-500 ${
+                    speedAnalysis.avg_seconds_per_q === 0 
+                      ? 'bg-slate-300' 
+                      : (speedAnalysis.avg_seconds_per_q <= 54 ? 'bg-emerald-500' : 'bg-rose-500')
+                  }`}
+                  style={{ width: `${Math.min(100, Math.max(10, (speedAnalysis.avg_seconds_per_q / 90) * 100))}%` }}
+                />
+              </div>
+              <div className="flex items-center justify-between text-[10px] text-slate-400">
+                <span>Fast (&lt;35s)</span>
+                <span className="font-bold text-blue-600">54s Target</span>
+                <span>Slow (&gt;75s)</span>
+              </div>
+            </div>
+
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+              {speedAnalysis.avg_seconds_per_q === 0 
+                ? 'Solve practice questions to calculate your average solving pace.'
+                : (speedAnalysis.avg_seconds_per_q <= 54 
+                    ? 'Excellent pace! You are working well within the DDCET 90-minute time allocation.' 
+                    : 'Pacing alert: Consider practicing timed topic tests to trim your solving time down to 54 seconds per question.')}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 text-xs">
+            <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-750 border border-slate-200 dark:border-slate-700">
+              <span className="text-slate-400 text-[10px]">Total Time Invested</span>
+              <p className="text-sm font-bold text-slate-900 dark:text-white mt-0.5">
+                {speedAnalysis.total_practice_time || summary.practice_time}
+              </p>
+            </div>
+            <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-750 border border-slate-200 dark:border-slate-700">
+              <span className="text-slate-400 text-[10px]">Avg Speed Efficiency</span>
+              <p className="text-sm font-bold text-slate-900 dark:text-white mt-0.5">
+                {speedAnalysis.avg_seconds_per_q > 0 ? `${Math.round((54 / speedAnalysis.avg_seconds_per_q) * 100)}%` : '0%'}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 10. Smart Study Recommendations & Revision Planner */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Smart Study Recommendations */}
+        <div className="bg-white dark:bg-slate-800 p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <Sparkles size={16} className="text-amber-500" />
+                <span>Smart Study Recommendations</span>
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Personalized study guidance driven by your real test results
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            {smartRecommendations.map((rec, idx) => (
+              <div 
+                key={idx} 
+                className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-750/50 border border-slate-200/80 dark:border-slate-700 space-y-2"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <span className="text-xs font-bold text-slate-900 dark:text-white leading-tight">
+                    {rec.title}
+                  </span>
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold shrink-0 ${
+                    rec.priority === 'high' 
+                      ? 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300' 
+                      : 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300'
+                  }`}>
+                    {rec.priority === 'high' ? 'High Priority' : 'Recommended'}
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                  {rec.description}
+                </p>
+                {rec.action_url && (
+                  <Link
+                    to={rec.action_url}
+                    className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline pt-0.5"
+                  >
+                    <span>{rec.action_text || 'Take Action'}</span>
+                    <ArrowRight size={12} />
+                  </Link>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Revision Planner (Spaced Repetition & Priority Topics) */}
+        <div className="bg-white dark:bg-slate-800 p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <Compass size={16} className="text-blue-600" />
+                <span>Revision Planner</span>
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Prioritizes topics by low accuracy, spaced retention interval, and pending syllabus
+              </p>
+            </div>
+            <Link
+              to="/student/practice"
+              className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+            >
+              <span>Practice All</span>
+              <ArrowRight size={13} />
+            </Link>
+          </div>
+
+          <div className="space-y-3">
+            {revisionPlanner.map((item, idx) => (
+              <div 
+                key={idx} 
+                className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-750/50 border border-slate-200/80 dark:border-slate-700 flex items-center justify-between gap-3"
+              >
+                <div className="space-y-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                      {item.topic_name}
+                    </span>
+                    <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 shrink-0">
+                      {item.badge || 'Revision'}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-slate-400 truncate">
+                    {item.subject_name} • {item.chapter_name}
+                  </p>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight">
+                    {item.reason}
+                  </p>
+                </div>
+
+                <Link
+                  to="/student/practice"
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition shrink-0"
+                >
+                  <span>Practice</span>
+                  <ArrowRight size={12} />
+                </Link>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* 11. Recent Mock Test Performance Scorecards */}
+      <div className="bg-white dark:bg-slate-800 p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <Trophy size={16} className="text-amber-500" />
+              <span>Mock Test & Assessment Performance Scorecards</span>
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              Verified submissions recorded with question breakdowns and test duration
+            </p>
+          </div>
+          <Link
+            to="/student/mock"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold transition"
+          >
+            <span>Take Mock Test</span>
+            <ArrowRight size={13} />
+          </Link>
+        </div>
+
+        {recentTests.length === 0 ? (
+          <div className="p-8 text-center text-slate-400 bg-slate-50/50 dark:bg-slate-750/30 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
+            <Target size={28} className="text-slate-300 dark:text-slate-600 mx-auto mb-1.5" />
+            <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">No activity yet</p>
+            <p className="text-[11px] text-slate-400 mt-0.5">
+              Assessments you complete will be recorded with full score breakdowns and mistake reviews.
+            </p>
+          </div>
+        ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
@@ -870,7 +1334,7 @@ export default function StudentAnalytics() {
                   <th className="py-2.5 px-3">Percentage</th>
                   <th className="py-2.5 px-3">Accuracy</th>
                   <th className="py-2.5 px-3">Time Spent</th>
-                  <th className="py-2.5 px-3 text-right">Review</th>
+                  <th className="py-2.5 px-3 text-right">Review Mistakes</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-750">
@@ -885,7 +1349,9 @@ export default function StudentAnalytics() {
                     </td>
                     <td className="py-3 px-3">
                       <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${
-                        t.percentage >= 75 ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300' : 'bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300'
+                        t.percentage >= 75 
+                          ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300' 
+                          : 'bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300'
                       }`}>
                         {t.percentage}%
                       </span>
@@ -910,31 +1376,39 @@ export default function StudentAnalytics() {
               </tbody>
             </table>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
     </div>
   );
 }
 
 // -------------------------------------------------------------
-// Component: SVG Weekly Activity Bar Chart
+// Component: Activity Timeline Bar Chart (7-Day & 30-Day Support)
 // -------------------------------------------------------------
-function WeeklyActivityBarChart({ days, hoveredDay, setHoveredDay }) {
-  const width = 540;
+function ActivityTimelineChart({ days, windowType, hoveredDay, setHoveredDay }) {
+  if (!days || days.length === 0) {
+    return (
+      <div className="h-44 flex items-center justify-center text-slate-400 text-xs">
+        No activity recorded in this period
+      </div>
+    );
+  }
+
+  const width = 640;
   const height = 180;
-  const padding = { top: 20, right: 20, bottom: 35, left: 35 };
+  const padding = { top: 20, right: 15, bottom: 35, left: 35 };
 
   const chartWidth = width - padding.left - padding.right;
   const chartHeight = height - padding.top - padding.bottom;
 
-  const maxMinutes = Math.max(90, ...days.map(d => d.minutes));
+  const maxMinutes = Math.max(30, ...days.map(d => d.minutes || 0));
   const step = chartWidth / days.length;
-  const barWidth = step * 0.55;
+  const barWidth = Math.max(4, step * (windowType === '30d' ? 0.65 : 0.55));
 
   return (
     <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto overflow-visible font-sans">
-      {/* Gridlines */}
+      {/* Background Grid Lines */}
       {[0, Math.round(maxMinutes / 2), maxMinutes].map((val, idx) => {
         const y = padding.top + chartHeight - (val / maxMinutes) * chartHeight;
         return (
@@ -949,10 +1423,12 @@ function WeeklyActivityBarChart({ days, hoveredDay, setHoveredDay }) {
               className="dark:stroke-slate-700"
             />
             <text
-              x={padding.left - 8}
+              x={padding.left - 6}
               y={y + 3}
               textAnchor="end"
-              className="text-[9px] fill-slate-400 font-medium"
+              fontSize="9"
+              fill="#94A3B8"
+              className="select-none font-medium"
             >
               {val}m
             </text>
@@ -962,43 +1438,69 @@ function WeeklyActivityBarChart({ days, hoveredDay, setHoveredDay }) {
 
       {/* Bars */}
       {days.map((d, idx) => {
-        const barH = (d.minutes / maxMinutes) * chartHeight;
+        const barHeight = Math.max(0, (d.minutes / maxMinutes) * chartHeight);
         const x = padding.left + idx * step + (step - barWidth) / 2;
-        const y = padding.top + chartHeight - barH;
-        const isHovered = hoveredDay === d.day;
+        const y = padding.top + chartHeight - barHeight;
+        const isHovered = hoveredDay?.date === d.date;
+
+        // Display label: for 30d show every 5th or 6th day
+        const showLabel = windowType === '7d' || idx % 5 === 0 || idx === days.length - 1;
+        const labelText = windowType === '7d' ? d.day : (d.display_date || d.day);
 
         return (
           <g 
             key={idx}
-            className="cursor-pointer"
-            onMouseEnter={() => setHoveredDay(d.day)}
+            className="cursor-pointer transition-all"
+            onMouseEnter={() => setHoveredDay(d)}
             onMouseLeave={() => setHoveredDay(null)}
           >
+            {/* Background Hover hit area */}
+            <rect
+              x={padding.left + idx * step}
+              y={padding.top}
+              width={step}
+              height={chartHeight}
+              fill="transparent"
+            />
+
+            {/* Empty bar baseline */}
             <rect
               x={x}
-              y={y}
+              y={padding.top}
               width={barWidth}
-              height={Math.max(4, barH)}
-              rx="4"
-              fill={isHovered ? "#1D4ED8" : "#2563EB"}
-              className="transition-all duration-200"
+              height={chartHeight}
+              rx={barWidth / 2}
+              fill="#F1F5F9"
+              className="dark:fill-slate-750 opacity-40"
             />
-            <text
-              x={x + barWidth / 2}
-              y={y - 5}
-              textAnchor="middle"
-              className="text-[9px] font-bold fill-slate-800 dark:fill-slate-200"
-            >
-              {d.minutes}m
-            </text>
-            <text
-              x={x + barWidth / 2}
-              y={padding.top + chartHeight + 16}
-              textAnchor="middle"
-              className={`text-[10px] font-medium ${isHovered ? 'fill-blue-600 font-bold' : 'fill-slate-500'}`}
-            >
-              {d.day}
-            </text>
+
+            {/* Filled bar */}
+            {d.minutes > 0 && (
+              <rect
+                x={x}
+                y={y}
+                width={barWidth}
+                height={barHeight}
+                rx={barWidth / 2}
+                fill={isHovered ? "#1D4ED8" : "#2563EB"}
+                className="transition-all duration-300"
+              />
+            )}
+
+            {/* X-axis Label */}
+            {showLabel && (
+              <text
+                x={padding.left + idx * step + step / 2}
+                y={height - 12}
+                textAnchor="middle"
+                fontSize={windowType === '30d' ? "8" : "10"}
+                fill={isHovered ? "#2563EB" : "#64748B"}
+                fontWeight={isHovered ? "bold" : "normal"}
+                className="select-none"
+              >
+                {labelText}
+              </text>
+            )}
           </g>
         );
       })}
@@ -1007,229 +1509,82 @@ function WeeklyActivityBarChart({ days, hoveredDay, setHoveredDay }) {
 }
 
 // -------------------------------------------------------------
-// Component: SVG Score Progression Line & Area Graph
-// -------------------------------------------------------------
-function ScoreProgressionChart({ trend, hoveredPoint, setHoveredPoint }) {
-  const width = 600;
-  const height = 220;
-  const padding = { top: 20, right: 30, bottom: 40, left: 45 };
-
-  const chartWidth = width - padding.left - padding.right;
-  const chartHeight = height - padding.top - padding.bottom;
-
-  const pointsCount = trend.length;
-  const getX = (idx) => {
-    if (pointsCount === 1) return padding.left + chartWidth / 2;
-    return padding.left + (idx / (pointsCount - 1)) * chartWidth;
-  };
-  const getY = (pct) => {
-    return padding.top + chartHeight - (pct / 100) * chartHeight;
-  };
-
-  const coords = trend.map((t, idx) => ({
-    x: getX(idx),
-    y: getY(t.percentage),
-    ...t
-  }));
-
-  const linePath = coords.reduce((acc, pt, idx) => {
-    return idx === 0 ? `M ${pt.x} ${pt.y}` : `${acc} L ${pt.x} ${pt.y}`;
-  }, '');
-
-  const areaPath = coords.length > 0
-    ? `${linePath} L ${coords[coords.length - 1].x} ${padding.top + chartHeight} L ${coords[0].x} ${padding.top + chartHeight} Z`
-    : '';
-
-  const targetY = getY(74);
-
-  return (
-    <div className="relative">
-      <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto overflow-visible font-sans">
-        <defs>
-          <linearGradient id="scoreAreaGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#2563EB" stopOpacity="0.35" />
-            <stop offset="100%" stopColor="#2563EB" stopOpacity="0.00" />
-          </linearGradient>
-        </defs>
-
-        {[0, 25, 50, 75, 100].map((val) => {
-          const y = getY(val);
-          return (
-            <g key={val}>
-              <line
-                x1={padding.left}
-                y1={y}
-                x2={width - padding.right}
-                y2={y}
-                stroke="#E2E8F0"
-                strokeDasharray={val === 0 || val === 100 ? undefined : "3 3"}
-                className="dark:stroke-slate-700"
-              />
-              <text
-                x={padding.left - 10}
-                y={y + 4}
-                textAnchor="end"
-                className="text-[10px] fill-slate-400 font-medium"
-              >
-                {val}%
-              </text>
-            </g>
-          );
-        })}
-
-        <line
-          x1={padding.left}
-          y1={targetY}
-          x2={width - padding.right}
-          y2={targetY}
-          stroke="#F59E0B"
-          strokeWidth="1.5"
-          strokeDasharray="4 4"
-        />
-        <text
-          x={width - padding.right}
-          y={targetY - 5}
-          textAnchor="end"
-          className="text-[9px] fill-amber-600 font-bold"
-        >
-          Cutoff (74%)
-        </text>
-
-        {areaPath && (
-          <path d={areaPath} fill="url(#scoreAreaGrad)" />
-        )}
-
-        {linePath && (
-          <path
-            d={linePath}
-            fill="none"
-            stroke="#2563EB"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        )}
-
-        {coords.map((pt, idx) => {
-          const isHovered = hoveredPoint?.id === pt.id;
-          return (
-            <g key={idx} className="cursor-pointer" onMouseEnter={() => setHoveredPoint(pt)} onMouseLeave={() => setHoveredPoint(null)}>
-              {isHovered && (
-                <circle cx={pt.x} cy={pt.y} r="8" fill="#2563EB" opacity="0.25" />
-              )}
-              <circle
-                cx={pt.x}
-                cy={pt.y}
-                r={isHovered ? "5" : "4"}
-                fill={pt.percentage >= 74 ? "#10B981" : "#2563EB"}
-                stroke="#FFFFFF"
-                strokeWidth="2"
-                className="transition-all duration-150"
-              />
-              <text
-                x={pt.x}
-                y={padding.top + chartHeight + 18}
-                textAnchor="middle"
-                className="text-[10px] fill-slate-500 font-medium"
-              >
-                {pt.date}
-              </text>
-            </g>
-          );
-        })}
-      </svg>
-
-      {hoveredPoint && (
-        <div 
-          className="absolute z-20 pointer-events-none p-3 rounded-xl bg-slate-900 text-white shadow-xl text-xs space-y-1 transform -translate-x-1/2 -translate-y-full mb-3"
-          style={{ 
-            left: `${(hoveredPoint.x / width) * 100}%`,
-            top: `${(hoveredPoint.y / height) * 100}%`
-          }}
-        >
-          <div className="font-bold text-blue-300">{hoveredPoint.test_title}</div>
-          <div className="flex items-center justify-between gap-4 text-slate-300">
-            <span>Score: <strong className="text-white">{hoveredPoint.score}/{hoveredPoint.max_score}</strong></span>
-            <span className="font-bold text-emerald-400">{hoveredPoint.percentage}%</span>
-          </div>
-          <div className="flex items-center justify-between gap-4 text-[11px] text-slate-400">
-            <span>Accuracy: {hoveredPoint.accuracy}%</span>
-            <span>Duration: {hoveredPoint.time_spent_minutes}m</span>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// -------------------------------------------------------------
 // Component: Accuracy Donut Chart
 // -------------------------------------------------------------
 function AccuracyDonutChart({ correct, wrong, unattempted }) {
-  const size = 160;
-  const strokeWidth = 18;
-  const radius = (size - strokeWidth) / 2;
+  const total = (correct || 0) + (wrong || 0) + (unattempted || 0);
+  
+  if (total === 0) {
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center text-center p-2">
+        <div className="w-24 h-24 rounded-full border-4 border-dashed border-slate-200 dark:border-slate-700 flex items-center justify-center">
+          <span className="text-[10px] text-slate-400 font-medium">No activity</span>
+        </div>
+      </div>
+    );
+  }
+
+  const radius = 38;
   const circumference = 2 * Math.PI * radius;
 
-  const total = Math.max(1, correct + wrong + unattempted);
   const correctPct = (correct / total);
   const wrongPct = (wrong / total);
   const unattemptedPct = (unattempted / total);
 
-  const correctDash = correctPct * circumference;
-  const wrongDash = wrongPct * circumference;
-  const unattemptedDash = unattemptedPct * circumference;
+  const correctStroke = circumference * correctPct;
+  const wrongStroke = circumference * wrongPct;
+  const unattemptedStroke = circumference * unattemptedPct;
 
-  const correctOffset = 0;
-  const wrongOffset = -correctDash;
-  const unattemptedOffset = -(correctDash + wrongDash);
+  const accRate = (correct + wrong) > 0 ? Math.round((correct / (correct + wrong)) * 100) : 0;
 
   return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="transform -rotate-90">
-      <circle
-        cx={size / 2}
-        cy={size / 2}
-        r={radius}
-        fill="transparent"
-        stroke="#E2E8F0"
-        strokeWidth={strokeWidth}
-        className="dark:stroke-slate-700"
-      />
-      <circle
-        cx={size / 2}
-        cy={size / 2}
-        r={radius}
-        fill="transparent"
-        stroke="#10B981"
-        strokeWidth={strokeWidth}
-        strokeDasharray={`${correctDash} ${circumference}`}
-        strokeDashoffset={correctOffset}
-        strokeLinecap="round"
-        className="transition-all duration-700"
-      />
-      <circle
-        cx={size / 2}
-        cy={size / 2}
-        r={radius}
-        fill="transparent"
-        stroke="#F43F5E"
-        strokeWidth={strokeWidth}
-        strokeDasharray={`${wrongDash} ${circumference}`}
-        strokeDashoffset={wrongOffset}
-        strokeLinecap="round"
-        className="transition-all duration-700"
-      />
-      <circle
-        cx={size / 2}
-        cy={size / 2}
-        r={radius}
-        fill="transparent"
-        stroke="#94A3B8"
-        strokeWidth={strokeWidth}
-        strokeDasharray={`${unattemptedDash} ${circumference}`}
-        strokeDashoffset={unattemptedOffset}
-        className="transition-all duration-700"
-      />
-    </svg>
+    <div className="relative w-full h-full flex items-center justify-center">
+      <svg className="w-32 h-32 -rotate-90">
+        {/* Unattempted segment */}
+        <circle
+          cx="64"
+          cy="64"
+          r={radius}
+          stroke="#94A3B8"
+          strokeWidth="12"
+          strokeDasharray={`${unattemptedStroke} ${circumference}`}
+          strokeDashoffset={0}
+          fill="transparent"
+          className="transition-all duration-700"
+        />
+        {/* Wrong segment */}
+        <circle
+          cx="64"
+          cy="64"
+          r={radius}
+          stroke="#F43F5E"
+          strokeWidth="12"
+          strokeDasharray={`${wrongStroke} ${circumference}`}
+          strokeDashoffset={-unattemptedStroke}
+          fill="transparent"
+          className="transition-all duration-700"
+        />
+        {/* Correct segment */}
+        <circle
+          cx="64"
+          cy="64"
+          r={radius}
+          stroke="#10B981"
+          strokeWidth="12"
+          strokeDasharray={`${correctStroke} ${circumference}`}
+          strokeDashoffset={-(unattemptedStroke + wrongStroke)}
+          fill="transparent"
+          className="transition-all duration-700"
+        />
+      </svg>
+      <div className="absolute flex flex-col items-center justify-center text-center">
+        <span className="text-xl font-black text-slate-900 dark:text-white leading-none">
+          {accRate}%
+        </span>
+        <span className="text-[9px] font-bold text-slate-400 uppercase mt-0.5">
+          Accuracy
+        </span>
+      </div>
+    </div>
   );
 }

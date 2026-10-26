@@ -5,7 +5,7 @@ import { useAuth } from '../../store/AuthContext';
 import { 
   Users, TrendingUp, Target, Award, ArrowLeft, BarChart3, 
   Activity, RefreshCw, BookOpen, Layers, CheckCircle2, ChevronRight,
-  LogIn, Clock, Compass, FileText, AlertTriangle, ShieldCheck
+  LogIn, Clock, Compass, FileText, AlertTriangle, ShieldCheck, Info
 } from 'lucide-react';
 
 export default function Analytics() {
@@ -13,7 +13,6 @@ export default function Analytics() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [lastUpdated, setLastUpdated] = useState(new Date());
   const [hoveredBucket, setHoveredBucket] = useState(null);
   const [hoveredHour, setHoveredHour] = useState(null);
 
@@ -26,7 +25,6 @@ export default function Analytics() {
       if (res.ok) {
         const json = await res.json();
         setData(json);
-        setLastUpdated(new Date());
       }
     } catch (err) {
       console.error('Error fetching admin analytics:', err);
@@ -40,55 +38,42 @@ export default function Analytics() {
     fetchAdminAnalytics();
   }, [token]);
 
+  // Clean Zero-State Default: strictly starts from zero, no fake data
   const overview = data?.overview || {
-    total_students: 8,
-    total_attempts: 15,
-    platform_avg_score: '74%',
-    pass_ratio: '93%',
+    total_students: 0,
+    total_attempts: 0,
+    platform_avg_score: '0%',
+    pass_ratio: '0%',
     total_questions: 2530
   };
 
   const activityTelemetry = data?.activity_telemetry || {
-    total_logins: 28,
-    daily_active_students: 6,
-    weekly_active_students: 8,
-    avg_session_duration_minutes: 38,
-    total_actions_logged: 140,
+    total_logins: 0,
+    daily_active_students: 0,
+    weekly_active_students: 0,
+    avg_session_duration_minutes: 0,
+    total_actions_logged: 0,
     hourly_traffic_curve: [],
-    weekly_day_distribution: [],
     action_breakdown: [
-      { type: 'Practice Lab Sessions', count: 49, percent: 35, color: '#2563EB' },
-      { type: 'Candidate Logins', count: 28, percent: 20, color: '#3B82F6' },
-      { type: 'Full Mock Assessments', count: 35, percent: 25, color: '#7C3AED' },
-      { type: 'Study Materials & PDFs', count: 18, percent: 12, color: '#059669' },
-      { type: 'Mistake Reviews', count: 10, percent: 8, color: '#F43F5E' }
+      { type: 'Practice Lab Sessions', count: 0, percent: 0, color: '#2563EB' },
+      { type: 'Candidate Logins', count: 0, percent: 0, color: '#3B82F6' },
+      { type: 'Full Mock Assessments', count: 0, percent: 0, color: '#7C3AED' },
+      { type: 'Study Materials & PDFs', count: 0, percent: 0, color: '#059669' },
+      { type: 'Mistake Reviews', count: 0, percent: 0, color: '#F43F5E' }
     ],
     live_activity_stream: []
   };
 
   const scoreBuckets = data?.score_distribution || {
     '0–35%': 0,
-    '36–50%': 1,
-    '51–70%': 6,
-    '71–85%': 7,
-    '86–100%': 1
+    '36–50%': 0,
+    '51–70%': 0,
+    '71–85%': 0,
+    '86–100%': 0
   };
 
-  const participationTrend = data?.participation_trend || [
-    { period: 'Week 1', attempts: 3 },
-    { period: 'Week 2', attempts: 6 },
-    { period: 'Week 3', attempts: 11 },
-    { period: 'Week 4', attempts: 15 }
-  ];
-
-  const branchBreakdown = data?.branch_breakdown || [
-    { branch: 'Computer', students_count: 2, attempts_count: 5, avg_score: '80%' },
-    { branch: 'Information Technology', students_count: 1, attempts_count: 2, avg_score: '81%' },
-    { branch: 'Mechanical', students_count: 1, attempts_count: 2, avg_score: '77%' },
-    { branch: 'Chemical', students_count: 1, attempts_count: 2, avg_score: '72%' },
-    { branch: 'Civil', students_count: 1, attempts_count: 2, avg_score: '64%' },
-    { branch: 'Electrical', students_count: 1, attempts_count: 1, avg_score: '60%' }
-  ];
+  const participationTrend = data?.participation_trend || [];
+  const branchBreakdown = data?.branch_breakdown || [];
 
   const subjectsBreakdown = [
     { name: 'Mathematics', count: 820, percent: 32.4, color: '#2563EB' },
@@ -105,7 +90,7 @@ export default function Analytics() {
         <div className="flex items-center gap-2.5">
           <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
           <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-            Synthesizing statewide platform & activity telemetry...
+            Synthesizing verified platform analytics...
           </span>
         </div>
       </div>
@@ -126,7 +111,7 @@ export default function Analytics() {
             Platform Analytics & Student Activity Telemetry
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-            Real-time analytics capturing every student login, practice session, assessment attempt, and curriculum interaction.
+            Real-time aggregate data calculated strictly from actual student registrations, test attempts, and verified portal actions.
           </p>
         </div>
 
@@ -151,7 +136,7 @@ export default function Analytics() {
         </div>
       </div>
 
-      {/* Top 5 Platform KPI Stat Cards */}
+      {/* Top 5 Platform KPI Stat Cards (Real data only, zero estimates) */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
         <StatCard 
           title="Active Students" 
@@ -190,7 +175,7 @@ export default function Analytics() {
         />
       </div>
 
-      {/* NEW: Student Portal Activity & Hourly Traffic Telemetry */}
+      {/* Candidate Engagement & 24-Hour Portal Traffic Curve */}
       <div className="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-4">
           <div>
@@ -221,21 +206,29 @@ export default function Analytics() {
               <h3 className="text-sm font-bold text-slate-900 dark:text-white">
                 24-Hour Activity Heatmap
               </h3>
-              <span className="text-[11px] font-semibold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-900">
-                Peak: 18:00 – 22:00
+              <span className="text-[11px] font-semibold text-slate-400">
+                {activityTelemetry.total_actions_logged > 0 ? 'Live Telemetry' : 'No activity yet'}
               </span>
             </div>
 
-            <HourlyTrafficHistogram 
-              curve={activityTelemetry.hourly_traffic_curve}
-              hoveredHour={hoveredHour}
-              setHoveredHour={setHoveredHour}
-            />
+            {activityTelemetry.total_actions_logged === 0 ? (
+              <div className="h-44 flex flex-col items-center justify-center text-slate-400 bg-slate-50/70 dark:bg-slate-800/40 rounded-xl border border-dashed border-slate-200 dark:border-slate-800 p-6 text-center">
+                <Clock size={28} className="text-slate-300 dark:text-slate-600 mb-1.5" />
+                <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">No activity yet</p>
+                <p className="text-[11px] text-slate-400 max-w-xs mt-0.5">Candidate activity throughout the day will appear here as students log in and take tests.</p>
+              </div>
+            ) : (
+              <HourlyTrafficHistogram 
+                curve={activityTelemetry.hourly_traffic_curve}
+                hoveredHour={hoveredHour}
+                setHoveredHour={setHoveredHour}
+              />
+            )}
 
             <div className="flex justify-between items-center text-xs text-slate-500 pt-1">
               <span>Low Traffic: 01:00 – 06:00</span>
               <span className="font-semibold text-slate-800 dark:text-slate-200">
-                Peak Server Load: 19:00 – 21:00 (Evening Sprints)
+                {activityTelemetry.total_actions_logged > 0 ? 'Peak usage hours update automatically' : 'Awaiting candidate actions'}
               </span>
             </div>
           </div>
@@ -251,44 +244,57 @@ export default function Analytics() {
               </span>
             </div>
 
-            <div className="space-y-2.5 pt-1">
-              {activityTelemetry.action_breakdown.map((act, idx) => (
-                <div key={idx} className="p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-850 space-y-1.5">
-                  <div className="flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: act.color }} />
-                      <span className="font-semibold text-slate-800 dark:text-slate-200">{act.type}</span>
+            {activityTelemetry.total_actions_logged === 0 ? (
+              <div className="h-44 flex flex-col items-center justify-center text-slate-400 bg-slate-50/70 dark:bg-slate-800/40 rounded-xl border border-dashed border-slate-200 dark:border-slate-800 p-6 text-center">
+                <Info size={24} className="text-slate-300 dark:text-slate-600 mb-1.5" />
+                <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">No activity yet</p>
+                <p className="text-[11px] text-slate-400 max-w-xs mt-0.5">Actions will be sorted by Practice Lab, Logins, Mock Tests, and Materials.</p>
+              </div>
+            ) : (
+              <div className="space-y-2.5 pt-1">
+                {activityTelemetry.action_breakdown.map((act, idx) => (
+                  <div key={idx} className="p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-850 space-y-1.5">
+                    <div className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: act.color }} />
+                        <span className="font-semibold text-slate-800 dark:text-slate-200">{act.type}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-slate-900 dark:text-white">{act.count}</span>
+                        <span className="text-[10px] text-slate-400">({act.percent}%)</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-slate-900 dark:text-white">{act.count}</span>
-                      <span className="text-[10px] text-slate-400">({act.percent}%)</span>
-                    </div>
-                  </div>
 
-                  <div className="w-full bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full rounded-full transition-all duration-500" 
-                      style={{ width: `${act.percent * 2.5}%`, backgroundColor: act.color }}
-                    />
+                    <div className="w-full bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full rounded-full transition-all duration-500" 
+                        style={{ width: `${Math.max(0, act.percent)}%`, backgroundColor: act.color }}
+                      />
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
 
         </div>
 
         {/* Live Candidate Action Stream Feed */}
-        {activityTelemetry.live_activity_stream?.length > 0 && (
-          <div className="space-y-3 pt-3 border-t border-slate-100 dark:border-slate-800">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <Clock size={15} className="text-blue-600" />
-                <span>Live Candidate Activity Audit Log</span>
-              </h3>
-              <span className="text-[11px] text-slate-400">Real-time actions across all diploma colleges</span>
-            </div>
+        <div className="space-y-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <Clock size={15} className="text-blue-600" />
+              <span>Live Candidate Activity Audit Log</span>
+            </h3>
+            <span className="text-[11px] text-slate-400">Real-time actions across all diploma colleges</span>
+          </div>
 
+          {activityTelemetry.live_activity_stream?.length === 0 ? (
+            <div className="p-6 text-center text-slate-400 bg-slate-50/50 dark:bg-slate-800/30 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
+              <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">No activity yet</p>
+              <p className="text-[11px] text-slate-400 mt-0.5">Live student actions will be logged here as candidates engage with the platform.</p>
+            </div>
+          ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               {activityTelemetry.live_activity_stream.slice(0, 9).map((act) => (
                 <div 
@@ -316,8 +322,8 @@ export default function Analytics() {
                 </div>
               ))}
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
       </div>
 
@@ -343,18 +349,26 @@ export default function Analytics() {
             </span>
           </div>
 
-          <div className="pt-2">
-            <ScoreDistributionHistogram 
-              buckets={scoreBuckets} 
-              totalAttempts={overview.total_attempts} 
-              hoveredBucket={hoveredBucket}
-              setHoveredBucket={setHoveredBucket}
-            />
-          </div>
+          {overview.total_attempts === 0 ? (
+            <div className="h-48 flex flex-col items-center justify-center text-slate-400 bg-slate-50/70 dark:bg-slate-800/40 rounded-xl border border-dashed border-slate-200 dark:border-slate-800 p-6 text-center">
+              <BarChart3 size={28} className="text-slate-300 dark:text-slate-600 mb-1.5" />
+              <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">No activity yet</p>
+              <p className="text-[11px] text-slate-400 max-w-xs mt-0.5">Score distribution will be generated once students submit assessment tests.</p>
+            </div>
+          ) : (
+            <div className="pt-2">
+              <ScoreDistributionHistogram 
+                buckets={scoreBuckets} 
+                totalAttempts={overview.total_attempts} 
+                hoveredBucket={hoveredBucket}
+                setHoveredBucket={setHoveredBucket}
+              />
+            </div>
+          )}
 
           <div className="flex items-center justify-between text-xs text-slate-500 pt-1 border-t border-slate-100 dark:border-slate-800">
             <span className="text-[11px]">
-              Top Density: <strong className="text-slate-800 dark:text-slate-200">71–85% Score Range</strong>
+              Platform Mean Score: <strong className="text-slate-800 dark:text-slate-200">{overview.platform_avg_score}</strong>
             </span>
             <span className="text-[11px] text-emerald-600 font-semibold">
               Pass Rate: {overview.pass_ratio}
@@ -377,16 +391,26 @@ export default function Analytics() {
               </p>
             </div>
             <span className="text-[11px] font-semibold text-purple-600 bg-purple-50 dark:bg-purple-950/50 px-2 py-0.5 rounded border border-purple-200 dark:border-purple-900">
-              Active Growth
+              {overview.total_attempts > 0 ? 'Active' : 'No activity yet'}
             </span>
           </div>
 
-          <div className="pt-2">
-            <ParticipationTrendChart trend={participationTrend} />
-          </div>
+          {overview.total_attempts === 0 ? (
+            <div className="h-44 flex flex-col items-center justify-center text-slate-400 bg-slate-50/70 dark:bg-slate-800/40 rounded-xl border border-dashed border-slate-200 dark:border-slate-800 p-6 text-center">
+              <Activity size={28} className="text-slate-300 dark:text-slate-600 mb-1.5" />
+              <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">No activity yet</p>
+              <p className="text-[11px] text-slate-400 max-w-xs mt-0.5">Assessment turnout trajectory will plot weekly submissions once attempts are recorded.</p>
+            </div>
+          ) : (
+            <div className="pt-2">
+              <ParticipationTrendChart trend={participationTrend} />
+            </div>
+          )}
 
           <div className="p-3 rounded-xl bg-purple-50/50 dark:bg-purple-950/20 border border-purple-100 dark:border-purple-900/40 text-xs text-slate-600 dark:text-slate-300">
-            Candidate participation has scaled from 3 initial baseline attempts to {overview.total_attempts} verified assessment submissions across all diploma institutions.
+            {overview.total_attempts > 0 
+              ? `Currently tracking ${overview.total_attempts} verified assessment submissions across all diploma institutions.` 
+              : 'Awaiting student assessment submissions to calculate platform turnout velocity.'}
           </div>
         </div>
 
@@ -407,41 +431,48 @@ export default function Analytics() {
               </p>
             </div>
             <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500">
-              6 Disciplines
+              {branchBreakdown.length} Disciplines
             </span>
           </div>
 
-          <div className="space-y-3 pt-1">
-            {branchBreakdown.map((b, idx) => {
-              const scoreNum = parseFloat(b.avg_score) || 0;
-              return (
-                <div key={idx} className="space-y-1">
-                  <div className="flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-slate-800 dark:text-slate-200">
-                        {b.branch}
-                      </span>
-                      <span className="text-[10px] text-slate-400">
-                        ({b.students_count} candidate{b.students_count > 1 ? 's' : ''}, {b.attempts_count} tests)
+          {branchBreakdown.length === 0 ? (
+            <div className="p-8 text-center text-slate-400 bg-slate-50/50 dark:bg-slate-800/30 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
+              <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">No activity yet</p>
+              <p className="text-[11px] text-slate-400 mt-0.5">Branch performance comparisons will populate as students complete tests.</p>
+            </div>
+          ) : (
+            <div className="space-y-3 pt-1">
+              {branchBreakdown.map((b, idx) => {
+                const scoreNum = parseFloat(b.avg_score) || 0;
+                return (
+                  <div key={idx} className="space-y-1">
+                    <div className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-slate-800 dark:text-slate-200">
+                          {b.branch}
+                        </span>
+                        <span className="text-[10px] text-slate-400">
+                          ({b.students_count} candidate{b.students_count > 1 ? 's' : ''}, {b.attempts_count} tests)
+                        </span>
+                      </div>
+                      <span className="font-bold text-slate-900 dark:text-white">
+                        {b.avg_score}
                       </span>
                     </div>
-                    <span className="font-bold text-slate-900 dark:text-white">
-                      {b.avg_score}
-                    </span>
-                  </div>
 
-                  <div className="w-full bg-slate-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden">
-                    <div 
-                      className={`h-full rounded-full transition-all duration-700 ${
-                        scoreNum >= 80 ? 'bg-emerald-500' : scoreNum >= 70 ? 'bg-blue-600' : 'bg-amber-500'
-                      }`}
-                      style={{ width: `${Math.min(100, Math.max(10, scoreNum))}%` }}
-                    />
+                    <div className="w-full bg-slate-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden">
+                      <div 
+                        className={`h-full rounded-full transition-all duration-700 ${
+                          scoreNum >= 80 ? 'bg-emerald-500' : scoreNum >= 70 ? 'bg-blue-600' : scoreNum > 0 ? 'bg-amber-500' : 'bg-transparent'
+                        }`}
+                        style={{ width: `${Math.min(100, Math.max(0, scoreNum))}%` }}
+                      />
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Question Bank Coverage Breakdown (5 cols) */}
@@ -522,13 +553,12 @@ function HourlyTrafficHistogram({ curve, hoveredHour, setHoveredHour }) {
   const chartWidth = width - padding.left - padding.right;
   const chartHeight = height - padding.top - padding.bottom;
 
-  const maxVal = Math.max(10, ...(curve?.map(c => c.count) || [10]));
+  const maxVal = Math.max(5, ...(curve?.map(c => c.count) || [5]));
   const step = chartWidth / (curve?.length || 24);
   const barWidth = Math.max(3, step * 0.7);
 
   return (
     <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto overflow-visible font-sans">
-      {/* Horizontal Gridlines */}
       {[0, Math.round(maxVal / 2), maxVal].map((val, idx) => {
         const y = padding.top + chartHeight - (val / maxVal) * chartHeight;
         return (
@@ -554,13 +584,11 @@ function HourlyTrafficHistogram({ curve, hoveredHour, setHoveredHour }) {
         );
       })}
 
-      {/* Hourly Bars */}
       {curve?.map((c, idx) => {
         const barH = (c.count / maxVal) * chartHeight;
         const x = padding.left + idx * step + (step - barWidth) / 2;
         const y = padding.top + chartHeight - barH;
         const isHovered = hoveredHour === c.hour;
-        const isPeak = idx >= 18 && idx <= 22;
 
         return (
           <g 
@@ -573,12 +601,11 @@ function HourlyTrafficHistogram({ curve, hoveredHour, setHoveredHour }) {
               x={x}
               y={y}
               width={barWidth}
-              height={Math.max(3, barH)}
+              height={Math.max(0, barH)}
               rx="2"
-              fill={isHovered ? "#1D4ED8" : isPeak ? "#2563EB" : "#93C5FD"}
+              fill={isHovered ? "#1D4ED8" : c.count > 0 ? "#2563EB" : "transparent"}
               className="transition-all duration-200"
             />
-            {/* Show label every 3 hours */}
             {idx % 3 === 0 && (
               <text
                 x={x + barWidth / 2}
@@ -667,7 +694,7 @@ function ScoreDistributionHistogram({ buckets, totalAttempts, hoveredBucket, set
               x={x}
               y={y}
               width={barWidth}
-              height={Math.max(4, barH)}
+              height={Math.max(0, barH)}
               rx="4"
               fill={barColors[key] || '#2563EB'}
               opacity={isHovered ? 1 : 0.85}
