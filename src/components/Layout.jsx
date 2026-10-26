@@ -23,6 +23,14 @@ export default function Layout() {
     navigate('/');
   };
 
+  // Guest bottom nav items (for public visitors exploring the platform)
+  const guestBottomNav = [
+    { name: 'Home', path: '/', icon: Home },
+    { name: 'Library', path: '/student/resources', icon: BookOpen },
+    { name: 'Syllabus', path: '/student/syllabus', icon: Book },
+    { name: 'Log in', path: '/login', icon: User },
+  ];
+
   // Student bottom nav items
   const studentBottomNav = [
     { name: 'Home', path: '/student', icon: Home },
@@ -40,7 +48,9 @@ export default function Layout() {
     { name: 'PDFs', path: '/admin/resources', icon: FileText },
   ];
 
-  const bottomNavItems = isAdmin ? adminBottomNav : studentBottomNav;
+  const bottomNavItems = isAdmin 
+    ? adminBottomNav 
+    : (isAuthenticated ? studentBottomNav : guestBottomNav);
 
   return (
     <div className="flex min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-sans selection:bg-blue-500 selection:text-white">
@@ -122,12 +132,20 @@ export default function Layout() {
                 <span className="hidden xs:inline">Log out</span>
               </button>
             ) : (
-              <Link 
-                to="/login"
-                className="flex items-center gap-1.5 px-2.5 py-1.5 text-[#1E3A8A] dark:text-blue-400 hover:underline rounded-md text-xs font-semibold transition-colors"
-              >
-                <span>Log in</span>
-              </Link>
+              <div className="flex items-center gap-2">
+                <Link 
+                  to="/login"
+                  className="px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-850 text-xs font-bold transition shadow-2xs cursor-pointer"
+                >
+                  Log in
+                </Link>
+                <Link 
+                  to="/login?mode=signup"
+                  className="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition shadow-xs cursor-pointer"
+                >
+                  Sign up
+                </Link>
+              </div>
             )}
           </div>
         </header>

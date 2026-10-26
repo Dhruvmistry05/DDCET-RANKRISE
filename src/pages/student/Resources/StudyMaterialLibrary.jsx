@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../../store/AuthContext';
 import { API_BASE_URL } from '../../../config/api';
 import { 
@@ -33,7 +34,8 @@ export default function StudyMaterialLibrary({ defaultCategory = 'all' }) {
   // Modal States
   const [previewPdfItem, setPreviewPdfItem] = useState(null);
 
-  const { token } = useAuth();
+  const { token, user } = useAuth();
+  const isAuthenticated = Boolean(user && token);
   const API_URL = API_BASE_URL;
 
   // Fetch published resources, subjects, and chapters
@@ -248,6 +250,35 @@ export default function StudyMaterialLibrary({ defaultCategory = 'all' }) {
           </p>
         </div>
       </div>
+
+      {/* Guest Mode Notice */}
+      {!isAuthenticated && (
+        <div className="p-4 rounded-xl bg-blue-50/90 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-2xs">
+          <div className="flex items-start gap-2.5">
+            <span className="p-1.5 rounded-lg bg-[#1E3A8A] text-white shrink-0 mt-0.5">
+              <Sparkles size={14} />
+            </span>
+            <div className="text-slate-700 dark:text-slate-300">
+              <span className="font-bold text-slate-900 dark:text-white">Open Access Library: </span>
+              All official GTU papers, paired answer keys, and syllabus blueprints are free to view and download. Sign in or sign up to practice individual questions in the interactive lab.
+            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <Link
+              to="/login"
+              className="px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 hover:text-blue-600 font-bold transition shadow-2xs text-xs"
+            >
+              Log In
+            </Link>
+            <Link
+              to="/login?mode=signup"
+              className="px-3.5 py-1.5 rounded-lg bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white font-bold transition shadow-xs text-xs"
+            >
+              Sign Up Free
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* Category Tabs: Cleaned up, Study Links removed, Question Papers & Keys paired */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">

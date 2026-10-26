@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { GraduationCap, ArrowRight, ShieldCheck, Mail, ArrowLeft } from 'lucide-react';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
+import { GraduationCap, ArrowRight, ShieldCheck, Mail, ArrowLeft, Home } from 'lucide-react';
 import { useAuth } from '../../store/AuthContext';
 import { getApiUrl } from '../../config/api';
 import PasswordInput from '../../components/PasswordInput';
 
 export default function Login() {
-  const [isLogin, setIsLogin] = useState(true);
+  const [searchParams] = useSearchParams();
+  const [isLogin, setIsLogin] = useState(() => searchParams.get('mode') !== 'signup');
   const role = 'student';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -15,6 +16,15 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { login, user, token, loading: authLoading } = useAuth();
+
+  useEffect(() => {
+    const mode = searchParams.get('mode');
+    if (mode === 'signup') {
+      setIsLogin(false);
+    } else if (mode === 'login') {
+      setIsLogin(true);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (user && token) {
@@ -184,13 +194,19 @@ export default function Login() {
               </div>
             </div>
 
-            {/* Back Link */}
-            <div>
+            {/* Top Navigation Links */}
+            <div className="flex items-center justify-between text-xs font-semibold">
               <Link 
-                to="/create-profile"
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 transition"
+                to="/"
+                className="inline-flex items-center gap-1.5 text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 transition"
               >
                 <ArrowLeft size={14} />
+                <span>Back to Home</span>
+              </Link>
+              <Link 
+                to="/create-profile"
+                className="inline-flex items-center gap-1.5 text-blue-600 dark:text-blue-400 hover:text-blue-700 transition"
+              >
                 <span>New Student? Create Profile</span>
               </Link>
             </div>

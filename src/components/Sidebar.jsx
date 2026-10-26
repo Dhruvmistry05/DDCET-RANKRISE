@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Home, BookOpen, PenTool, ClipboardCheck, History, PieChart, 
-  AlertTriangle, Book, MessageCircle, LogOut, X, Sparkles, ShieldCheck, User
+  AlertTriangle, Book, MessageCircle, LogOut, X, Sparkles, ShieldCheck, User, Lock, Trophy
 } from 'lucide-react';
 import { useAuth } from '../store/AuthContext';
 
@@ -24,6 +24,17 @@ export default function Sidebar({ isOpen, onClose }) {
   const handleNavClick = () => {
     if (onClose) onClose();
   };
+
+  const guestLinks = [
+    { name: 'Overview / Home', path: '/', icon: Home },
+    { name: 'Study Library', path: '/student/resources', icon: BookOpen },
+    { name: 'Syllabus', path: '/student/syllabus', icon: Book },
+    { name: 'Practice Lab', path: '/student/practice', icon: PenTool, requiresAuth: true },
+    { name: 'Mock Tests', path: '/student/mock', icon: ClipboardCheck, requiresAuth: true },
+    { name: 'Analytics', path: '/student/analytics', icon: PieChart, requiresAuth: true },
+    { name: 'Mistake Book', path: '/student/mistakes', icon: AlertTriangle, requiresAuth: true },
+    { name: 'Leaderboard', path: '/student/leaderboard', icon: Trophy, requiresAuth: true },
+  ];
 
   const studentLinks = [
     { name: 'Dashboard', path: '/student', icon: Home },
@@ -49,7 +60,7 @@ export default function Sidebar({ isOpen, onClose }) {
     { name: 'Analytics', path: '/admin/analytics', icon: PieChart },
   ];
 
-  const links = isAdmin ? adminLinks : studentLinks;
+  const links = isAdmin ? adminLinks : (isAuthenticated ? studentLinks : guestLinks);
 
   const sidebarContent = (
     <div className="flex flex-col h-full bg-[#0b1329] text-slate-300 border-r border-slate-800">
@@ -95,14 +106,19 @@ export default function Sidebar({ isOpen, onClose }) {
               key={link.name}
               to={link.path}
               onClick={handleNavClick}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
+              className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-colors ${
                 isActive 
                   ? 'bg-[#1E3A8A] text-white font-semibold shadow-xs' 
                   : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
               }`}
             >
-              <link.icon size={18} className={`shrink-0 ${isActive ? 'text-white' : 'text-slate-400'}`} />
-              <span className="truncate">{link.name}</span>
+              <div className="flex items-center gap-3 truncate">
+                <link.icon size={18} className={`shrink-0 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                <span className="truncate">{link.name}</span>
+              </div>
+              {link.requiresAuth && !isAuthenticated && (
+                <Lock size={12} className="text-slate-400 shrink-0 ml-1.5 opacity-70" title="Sign in required" />
+              )}
             </Link>
           );
         })}
@@ -136,32 +152,30 @@ export default function Sidebar({ isOpen, onClose }) {
 
       {/* User Footer Card */}
       <div className="p-3.5 border-t border-slate-800 bg-[#080e1c]">
-        <div className="flex items-center gap-3 p-2 rounded-lg bg-slate-900 border border-slate-800">
-          <Link
-            to={isAdmin ? '/admin' : '/student/profile'}
-            onClick={handleNavClick}
-            className="flex items-center gap-3 flex-1 min-w-0 hover:opacity-90 transition group cursor-pointer"
-            title="View My Profile"
-          >
-            <div className="w-8 h-8 rounded-md bg-slate-800 text-slate-200 border border-slate-700 flex items-center justify-center font-bold text-xs uppercase shrink-0 group-hover:border-blue-500 transition">
-              {isAdmin 
-                ? (isSuperAdmin ? 'SA' : 'A') 
-                : (user?.name ? user.name[0].toUpperCase() : 'S')}
-            </div>
-            <div className="flex-1 min-w-0">
-              <span className="block text-xs text-slate-200 font-semibold truncate leading-tight group-hover:text-blue-300 transition">
+        {isAuthenticated ? (
+          <div className="flex items-center gap-3 p-2 rounded-lg bg-slate-900 border border-slate-800">
+            <Link
+              to={isAdmin ? '/admin' : '/student/profile'}
+              onClick={handleNavClick}
+              className="flex items-center gap-3 flex-1 min-w-0 hover:opacity-90 transition group cursor-pointer"
+              title="View My Profile"
+            >
+              <div className="w-8 h-8 rounded-md bg-slate-800 text-slate-200 border border-slate-700 flex items-center justify-center font-bold text-xs uppercase shrink-0 group-hover:border-blue-500 transition">
                 {isAdmin 
-                  ? (user?.name || (isSuperAdmin ? 'Super Admin' : 'Administrator')) 
-                  : (user?.name || (isAuthenticated ? 'Student' : 'Student Portal'))}
-              </span>
-              <span className="block text-slate-400 text-[11px] truncate mt-0.5">
-                {isAdmin 
-                  ? (user?.email || 'Admin Access') 
-                  : (user?.email || (isAuthenticated ? 'DDCET Aspirant' : 'Sign in to access lab'))}
-              </span>
-            </div>
-          </Link>
-          {isAuthenticated ? (
+                  ? (isSuperAdmin ? 'SA' : 'A') 
+                  : (user?.name ? user.name[0].toUpperCase() : 'S')}
+              </div>
+              <div className="flex-1 min-w-0">
+                <span className="block text-xs text-slate-200 font-semibold truncate leading-tight group-hover:text-blue-300 transition">
+                  {isAdmin 
+                    ? (user?.name || (isSuperAdmin ? 'Super Admin' : 'Administrator')) 
+                    : (user?.name || 'Student')}
+                </span>
+                <span className="block text-slate-400 text-[11px] truncate mt-0.5">
+                  {isAdmin ? (user?.email || 'Admin Access') : (user?.email || 'DDCET Aspirant')}
+                </span>
+              </div>
+            </Link>
             <button 
               onClick={handleLogout} 
               className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-md transition-colors shrink-0 cursor-pointer"
@@ -170,16 +184,30 @@ export default function Sidebar({ isOpen, onClose }) {
             >
               <LogOut size={16} />
             </button>
-          ) : (
-            <Link 
-              to="/login"
-              onClick={handleNavClick}
-              className="px-2 py-1 text-xs font-semibold text-blue-400 hover:text-white rounded transition-colors shrink-0"
-            >
-              Log in
-            </Link>
-          )}
-        </div>
+          </div>
+        ) : (
+          <div className="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 space-y-2.5">
+            <div className="text-[11px] text-slate-300 font-medium leading-snug">
+              Sign in to track progress, take tests, and save bookmarks.
+            </div>
+            <div className="flex items-center gap-2">
+              <Link
+                to="/login"
+                onClick={handleNavClick}
+                className="flex-1 py-1.5 text-center text-xs font-bold text-slate-200 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-lg border border-slate-700 transition shadow-2xs"
+              >
+                Log In
+              </Link>
+              <Link
+                to="/login?mode=signup"
+                onClick={handleNavClick}
+                className="flex-1 py-1.5 text-center text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition shadow-xs"
+              >
+                Sign Up
+              </Link>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

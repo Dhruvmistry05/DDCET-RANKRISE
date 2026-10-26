@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
+import LandingPage from './pages/public/LandingPage';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import CreateTest from './pages/admin/CreateTest';
 import TestManagement from './pages/admin/TestManagement';
@@ -74,7 +75,7 @@ function App() {
     <Router>
       <Routes>
         {/* Public Entry Points */}
-        <Route path="/" element={<Login />} />
+        <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/create-profile" element={<StudentProfileCreation />} />
         <Route path="/admin-login" element={<AdminLogin />} />
@@ -83,6 +84,19 @@ function App() {
         
         {/* Layout Routes */}
         <Route element={<Layout />}>
+          {/* Public Academic Exploration (Accessible to all visitors without login) */}
+          <Route path="/student/syllabus" element={<StudentSyllabus />} />
+          <Route path="/syllabus" element={<StudentSyllabus />} />
+          <Route path="/student/resources" element={<StudyMaterialLibrary />} />
+          <Route path="/resources" element={<StudyMaterialLibrary />} />
+          <Route path="/study-library" element={<Navigate to="/student/resources" replace />} />
+          <Route path="/student/resources/papers" element={<Navigate to="/student/resources" replace />} />
+          <Route path="/student/resources/keys" element={<Navigate to="/student/resources" replace />} />
+          <Route path="/student/resources/links" element={<Navigate to="/student/resources" replace />} />
+          <Route path="/student/pyq" element={<Navigate to="/student/resources" replace />} />
+          <Route path="/pyq" element={<Navigate to="/student/resources" replace />} />
+          <Route path="/student/resources/official-syllabus" element={<OfficialSyllabus />} />
+
           {/* Admin Routes - Strictly Protected */}
           <Route path="/admin" element={<ProtectedRoute allowedRole="admin"><AdminDashboard /></ProtectedRoute>} />
           <Route path="/admin/tests" element={<ProtectedRoute allowedRole="admin"><TestManagement /></ProtectedRoute>} />
@@ -94,23 +108,12 @@ function App() {
           <Route path="/admin/resources" element={<ProtectedRoute allowedRole="admin"><ResourceManagement /></ProtectedRoute>} />
           <Route path="/admin/admins" element={<ProtectedRoute allowedRole="superadmin"><AdminManagement /></ProtectedRoute>} />
           
-          {/* Student Routes - Protected via Student Login */}
+          {/* Student Personal Features - Protected via Student Login */}
           <Route path="/student" element={<ProtectedRoute allowedRole="student"><StudentHome /></ProtectedRoute>} />
           <Route path="/student/profile" element={<ProtectedRoute allowedRole="student"><StudentProfile /></ProtectedRoute>} />
           <Route path="/profile" element={<Navigate to="/student/profile" replace />} />
           <Route path="/student/leaderboard" element={<ProtectedRoute allowedRole="student"><Leaderboard /></ProtectedRoute>} />
           <Route path="/student/mistakes" element={<ProtectedRoute allowedRole="student"><MistakeBook /></ProtectedRoute>} />
-          
-          <Route path="/student/syllabus" element={<ProtectedRoute allowedRole="student"><StudentSyllabus /></ProtectedRoute>} />
-          
-          {/* Study Library: Unified repository for Question Papers, Answer Keys & Notes */}
-          <Route path="/student/resources" element={<ProtectedRoute allowedRole="student"><StudyMaterialLibrary /></ProtectedRoute>} />
-          <Route path="/student/resources/papers" element={<Navigate to="/student/resources" replace />} />
-          <Route path="/student/resources/keys" element={<Navigate to="/student/resources" replace />} />
-          <Route path="/student/resources/links" element={<Navigate to="/student/resources" replace />} />
-          <Route path="/student/pyq" element={<Navigate to="/student/resources" replace />} />
-          <Route path="/student/resources/official-syllabus" element={<ProtectedRoute allowedRole="student"><OfficialSyllabus /></ProtectedRoute>} />
-          
           <Route path="/student/practice" element={<ProtectedRoute allowedRole="student"><PracticeLab /></ProtectedRoute>} />
           <Route path="/student/mock" element={<ProtectedRoute allowedRole="student"><MockTestCenter /></ProtectedRoute>} />
           <Route path="/student/quiz" element={<ProtectedRoute allowedRole="student"><QuizGenerator /></ProtectedRoute>} />

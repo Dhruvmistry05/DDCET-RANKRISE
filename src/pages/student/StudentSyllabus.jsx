@@ -36,7 +36,9 @@ export default function StudentSyllabus() {
   const [expandedChapters, setExpandedChapters] = useState(new Set());
   const [completedTopicIds, setCompletedTopicIds] = useState(new Set());
   const [searchQuery, setSearchQuery] = useState('');
-  const { token } = useAuth();
+  const [guestNotice, setGuestNotice] = useState(false);
+  const { token, user } = useAuth();
+  const isAuthenticated = Boolean(user && token);
 
   const API_URL = API_BASE_URL;
 
@@ -121,6 +123,8 @@ export default function StudentSyllabus() {
       } catch (err) {
         console.error('Error toggling topic progress:', err);
       }
+    } else {
+      setGuestNotice(true);
     }
   };
 
@@ -354,6 +358,37 @@ export default function StudentSyllabus() {
           </div>
         </div>
       </div>
+
+      {/* Guest Mode Notice */}
+      {!isAuthenticated && (
+        <div className="p-4 rounded-xl bg-blue-50/90 border border-blue-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-2xs">
+          <div className="flex items-start gap-2.5">
+            <span className="p-1.5 rounded-lg bg-[#1E3A8A] text-white shrink-0 mt-0.5">
+              <Sparkles size={14} />
+            </span>
+            <div className="text-slate-700">
+              <span className="font-bold text-slate-900">Exploring as Guest: </span>
+              {guestNotice 
+                ? 'Sign in or create an account to permanently sync your checked topics and track your syllabus completion across devices!' 
+                : 'You are browsing the complete DDCET 2027 syllabus. Sign in to track completed topics and access practice tests.'}
+            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <Link
+              to="/login"
+              className="px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-800 hover:text-blue-600 font-bold transition shadow-2xs text-xs"
+            >
+              Log In
+            </Link>
+            <Link
+              to="/login?mode=signup"
+              className="px-3.5 py-1.5 rounded-lg bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white font-bold transition shadow-xs text-xs"
+            >
+              Sign Up Free
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* Primary Section Switcher Tabs */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
