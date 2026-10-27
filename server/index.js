@@ -1243,50 +1243,378 @@ app.delete('/api/questions/:id', async (req, res) => {
   res.json({ success: true });
 });
 
-// --- TESTS API ---
-app.get('/api/tests', async (req, res) => {
-  const tests = await db.getAll('tests');
-  res.json(tests);
-});
+// --- TESTS API & ASSESSMENT MANAGEMENT ---
 
-app.post('/api/tests', async (req, res) => {
-  const { title, type, subject_id, chapter_id, duration_minutes, scheduled_start_time, scheduled_end_time, status, question_ids } = req.body;
-  
-  const newTest = await db.insert('tests', {
-    title, type, 
-    subject_id: subject_id ? parseInt(subject_id) : null,
-    chapter_id: chapter_id ? parseInt(chapter_id) : null,
-    duration_minutes: parseInt(duration_minutes) || 60,
-    scheduled_start_time,
-    scheduled_end_time,
-    status: status || 'draft'
-  });
+// Ensure initial standard mock tests exist in database if tests table is empty
+const ensureStandardTestsSeeded = async () => {
+  try {
+    const existingTests = await db.getAll('tests');
+    if (existingTests && existingTests.length > 0) return;
 
-  if (Array.isArray(question_ids)) {
-    for (const qid of question_ids) {
-      await db.insert('test_questions', { test_id: newTest.id, question_id: parseInt(qid) });
+    const allQuestions = await db.getAll('questions');
+    if (!allQuestions || allQuestions.length === 0) return;
+
+    const sec1Questions = allQuestions
+      .filter(q => q.subject_id === 1 || q.subject_id === 2 || q.subject_id === 3 || q.subject_id === 4)
+      .slice(0, 50);
+
+    const sec2Questions = allQuestions
+      .filter(q => q.subject_id === 5 || q.subject_id === 6)
+      .slice(0, 50);
+
+    const fullQuestions = [...sec1Questions, ...sec2Questions];
+
+    const now = Date.now();
+    const oneYearLater = now + 86400000 * 365;
+
+    // 1. Full DDCET Statewide Mock Exam (100 MCQs)
+    const test1 = await db.insert('tests', {
+      title: 'Full DDCET-style Mock Test (100 MCQs)',
+      type: 'mock_paper',
+      subject_id: null,
+      chapter_id: null,
+      duration_minutes: 120,
+      scheduled_start_time: new Date(now - 3600000).toISOString(),
+      scheduled_end_time: new Date(oneYearLater).toISOString(),
+      status: 'published'
+    });
+    for (const q of fullQuestions) {
+      await db.insert('test_questions', { test_id: test1.id, question_id: q.id });
     }
+
+    // 2. Section 1 Mock Exam (50 MCQs)
+    const test2 = await db.insert('tests', {
+      title: 'DDCET Section-1: Engineering Science (50 MCQs)',
+      type: 'subject_wise',
+      subject_id: 1,
+      chapter_id: null,
+      duration_minutes: 60,
+      scheduled_start_time: new Date(now - 3600000).toISOString(),
+      scheduled_end_time: new Date(oneYearLater).toISOString(),
+      status: 'published'
+    });
+    for (const q of sec1Questions) {
+      await db.insert('test_questions', { test_id: test2.id, question_id: q.id });
+    }
+
+    // 3. Section 2 Mock Exam (50 MCQs)
+    const test3 = await db.insert('tests', {
+      title: 'DDCET Section-2: Aptitude & Soft Skills (50 MCQs)',
+      type: 'subject_wise',
+      subject_id: 5,
+      chapter_id: null,
+      duration_minutes: 60,
+      scheduled_start_time: new Date(now - 3600000).toISOString(),
+      scheduled_end_time: new Date(oneYearLater).toISOString(),
+      status: 'published'
+    });
+    for (const q of sec2Questions) {
+      await db.insert('test_questions', { test_id: test3.id, question_id: q.id });
+    }
+
+    console.log('[Tests Seed] Successfully seeded standard mock assessments into database.');
+  } catch (err) {
+    console.warn('[Tests Seed] Notice:', err.message);
   }
-  
-  res.json(newTest);
+};
+
+// Fetch tests with role-based filtering, subject/chapter mapping, and question counts
+app.get('/api/tests', async (req, res) => {
+  try {
+    const { publishedOnly, type, subject_id, chapter_id, status } = req.query;
+
+    // Check if requester is an admin or superadmin
+    let isUserAdmin = false;
+    const authHeader = req.headers['authorization'];
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      try {
+        const decoded = jwt.verify(authHeader.split(' ')[1], JWT_SECRET);
+        if (decoded && (decoded.role === 'admin' || decoded.role === 'superadmin')) {
+          isUserAdmin = true;
+        }
+      } catch (_err) {}
+    }
+
+    const [tests, subjects, chapters, testQuestions, allQuestions] = await Promise.all([
+      db.getAll('tests'),
+      db.getAll('subjects'),
+      db.getAll('chapters'),
+      db.getAll('test_questions'),
+      db.getAll('questions')
+    ]);
+
+    const subjectMap = {};
+    (subjects || []).forEach(s => { subjectMap[s.id] = s; });
+
+    const chapterMap = {};
+    (chapters || []).forEach(c => { chapterMap[c.id] = c; });
+
+    const questionMap = {};
+    (allQuestions || []).forEach(q => { questionMap[q.id] = q; });
+
+    // Group test_questions by test_id
+    const tqByTestId = {};
+    (testQuestions || []).forEach(tq => {
+      if (!tqByTestId[tq.test_id]) tqByTestId[tq.test_id] = [];
+      tqByTestId[tq.test_id].push(tq.question_id);
+    });
+
+    let filtered = tests || [];
+
+    // CRITICAL SECURITY & VISIBILITY ENFORCEMENT:
+    // If not admin, or if publishedOnly is requested, strictly return ONLY published tests!
+    // Draft/unpublished tests MUST remain completely hidden from students.
+    if (!isUserAdmin || publishedOnly === 'true' || status === 'published') {
+      filtered = filtered.filter(t => t.status === 'published');
+    } else if (status) {
+      filtered = filtered.filter(t => t.status === status);
+    }
+
+    if (type) {
+      filtered = filtered.filter(t => t.type === type);
+    }
+    if (subject_id) {
+      filtered = filtered.filter(t => String(t.subject_id) === String(subject_id));
+    }
+    if (chapter_id) {
+      filtered = filtered.filter(t => String(t.chapter_id) === String(chapter_id));
+    }
+
+    // Format and enrich each test record
+    const enriched = filtered.map(t => {
+      const qIds = tqByTestId[t.id] || [];
+      const sub = subjectMap[t.subject_id];
+      const chap = chapterMap[t.chapter_id];
+      const durationMins = parseInt(t.duration_minutes, 10) || 60;
+      const count = qIds.length;
+
+      // Question summary objects for list view
+      const questionsList = qIds.map((qid, idx) => {
+        const q = questionMap[qid];
+        return q ? { id: q.id, number: idx + 1, marks: q.marks || 2, text: q.text } : { id: qid, number: idx + 1, marks: 2 };
+      });
+
+      return {
+        id: t.id,
+        title: t.title,
+        type: t.type || 'mock_paper',
+        subject_id: t.subject_id || null,
+        subject_name: sub ? sub.name : null,
+        subject: sub ? sub.name : null,
+        chapter_id: t.chapter_id || null,
+        chapter_name: chap ? chap.name : null,
+        chapter: chap ? chap.name : null,
+        duration_minutes: durationMins,
+        durationMinutes: durationMins,
+        scheduled_start_time: t.scheduled_start_time || null,
+        scheduledStartTime: t.scheduled_start_time || null,
+        scheduled_end_time: t.scheduled_end_time || null,
+        scheduledEndTime: t.scheduled_end_time || null,
+        status: t.status || 'draft',
+        question_count: count,
+        questions_count: count,
+        total_marks: count * 2,
+        totalMarks: count * 2,
+        questions: questionsList
+      };
+    });
+
+    // Sort newest first
+    enriched.sort((a, b) => {
+      const idA = typeof a.id === 'number' ? a.id : 0;
+      const idB = typeof b.id === 'number' ? b.id : 0;
+      return idB - idA;
+    });
+
+    res.json(enriched);
+  } catch (err) {
+    console.error('Error fetching tests:', err);
+    res.status(500).json({ error: 'Failed to retrieve assessments' });
+  }
 });
 
-app.put('/api/tests/:id/publish', async (req, res) => {
-  const id = parseInt(req.params.id);
-  const test = await db.update('tests', id, { status: 'published' });
-  if (test) res.json(test);
-  else res.status(404).json({ error: 'Test not found' });
+// Single test endpoint with full question data for Live Test Arena
+app.get('/api/tests/:id', async (req, res) => {
+  try {
+    const testId = req.params.id;
+
+    // Check user role
+    let isUserAdmin = false;
+    const authHeader = req.headers['authorization'];
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      try {
+        const decoded = jwt.verify(authHeader.split(' ')[1], JWT_SECRET);
+        if (decoded && (decoded.role === 'admin' || decoded.role === 'superadmin')) {
+          isUserAdmin = true;
+        }
+      } catch (_err) {}
+    }
+
+    const [allTests, subjects, chapters, testQuestions, allQuestions] = await Promise.all([
+      db.getAll('tests'),
+      db.getAll('subjects'),
+      db.getAll('chapters'),
+      db.getAll('test_questions'),
+      db.getAll('questions')
+    ]);
+
+    const test = (allTests || []).find(t => String(t.id) === String(testId));
+    if (!test) {
+      return res.status(404).json({ error: 'Assessment not found' });
+    }
+
+    // Security check: draft tests are forbidden for students
+    if (!isUserAdmin && test.status !== 'published') {
+      return res.status(403).json({ error: 'This assessment is currently in draft and not published for students.' });
+    }
+
+    const subjectMap = {};
+    (subjects || []).forEach(s => { subjectMap[s.id] = s; });
+
+    const chapterMap = {};
+    (chapters || []).forEach(c => { chapterMap[c.id] = c; });
+
+    const questionMap = {};
+    (allQuestions || []).forEach(q => { questionMap[q.id] = q; });
+
+    const sub = subjectMap[test.subject_id];
+    const chap = chapterMap[test.chapter_id];
+    const durationMins = parseInt(test.duration_minutes, 10) || 60;
+
+    // Fetch linked questions
+    const linkedTq = (testQuestions || []).filter(tq => String(tq.test_id) === String(test.id));
+    const fullQuestions = linkedTq.map((tq, idx) => {
+      const q = questionMap[tq.question_id];
+      if (q) {
+        let opts = q.options;
+        if (typeof opts === 'string') {
+          try { opts = JSON.parse(opts); } catch (e) {}
+        }
+        return {
+          id: q.id,
+          number: idx + 1,
+          text: q.text,
+          options: Array.isArray(opts) ? opts : [],
+          correctOptionIndex: (q.answer_index !== undefined ? q.answer_index : (q.correct_option !== undefined ? q.correct_option : 0)),
+          marks: q.marks || 2,
+          negativeMarks: q.negative_marks !== undefined ? q.negative_marks : 0.5,
+          explanation: q.explanation || '',
+          subject: q.subject || (sub ? sub.name : ''),
+          chapter: q.chapter || (chap ? chap.name : ''),
+          topic: q.topic || ''
+        };
+      }
+      return null;
+    }).filter(Boolean);
+
+    res.json({
+      id: test.id,
+      title: test.title,
+      type: test.type || 'mock_paper',
+      subject_id: test.subject_id || null,
+      subject_name: sub ? sub.name : null,
+      subject: sub ? sub.name : null,
+      chapter_id: test.chapter_id || null,
+      chapter_name: chap ? chap.name : null,
+      chapter: chap ? chap.name : null,
+      duration_minutes: durationMins,
+      durationMinutes: durationMins,
+      scheduled_start_time: test.scheduled_start_time || null,
+      scheduledStartTime: test.scheduled_start_time || null,
+      scheduled_end_time: test.scheduled_end_time || null,
+      scheduledEndTime: test.scheduled_end_time || null,
+      status: test.status || 'draft',
+      question_count: fullQuestions.length,
+      questions: fullQuestions
+    });
+  } catch (err) {
+    console.error('Error fetching test by ID:', err);
+    res.status(500).json({ error: 'Failed to retrieve assessment details' });
+  }
 });
 
-app.delete('/api/tests/:id', async (req, res) => {
-  const id = parseInt(req.params.id);
-  await db.remove('tests', id);
-  // Remove associated test questions
-  const tq = await db.find('test_questions', { test_id: id });
-  for (const link of tq) {
-    await db.remove('test_questions', link.id);
+// Admin Create Test
+app.post('/api/tests', requireUser, requireAdmin, async (req, res) => {
+  try {
+    const { title, type, subject_id, chapter_id, duration_minutes, scheduled_start_time, scheduled_end_time, status, question_ids } = req.body;
+    
+    if (!title || typeof title !== 'string' || !title.trim()) {
+      return res.status(400).json({ error: 'Assessment title is required.' });
+    }
+
+    if (!Array.isArray(question_ids) || question_ids.length === 0) {
+      return res.status(400).json({ error: 'At least one question must be selected for the assessment.' });
+    }
+
+    const newTest = await db.insert('tests', {
+      title: title.trim(),
+      type: type || 'mock_paper',
+      subject_id: subject_id ? parseInt(subject_id, 10) : null,
+      chapter_id: chapter_id ? parseInt(chapter_id, 10) : null,
+      duration_minutes: parseInt(duration_minutes, 10) || 60,
+      scheduled_start_time: scheduled_start_time ? new Date(scheduled_start_time).toISOString() : null,
+      scheduled_end_time: scheduled_end_time ? new Date(scheduled_end_time).toISOString() : null,
+      status: status === 'published' ? 'published' : 'draft'
+    });
+
+    for (const qid of question_ids) {
+      const qIdParsed = isNaN(Number(qid)) ? qid : Number(qid);
+      await db.insert('test_questions', { test_id: newTest.id, question_id: qIdParsed });
+    }
+    
+    res.json({
+      ...newTest,
+      question_count: question_ids.length,
+      durationMinutes: newTest.duration_minutes
+    });
+  } catch (err) {
+    console.error('Error creating assessment:', err);
+    res.status(500).json({ error: 'Failed to create assessment' });
   }
-  res.json({ success: true });
+});
+
+// Admin Publish Test
+app.put('/api/tests/:id/publish', requireUser, requireAdmin, async (req, res) => {
+  try {
+    const id = isNaN(Number(req.params.id)) ? req.params.id : Number(req.params.id);
+    const test = await db.update('tests', id, { status: 'published' });
+    if (test) res.json(test);
+    else res.status(404).json({ error: 'Test not found' });
+  } catch (err) {
+    console.error('Error publishing test:', err);
+    res.status(500).json({ error: 'Failed to publish assessment' });
+  }
+});
+
+// Admin Unpublish Test (Return to draft)
+app.put('/api/tests/:id/unpublish', requireUser, requireAdmin, async (req, res) => {
+  try {
+    const id = isNaN(Number(req.params.id)) ? req.params.id : Number(req.params.id);
+    const test = await db.update('tests', id, { status: 'draft' });
+    if (test) res.json(test);
+    else res.status(404).json({ error: 'Test not found' });
+  } catch (err) {
+    console.error('Error unpublishing test:', err);
+    res.status(500).json({ error: 'Failed to unpublish assessment' });
+  }
+});
+
+// Admin Delete Test
+app.delete('/api/tests/:id', requireUser, requireAdmin, async (req, res) => {
+  try {
+    const id = isNaN(Number(req.params.id)) ? req.params.id : Number(req.params.id);
+    await db.remove('tests', id);
+    // Remove associated test questions
+    const allTQ = await db.getAll('test_questions');
+    const tq = (allTQ || []).filter(link => String(link.test_id) === String(id));
+    for (const link of tq) {
+      await db.remove('test_questions', link.id);
+    }
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Error deleting test:', err);
+    res.status(500).json({ error: 'Failed to delete assessment' });
+  }
 });
 
 // Full DDCET syllabus endpoint for student view
@@ -3370,6 +3698,7 @@ const startServer = async () => {
   let dbType = 'json';
   try {
     dbType = await db.initDb();
+    await ensureStandardTestsSeeded();
   } catch (err) {
     console.error('FATAL ERROR: Database connection failed.', err.message);
     process.exit(1);

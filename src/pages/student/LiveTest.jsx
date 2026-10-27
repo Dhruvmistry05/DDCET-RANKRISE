@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getTestById } from '../../store/mockData';
 import { API_BASE_URL } from '../../config/api';
@@ -11,6 +11,8 @@ export default function LiveTest() {
   const { testId } = useParams();
   const navigate = useNavigate();
   const [test, setTest] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState(null);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [answers, setAnswers] = useState({}); // qId -> optIdx
   const [status, setStatus] = useState({}); // qId -> 'answered' | 'review' | 'unanswered'
@@ -18,35 +20,23 @@ export default function LiveTest() {
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
 
+  const testRef = useRef(null);
+  const answersRef = useRef({});
+  const timeLeftRef = useRef(0);
+  const submitRef = useRef(null);
+
+  // Keep refs synchronized with state
   useEffect(() => {
-    const t = getTestById(testId);
-    if (!t) return;
-    
-    // Quick validation
-    const now = new Date();
-    if (now > new Date(t.scheduledEndTime) || now < new Date(t.scheduledStartTime)) {
-      navigate('/student');
-      return;
-    }
+    testRef.current = test;
+  }, [test]);
 
-    setTest(t);
-    const endTime = new Date(t.scheduledEndTime).getTime();
-    
-    const initStatuses = {};
-    t.questions.forEach(q => initStatuses[q.id] = 'unanswered');
-    setStatus(initStatuses);
+  useEffect(() => {
+    answersRef.current = answers;
+  }, [answers]);
 
-    const timer = setInterval(() => {
-      const remaining = Math.max(0, Math.floor((endTime - Date.now()) / 1000));
-      setTimeLeft(Math.min(remaining, t.durationMinutes * 60));
-      if (remaining <= 0) {
-        clearInterval(timer);
-        submitTest();
-      }
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [testId]);
+  useEffect(() => {
+    timeLeftRef.current = timeLeft;
+  }, [timeLeft]);
 
   // Anti-cheating: Tab switch detection
   useEffect(() => {
@@ -60,25 +50,35 @@ export default function LiveTest() {
   }, []);
 
   const submitTest = async () => {
+    const currentTest = testRef.current;
+    const currentAnswers = answersRef.current;
+    if (!currentTest || !Array.isArray(currentTest.questions) || currentTest.questions.length === 0) {
+      navigate('/student/mocks');
+      return;
+    }
+
     let score = 0, correct = 0, wrong = 0, unattempted = 0;
     const newMistakes = [];
     
-    test.questions.forEach(q => {
-      const ans = answers[q.id];
+    currentTest.questions.forEach(q => {
+      const ans = currentAnswers[q.id];
+      const marks = Number(q.marks) || 2;
+      const negMarks = Number(q.negativeMarks !== undefined ? q.negativeMarks : (q.negative_marks !== undefined ? q.negative_marks : 0.5)) || 0;
+
       if (ans === undefined) {
         unattempted++;
       } else if (ans === q.correctOptionIndex) {
         correct++;
-        score += q.marks;
+        score += marks;
       } else {
         wrong++;
-        score -= q.negativeMarks;
+        score -= negMarks;
         newMistakes.push({
           qid: q.id,
-          topic: q.chapter || q.subject,
+          topic: q.chapter || q.subject || 'General',
           question: q.text,
-          selected: q.options[ans],
-          correct: q.options[q.correctOptionIndex]
+          selected: (Array.isArray(q.options) && q.options[ans] !== undefined) ? q.options[ans] : `Option ${ans + 1}`,
+          correct: (Array.isArray(q.options) && q.options[q.correctOptionIndex] !== undefined) ? q.options[q.correctOptionIndex] : `Option ${(q.correctOptionIndex || 0) + 1}`
         });
       }
     });
@@ -98,19 +98,20 @@ export default function LiveTest() {
         }
         store.mistakes = uniqueMistakes;
         saveProgressStore(store);
-      });
+      }).catch(err => console.warn('Could not save mistakes locally', err));
     }
 
     const accuracy = (correct + wrong) > 0 ? (correct / (correct + wrong)) * 100 : 0;
     const questionsAttempted = correct + wrong;
-    const totalDuration = test.durationMinutes * 60;
-    const timeSpentSeconds = Math.max(1, totalDuration - timeLeft);
-    const maxScore = test.questions.reduce((sum, q) => sum + (q.marks || 2), 0);
+    const duration = currentTest.durationMinutes || currentTest.duration_minutes || 60;
+    const totalDuration = duration * 60;
+    const timeSpentSeconds = Math.max(1, totalDuration - (timeLeftRef.current || 0));
 
     let recordedRank = null;
     const token = localStorage.getItem('token');
     if (token) {
       try {
+        const maxScore = currentTest.questions.reduce((sum, q) => sum + (Number(q.marks) || 2), 0);
         const res = await fetch(`${API_BASE_URL}/api/student/tests/submit`, {
           method: 'POST',
           headers: {
@@ -118,8 +119,8 @@ export default function LiveTest() {
             'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify({
-            test_id: test.id,
-            test_title: test.title,
+            test_id: currentTest.id,
+            test_title: currentTest.title,
             score,
             max_score: maxScore,
             correct_count: correct,
@@ -128,7 +129,7 @@ export default function LiveTest() {
             questions_attempted: questionsAttempted,
             accuracy,
             time_spent_seconds: timeSpentSeconds,
-            answers
+            answers: currentAnswers
           })
         });
         if (res.ok) {
@@ -146,21 +147,152 @@ export default function LiveTest() {
       rank: recordedRank || '#1'
     };
     
-    navigate(`/student/result/${test.id}`, { state: { result } });
+    navigate(`/student/result/${currentTest.id}`, { state: { result } });
   };
 
-  if (!test) {
+  submitRef.current = submitTest;
+
+  // Load test details and initialize timer
+  useEffect(() => {
+    let timer = null;
+
+    const loadAssessment = async () => {
+      setLoading(true);
+      setErrorMsg(null);
+      let t = null;
+
+      try {
+        const token = localStorage.getItem('token');
+        const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+        const res = await fetch(`${API_BASE_URL}/api/tests/${testId}`, { headers });
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.id) {
+            t = data;
+          }
+        }
+      } catch (err) {
+        console.warn('Network fetch failed, attempting fallback to static tests', err);
+      }
+
+      if (!t) {
+        // Fallback for static mock tests if offline or not in backend
+        t = getTestById(testId);
+      }
+
+      if (!t) {
+        setLoading(false);
+        setErrorMsg('Assessment not found or is currently unavailable.');
+        return;
+      }
+
+      // Check if test has questions
+      if (!Array.isArray(t.questions) || t.questions.length === 0) {
+        setLoading(false);
+        setErrorMsg('This assessment currently has no questions assigned to it.');
+        return;
+      }
+
+      // Timing & Window validation
+      const now = new Date();
+      const startTime = t.scheduledStartTime || t.scheduled_start_time;
+      const endTime = t.scheduledEndTime || t.scheduled_end_time;
+      const isScheduledLive = t.type === 'scheduled_live';
+
+      if (isScheduledLive && startTime && endTime) {
+        const start = new Date(startTime);
+        const end = new Date(endTime);
+        if (now < start) {
+          setLoading(false);
+          setErrorMsg(`This scheduled assessment has not started yet. Starts at: ${start.toLocaleString()}`);
+          return;
+        }
+        if (now > end) {
+          setLoading(false);
+          setErrorMsg('This scheduled live assessment window has concluded.');
+          return;
+        }
+      }
+
+      const durationMins = t.durationMinutes || t.duration_minutes || 60;
+      t.durationMinutes = durationMins;
+      t.duration_minutes = durationMins;
+
+      // Determine initial timeLeft
+      let initialSeconds = durationMins * 60;
+      if (isScheduledLive && endTime) {
+        const remainingWindow = Math.max(0, Math.floor((new Date(endTime).getTime() - Date.now()) / 1000));
+        initialSeconds = Math.min(initialSeconds, remainingWindow);
+      }
+
+      setTest(t);
+      testRef.current = t;
+      setTimeLeft(initialSeconds);
+      timeLeftRef.current = initialSeconds;
+
+      const initStatuses = {};
+      t.questions.forEach(q => {
+        initStatuses[q.id] = 'unanswered';
+      });
+      setStatus(initStatuses);
+      setLoading(false);
+
+      timer = setInterval(() => {
+        setTimeLeft(prev => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            if (submitRef.current) submitRef.current();
+            return 0;
+          }
+          timeLeftRef.current = prev - 1;
+          return prev - 1;
+        });
+      }, 1000);
+    };
+
+    loadAssessment();
+
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [testId]);
+
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-900 text-white p-4">
         <div className="flex items-center gap-3">
           <div className="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
-          <span>Loading assessment environment...</span>
+          <span className="text-sm font-medium">Loading assessment environment...</span>
         </div>
       </div>
     );
   }
 
-  const q = test.questions[currentIdx];
+  if (errorMsg || !test) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-900 text-white p-4">
+        <div className="max-w-md w-full bg-slate-800 border border-slate-700 rounded-xl p-6 text-center space-y-4 shadow-xl">
+          <div className="w-12 h-12 rounded-full bg-rose-500/10 text-rose-400 flex items-center justify-center mx-auto border border-rose-500/20">
+            <AlertCircle size={24} />
+          </div>
+          <h2 className="text-lg font-bold text-white">Assessment Notice</h2>
+          <p className="text-sm text-slate-300">
+            {errorMsg || 'Assessment not found or is currently unavailable.'}
+          </p>
+          <div className="pt-2">
+            <button
+              onClick={() => navigate('/student/mocks')}
+              className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm rounded-lg transition-colors cursor-pointer"
+            >
+              Return to Test Center
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const q = test.questions[currentIdx] || test.questions[0];
 
   const formatTime = (sec) => {
     const h = Math.floor(sec / 3600);
@@ -172,6 +304,7 @@ export default function LiveTest() {
   const answeredCount = Object.values(status).filter(s => s === 'answered').length;
   const reviewCount = Object.values(status).filter(s => s === 'review').length;
   const unansweredCount = test.questions.length - answeredCount - reviewCount;
+  const currentOptions = Array.isArray(q.options) ? q.options : [];
 
   const renderPaletteContent = () => (
     <div className="flex flex-col h-full bg-white dark:bg-slate-800">
@@ -182,7 +315,7 @@ export default function LiveTest() {
         </div>
         <button 
           onClick={() => setIsPaletteOpen(false)}
-          className="lg:hidden p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-white rounded-md"
+          className="lg:hidden p-1.5 text-slate-400 hover:text-slate-700 dark:hover:white rounded-md cursor-pointer"
         >
           <X size={16} />
         </button>
@@ -203,7 +336,7 @@ export default function LiveTest() {
                 setCurrentIdx(idx);
                 setIsPaletteOpen(false);
               }}
-              className={`h-9 rounded-lg font-semibold text-xs border flex items-center justify-center transition-colors ${bgColor} ${
+              className={`h-9 rounded-lg font-semibold text-xs border flex items-center justify-center transition-colors cursor-pointer ${bgColor} ${
                 isCurrent ? 'ring-2 ring-slate-900 dark:ring-white ring-offset-1 dark:ring-offset-slate-800' : ''
               }`}
             >
@@ -258,7 +391,7 @@ export default function LiveTest() {
           {/* Mobile Palette Trigger Button */}
           <button
             onClick={() => setIsPaletteOpen(true)}
-            className="lg:hidden flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-750 text-xs font-medium border border-slate-700"
+            className="lg:hidden flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-750 text-xs font-medium border border-slate-700 cursor-pointer"
             title="Open Question Palette"
           >
             <Grid size={14} />
@@ -278,7 +411,7 @@ export default function LiveTest() {
           {/* Quick Submit Button */}
           <button
             onClick={() => setIsSubmitModalOpen(true)}
-            className="hidden sm:inline-flex items-center justify-center px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold transition-colors"
+            className="hidden sm:inline-flex items-center justify-center px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold transition-colors cursor-pointer"
           >
             Submit
           </button>
@@ -298,10 +431,10 @@ export default function LiveTest() {
             </span>
             <div className="flex items-center gap-2">
               <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-medium">
-                +{q.marks} Mark
+                +{q.marks || 2} Mark
               </span>
               <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 text-xs font-medium">
-                -{q.negativeMarks} Neg
+                -{q.negativeMarks !== undefined ? q.negativeMarks : 0.5} Neg
               </span>
             </div>
           </div>
@@ -314,7 +447,7 @@ export default function LiveTest() {
 
             {/* Answer Options */}
             <div className="space-y-2.5 pt-1">
-              {q.options.map((opt, idx) => {
+              {currentOptions.map((opt, idx) => {
                 const isSelected = answers[q.id] === idx;
                 return (
                   <label 
@@ -343,8 +476,8 @@ export default function LiveTest() {
                       className="hidden"
                       checked={isSelected}
                       onChange={() => {
-                        setAnswers({ ...answers, [q.id]: idx });
-                        setStatus({ ...status, [q.id]: 'answered' });
+                        setAnswers(prev => ({ ...prev, [q.id]: idx }));
+                        setStatus(prev => ({ ...prev, [q.id]: 'answered' }));
                       }}
                     />
                   </label>
@@ -360,19 +493,21 @@ export default function LiveTest() {
               {/* Review & Clear Actions */}
               <div className="flex gap-2">
                 <button 
-                  onClick={() => setStatus({ ...status, [q.id]: 'review' })}
-                  className="flex-1 sm:flex-none px-3.5 py-2 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg font-medium text-xs transition-colors"
+                  onClick={() => setStatus(prev => ({ ...prev, [q.id]: 'review' }))}
+                  className="flex-1 sm:flex-none px-3.5 py-2 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg font-medium text-xs transition-colors cursor-pointer"
                 >
                   Mark Review
                 </button>
                 <button 
                   onClick={() => {
-                    const newAns = {...answers}; 
-                    delete newAns[q.id];
-                    setAnswers(newAns);
-                    setStatus({ ...status, [q.id]: 'unanswered' });
+                    setAnswers(prev => {
+                      const next = { ...prev };
+                      delete next[q.id];
+                      return next;
+                    });
+                    setStatus(prev => ({ ...prev, [q.id]: 'unanswered' }));
                   }}
-                  className="flex-1 sm:flex-none px-3.5 py-2 border border-[#E2E8F0] dark:border-slate-700 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg font-medium text-xs transition-colors"
+                  className="flex-1 sm:flex-none px-3.5 py-2 border border-[#E2E8F0] dark:border-slate-700 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg font-medium text-xs transition-colors cursor-pointer"
                 >
                   Clear Answer
                 </button>
@@ -383,7 +518,7 @@ export default function LiveTest() {
                 {currentIdx > 0 && (
                   <button 
                     onClick={() => setCurrentIdx(currentIdx - 1)} 
-                    className="flex-1 sm:flex-none px-3.5 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-650 text-slate-700 dark:text-slate-200 rounded-lg font-medium text-xs flex items-center justify-center gap-1.5 transition-colors"
+                    className="flex-1 sm:flex-none px-3.5 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-650 text-slate-700 dark:text-slate-200 rounded-lg font-medium text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                   >
                     <ArrowLeft size={14} />
                     <span>Previous</span>
@@ -393,7 +528,7 @@ export default function LiveTest() {
                 {currentIdx < test.questions.length - 1 ? (
                   <button 
                     onClick={() => setCurrentIdx(currentIdx + 1)} 
-                    className="flex-1 sm:flex-none px-4 py-2 bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white rounded-lg font-medium text-xs flex items-center justify-center gap-1.5 transition-colors shadow-xs"
+                    className="flex-1 sm:flex-none px-4 py-2 bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white rounded-lg font-medium text-xs flex items-center justify-center gap-1.5 transition-colors shadow-xs cursor-pointer"
                   >
                     <span>Save & Next</span>
                     <ArrowRight size={14} />
@@ -401,7 +536,7 @@ export default function LiveTest() {
                 ) : (
                   <button 
                     onClick={() => setIsSubmitModalOpen(true)} 
-                    className="flex-1 sm:flex-none px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold text-xs transition-colors shadow-xs"
+                    className="flex-1 sm:flex-none px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold text-xs transition-colors shadow-xs cursor-pointer"
                   >
                     Submit Test
                   </button>
@@ -468,13 +603,13 @@ export default function LiveTest() {
             <div className="flex justify-end gap-2.5 pt-2">
               <button 
                 onClick={() => setIsSubmitModalOpen(false)} 
-                className="flex-1 sm:flex-none px-4 py-2 font-semibold text-xs sm:text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg min-h-[40px] transition-colors"
+                className="flex-1 sm:flex-none px-4 py-2 font-semibold text-xs sm:text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg min-h-[40px] transition-colors cursor-pointer"
               >
                 Back to Test
               </button>
               <button 
                 onClick={submitTest} 
-                className="flex-1 sm:flex-none px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs sm:text-sm rounded-lg shadow-xs min-h-[40px] transition-colors"
+                className="flex-1 sm:flex-none px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs sm:text-sm rounded-lg shadow-xs min-h-[40px] transition-colors cursor-pointer"
               >
                 Confirm & Submit
               </button>

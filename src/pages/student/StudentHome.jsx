@@ -23,8 +23,21 @@ export default function StudentHome() {
   const { user, token } = useAuth();
 
   useEffect(() => {
-    const loadTests = () => {
-      setTests(getTests().filter(t => t.status !== 'draft'));
+    const loadTests = async () => {
+      try {
+        const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+        const res = await fetch(`${API_BASE_URL}/api/tests?publishedOnly=true`, { headers });
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data)) {
+            setTests(data);
+            return;
+          }
+        }
+        setTests(getTests().filter(t => t.status !== 'draft'));
+      } catch {
+        setTests(getTests().filter(t => t.status !== 'draft'));
+      }
     };
     loadTests();
     const timer = setInterval(loadTests, 60000);
@@ -262,41 +275,62 @@ export default function StudentHome() {
           
           {tests.map(test => {
             const now = new Date();
-            const start = new Date(test.scheduledStartTime);
-            const end = new Date(test.scheduledEndTime);
-            const isLive = now >= start && now <= end;
-            const isUpcoming = now < start;
+            const startTime = test.scheduledStartTime || test.scheduled_start_time;
+            const endTime = test.scheduledEndTime || test.scheduled_end_time;
+            const isScheduledLive = test.type === 'scheduled_live';
+
+            let isLive = true;
+            let isUpcoming = false;
+
+            if (isScheduledLive && startTime && endTime) {
+              const start = new Date(startTime);
+              const end = new Date(endTime);
+              isLive = now >= start && now <= end;
+              isUpcoming = now < start;
+            }
+
+            const qCount = test.question_count || test.questions?.length || 0;
+            const duration = test.duration_minutes || test.durationMinutes || 60;
 
             return (
               <div 
                 key={test.id} 
                 className={`bg-white dark:bg-slate-800 p-5 rounded-xl border transition-colors shadow-xs ${
                   isLive 
-                    ? 'border-[#2563EB] dark:border-blue-600' 
+                    ? 'border-blue-300 dark:border-blue-700' 
                     : 'border-[#E2E8F0] dark:border-slate-700'
                 }`}
               >
                 <div className="flex justify-between items-start gap-2 mb-3">
-                  <h3 className="text-base font-semibold text-slate-900 dark:text-white leading-snug">
-                    {test.title}
-                  </h3>
+                  <div>
+                    <h3 className="text-base font-semibold text-slate-900 dark:text-white leading-snug">
+                      {test.title}
+                    </h3>
+                    {(test.subject_name || test.subject) && (
+                      <span className="text-[11px] text-blue-600 dark:text-blue-400 font-semibold block mt-0.5">
+                        {test.subject_name || test.subject}
+                      </span>
+                    )}
+                  </div>
                   <span className={`shrink-0 px-2 py-0.5 rounded text-xs font-semibold ${
-                    isLive ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800' 
-                    : isUpcoming ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-200 dark:border-amber-800' 
-                    : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400'
+                    isScheduledLive 
+                      ? (isLive ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-200' 
+                        : isUpcoming ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-200' 
+                        : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400')
+                      : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-200'
                   }`}>
-                    {isLive ? 'Live Now' : isUpcoming ? 'Upcoming' : 'Closed'}
+                    {isScheduledLive ? (isLive ? 'Live Now' : isUpcoming ? 'Upcoming' : 'Closed') : 'Active Mock'}
                   </span>
                 </div>
                 
                 <div className="flex flex-wrap gap-2 text-xs font-medium text-slate-600 dark:text-slate-400 mb-4">
                   <div className="flex items-center gap-1.5 bg-[#F8FAFC] dark:bg-slate-900 px-2.5 py-1 rounded-md border border-[#E2E8F0] dark:border-slate-700">
                     <Clock size={13} className="text-slate-400" /> 
-                    <span>{test.durationMinutes} Mins</span>
+                    <span>{duration} Mins</span>
                   </div>
                   <div className="flex items-center gap-1.5 bg-[#F8FAFC] dark:bg-slate-900 px-2.5 py-1 rounded-md border border-[#E2E8F0] dark:border-slate-700">
                     <BookOpen size={13} className="text-slate-400" /> 
-                    <span>{test.questions.length} Questions</span>
+                    <span>{qCount} Questions</span>
                   </div>
                 </div>
 
@@ -305,7 +339,7 @@ export default function StudentHome() {
                   disabled={!isLive}
                   className={`w-full py-2.5 px-4 rounded-lg font-medium text-xs sm:text-sm flex items-center justify-center gap-2 transition-colors ${
                     isLive 
-                      ? 'bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white shadow-xs' 
+                      ? 'bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white shadow-xs cursor-pointer' 
                       : 'bg-slate-100 dark:bg-slate-750 text-slate-400 dark:text-slate-500 cursor-not-allowed'
                   }`}
                 >

@@ -1,19 +1,66 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getTests } from '../../store/mockData';
+import { API_BASE_URL } from '../../config/api';
 import { 
   ClipboardCheck, Clock, BookOpen, AlertCircle, ArrowRight, 
-  Award, CheckCircle2, ShieldAlert, BarChart3, HelpCircle, Sparkles 
+  Award, CheckCircle2, ShieldAlert, BarChart3, HelpCircle, Sparkles,
+  Layers, RefreshCw, FileText
 } from 'lucide-react';
 
 export default function MockTestCenter() {
   const [tests, setTests] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [activeCategory, setActiveCategory] = useState('all'); // 'all' | 'full' | 'subject' | 'live'
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Load published mock assessments
-    setTests(getTests().filter(t => t.status !== 'draft'));
+    let isMounted = true;
+    const fetchTests = async () => {
+      setLoading(true);
+      try {
+        const token = localStorage.getItem('token');
+        const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+        const res = await fetch(`${API_BASE_URL}/api/tests?publishedOnly=true`, { headers });
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && isMounted) {
+            setTests(data);
+            setLoading(false);
+            return;
+          }
+        }
+        // Fallback to static mock data if backend request fails
+        if (isMounted) {
+          setTests(getTests().filter(t => t.status !== 'draft'));
+        }
+      } catch (err) {
+        console.error('Error fetching mock tests from server:', err);
+        if (isMounted) {
+          setTests(getTests().filter(t => t.status !== 'draft'));
+        }
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    fetchTests();
+    return () => { isMounted = false; };
   }, []);
+
+  // Filter tests by active category
+  const filteredTests = tests.filter(test => {
+    if (activeCategory === 'full') {
+      return test.type === 'mock_paper' || test.type === 'combined';
+    }
+    if (activeCategory === 'subject') {
+      return test.type === 'subject_wise' || test.type === 'chapter_wise' || test.type === 'sectional';
+    }
+    if (activeCategory === 'live') {
+      return test.type === 'scheduled_live';
+    }
+    return true;
+  });
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto space-y-6 font-sans">
@@ -48,7 +95,7 @@ export default function MockTestCenter() {
           <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-[#1E3A8A] dark:text-blue-400 flex items-center justify-center mb-2.5 border border-blue-100 dark:border-blue-900">
             <Clock size={16} />
           </div>
-          <h2 className="text-sm font-bold text-slate-900 dark:text-white mb-1">Standard 120 Mins</h2>
+          <h2 className="text-sm font-bold text-slate-900 dark:text-white mb-1">Standard Exam Timing</h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
             Strict timed environment matching official DDCET board exam duration with real-time countdown.
           </p>
@@ -102,23 +149,64 @@ export default function MockTestCenter() {
 
       {/* Active Mock Assessments List */}
       <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
-            Available Mock Assessments
-          </h2>
-          <span className="text-xs text-slate-500 font-medium">
-            {tests.length} Assessment{tests.length !== 1 ? 's' : ''} Published
-          </span>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+              Available Mock Assessments
+            </h2>
+            <span className="text-xs text-slate-500 font-medium">
+              {tests.length} Assessment{tests.length !== 1 ? 's' : ''} Published by Academic Team
+            </span>
+          </div>
+
+          {/* Category Tabs */}
+          <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg text-xs font-semibold overflow-x-auto">
+            <button
+              onClick={() => setActiveCategory('all')}
+              className={`px-3 py-1 rounded-md transition ${activeCategory === 'all' ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-2xs font-bold' : 'text-slate-600 dark:text-slate-300'}`}
+            >
+              All ({tests.length})
+            </button>
+            <button
+              onClick={() => setActiveCategory('full')}
+              className={`px-3 py-1 rounded-md transition ${activeCategory === 'full' ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-2xs font-bold' : 'text-slate-600 dark:text-slate-300'}`}
+            >
+              Full Mocks
+            </button>
+            <button
+              onClick={() => setActiveCategory('subject')}
+              className={`px-3 py-1 rounded-md transition ${activeCategory === 'subject' ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-2xs font-bold' : 'text-slate-600 dark:text-slate-300'}`}
+            >
+              Subject & Chapter
+            </button>
+            <button
+              onClick={() => setActiveCategory('live')}
+              className={`px-3 py-1 rounded-md transition ${activeCategory === 'live' ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-2xs font-bold' : 'text-slate-600 dark:text-slate-300'}`}
+            >
+              Scheduled Live
+            </button>
+          </div>
         </div>
 
-        {tests.length === 0 ? (
+        {loading ? (
+          <div className="p-12 text-center bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
+            <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+            <span className="text-xs text-slate-500 font-medium">Loading published assessments...</span>
+          </div>
+        ) : filteredTests.length === 0 ? (
           <div className="p-10 text-center bg-white dark:bg-slate-800 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
             <ClipboardCheck size={36} className="mx-auto text-slate-400 mb-2" />
-            <h3 className="text-sm font-semibold text-slate-800 dark:text-white">No Mock Tests Active</h3>
+            <h3 className="text-sm font-semibold text-slate-800 dark:text-white">No Mock Tests in this category</h3>
             <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
-              Assessments are scheduled during specific test windows. You can practice individual chapters in the Practice Lab.
+              New tests created by admins will appear here once published. You can also explore topic-wise tests in Practice Lab.
             </p>
-            <div className="mt-4">
+            <div className="mt-4 flex items-center justify-center gap-2">
+              <button
+                onClick={() => setActiveCategory('all')}
+                className="px-3.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100"
+              >
+                View All Assessments
+              </button>
               <Link
                 to="/student/practice"
                 className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#1E3A8A] text-white text-xs font-semibold shadow-xs hover:bg-[#1E3A8A]/90 transition-colors"
@@ -129,51 +217,90 @@ export default function MockTestCenter() {
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {tests.map(test => {
+            {filteredTests.map(test => {
               const now = new Date();
-              const start = new Date(test.scheduledStartTime);
-              const end = new Date(test.scheduledEndTime);
-              const isLive = now >= start && now <= end;
-              const isUpcoming = now < start;
-              const totalMarks = (test.questions?.length || 0) * 2;
+              const startTime = test.scheduledStartTime || test.scheduled_start_time;
+              const endTime = test.scheduledEndTime || test.scheduled_end_time;
+              const isScheduledLive = test.type === 'scheduled_live';
+
+              let isLive = true;
+              let isUpcoming = false;
+              let isConcluded = false;
+
+              if (isScheduledLive && startTime && endTime) {
+                const start = new Date(startTime);
+                const end = new Date(endTime);
+                isLive = now >= start && now <= end;
+                isUpcoming = now < start;
+                isConcluded = now > end;
+              }
+
+              const questionCount = test.question_count || test.questions?.length || 0;
+              const duration = test.duration_minutes || test.durationMinutes || 60;
+              const totalMarks = test.total_marks || test.totalMarks || (questionCount * 2);
 
               return (
                 <div 
                   key={test.id} 
                   className={`bg-white dark:bg-slate-800 p-5 rounded-xl border transition-colors shadow-xs flex flex-col justify-between ${
                     isLive 
-                      ? 'border-[#2563EB] dark:border-blue-600' 
-                      : 'border-[#E2E8F0] dark:border-slate-700'
+                      ? 'border-blue-300 dark:border-blue-700 hover:border-blue-500' 
+                      : 'border-slate-200 dark:border-slate-700'
                   }`}
                 >
                   <div>
                     <div className="flex justify-between items-start gap-2 mb-2">
-                      <h3 className="text-base font-bold text-slate-900 dark:text-white leading-snug">
-                        {test.title}
-                      </h3>
-                      <span className={`shrink-0 px-2 py-0.5 rounded text-xs font-semibold ${
-                        isLive 
-                          ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800' 
-                          : isUpcoming 
-                            ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-200 dark:border-amber-800' 
-                            : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400'
+                      <div>
+                        <h3 className="text-base font-bold text-slate-900 dark:text-white leading-snug">
+                          {test.title}
+                        </h3>
+                        {(test.subject_name || test.subject || test.chapter_name || test.chapter) && (
+                          <div className="flex flex-wrap gap-1 mt-1 text-[11px] font-medium text-slate-500">
+                            {(test.subject_name || test.subject) && (
+                              <span className="px-2 py-0.5 rounded bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300">
+                                {test.subject_name || test.subject}
+                              </span>
+                            )}
+                            {(test.chapter_name || test.chapter) && (
+                              <span className="px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300">
+                                {test.chapter_name || test.chapter}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      <span className={`shrink-0 px-2.5 py-0.5 rounded text-xs font-semibold ${
+                        isScheduledLive 
+                          ? (isLive 
+                              ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-200' 
+                              : isUpcoming 
+                                ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-200' 
+                                : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400')
+                          : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-200'
                       }`}>
-                        {isLive ? 'Active Test' : isUpcoming ? 'Scheduled' : 'Concluded'}
+                        {isScheduledLive 
+                          ? (isLive ? 'Live Window Open' : isUpcoming ? 'Scheduled' : 'Concluded')
+                          : 'Open Assessment'}
                       </span>
                     </div>
 
                     <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
-                      Comprehensive evaluation covering Basic Engineering and Aptitude sections.
+                      {test.type === 'mock_paper' || test.type === 'combined'
+                        ? 'Full simulated test matching GTU DDCET 2027 blueprint pattern and negative evaluation.'
+                        : test.type === 'subject_wise'
+                        ? 'Subject-level targeted evaluation to identify strong and weak chapters.'
+                        : 'Practice assessment with real-time score analytics and negative marking.'}
                     </p>
 
                     <div className="grid grid-cols-3 gap-2 mb-4">
                       <div className="bg-[#F8FAFC] dark:bg-slate-900/60 p-2.5 rounded-lg border border-[#E2E8F0] dark:border-slate-700/80 text-center">
                         <span className="text-[10px] uppercase font-semibold text-slate-400 block">Questions</span>
-                        <span className="text-sm font-bold text-slate-900 dark:text-white">{test.questions?.length || 0}</span>
+                        <span className="text-sm font-bold text-slate-900 dark:text-white">{questionCount}</span>
                       </div>
                       <div className="bg-[#F8FAFC] dark:bg-slate-900/60 p-2.5 rounded-lg border border-[#E2E8F0] dark:border-slate-700/80 text-center">
                         <span className="text-[10px] uppercase font-semibold text-slate-400 block">Duration</span>
-                        <span className="text-sm font-bold text-slate-900 dark:text-white">{test.durationMinutes}m</span>
+                        <span className="text-sm font-bold text-slate-900 dark:text-white">{duration}m</span>
                       </div>
                       <div className="bg-[#F8FAFC] dark:bg-slate-900/60 p-2.5 rounded-lg border border-[#E2E8F0] dark:border-slate-700/80 text-center">
                         <span className="text-[10px] uppercase font-semibold text-slate-400 block">Max Marks</span>
@@ -185,7 +312,7 @@ export default function MockTestCenter() {
                   <button 
                     onClick={() => navigate(`/student/test/${test.id}`)}
                     disabled={!isLive}
-                    className={`w-full py-2.5 px-4 rounded-lg font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition-colors ${
+                    className={`w-full py-2.5 px-4 rounded-lg font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition-colors cursor-pointer ${
                       isLive 
                         ? 'bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white shadow-xs' 
                         : 'bg-slate-100 dark:bg-slate-750 text-slate-400 dark:text-slate-500 cursor-not-allowed'

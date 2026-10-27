@@ -30,6 +30,18 @@ export default function TestManagement() {
     }
   };
 
+  const handleUnpublish = async (id) => {
+    try {
+      await fetch(`${API_URL}/api/tests/${id}/unpublish`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      fetchTests();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   const handlePublish = async (id) => {
     try {
       await fetch(`${API_URL}/api/tests/${id}/publish`, {
@@ -88,6 +100,22 @@ export default function TestManagement() {
         </Link>
       </div>
 
+      {/* Overview Stats Bar */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Assessments</span>
+          <div className="text-2xl font-bold text-slate-900 dark:text-white mt-0.5">{tests.length}</div>
+        </div>
+        <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Published to Students</span>
+          <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">{tests.filter(t => t.status === 'published').length}</div>
+        </div>
+        <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">Drafts (Hidden)</span>
+          <div className="text-2xl font-bold text-amber-600 dark:text-amber-400 mt-0.5">{tests.filter(t => t.status === 'draft').length}</div>
+        </div>
+      </div>
+
       {/* Mobile Card List View (< md) */}
       <div className="block md:hidden space-y-3">
         {tests.map(test => (
@@ -112,8 +140,21 @@ export default function TestManagement() {
               <span className="capitalize px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded font-medium">
                 {test.type?.replace('_', ' ')}
               </span>
+              {test.subject_name && (
+                <span className="px-2 py-0.5 bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 rounded font-medium">
+                  {test.subject_name}
+                </span>
+              )}
+              {test.chapter_name && (
+                <span className="px-2 py-0.5 bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300 rounded font-medium">
+                  {test.chapter_name}
+                </span>
+              )}
               <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded font-medium flex items-center gap-1">
                 <Clock size={12} /> {test.duration_minutes} min
+              </span>
+              <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded font-medium">
+                {test.question_count || test.questions?.length || 0} Questions
               </span>
             </div>
 
@@ -129,12 +170,20 @@ export default function TestManagement() {
             )}
 
             <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-              {test.status === 'draft' && (
+              {test.status === 'draft' ? (
                 <button 
                   onClick={() => handlePublish(test.id)} 
-                  className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-blue-600 dark:text-blue-400 rounded-lg text-xs font-semibold transition"
+                  className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 rounded-lg text-xs font-semibold transition"
                 >
                   Publish
+                </button>
+              ) : (
+                <button 
+                  onClick={() => handleUnpublish(test.id)} 
+                  className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg text-xs font-medium transition"
+                  title="Unpublish test (hide from students)"
+                >
+                  Unpublish
                 </button>
               )}
               <button 
@@ -172,9 +221,17 @@ export default function TestManagement() {
             <tbody className="text-sm divide-y divide-[#E2E8F0] dark:divide-slate-800">
               {tests.map(test => (
                 <tr key={test.id} className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition">
-                  <td className="p-4 font-bold text-slate-900 dark:text-white">{test.title}</td>
+                  <td className="p-4">
+                    <span className="font-bold text-slate-900 dark:text-white block">{test.title}</span>
+                    {(test.subject_name || test.chapter_name) && (
+                      <span className="text-xs text-slate-400 block mt-0.5">
+                        {test.subject_name}{test.chapter_name ? ` • ${test.chapter_name}` : ''}
+                      </span>
+                    )}
+                  </td>
                   <td className="p-4 text-slate-600 dark:text-slate-300 capitalize text-xs">
-                    {test.type?.replace('_', ' ')}
+                    <div>{test.type?.replace('_', ' ')}</div>
+                    <div className="text-[11px] text-slate-400 font-medium">{test.question_count || test.questions?.length || 0} Questions</div>
                   </td>
                   <td className="p-4 text-slate-600 dark:text-slate-400">
                     {test.type === 'scheduled_live' ? (
@@ -207,12 +264,20 @@ export default function TestManagement() {
                     )}
                   </td>
                   <td className="p-4 text-right flex justify-end items-center gap-2">
-                    {test.status === 'draft' && (
+                    {test.status === 'draft' ? (
                       <button 
                         onClick={() => handlePublish(test.id)} 
-                        className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-blue-600 dark:text-blue-400 rounded-lg text-xs font-semibold transition"
+                        className="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 rounded-lg text-xs font-semibold transition"
                       >
                         Publish
+                      </button>
+                    ) : (
+                      <button 
+                        onClick={() => handleUnpublish(test.id)} 
+                        className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg text-xs font-medium transition"
+                        title="Unpublish test (hide from students)"
+                      >
+                        Unpublish
                       </button>
                     )}
                     <button 

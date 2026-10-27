@@ -16,6 +16,7 @@ export default function CreateTest() {
   const [chapterId, setChapterId] = useState('');
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
+  const [status, setStatus] = useState('published');
   
   const [search, setSearch] = useState('');
 
@@ -80,7 +81,8 @@ export default function CreateTest() {
           chapter_id: chapterId ? parseInt(chapterId) : null,
           scheduled_start_time: startTime ? new Date(startTime).toISOString() : null,
           scheduled_end_time: endTime ? new Date(endTime).toISOString() : null,
-          question_ids: Array.from(selectedQuestions)
+          question_ids: Array.from(selectedQuestions),
+          status
         })
       });
       navigate('/admin/tests');
@@ -239,6 +241,41 @@ export default function CreateTest() {
               />
             </div>
             
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
+                Publication Status *
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setStatus('published')}
+                  className={`py-2 px-3 rounded-lg text-xs font-bold border transition text-center ${
+                    status === 'published'
+                      ? 'bg-emerald-50 dark:bg-emerald-950/60 border-emerald-500 text-emerald-700 dark:text-emerald-300 ring-1 ring-emerald-500'
+                      : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50'
+                  }`}
+                >
+                  ✓ Published
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStatus('draft')}
+                  className={`py-2 px-3 rounded-lg text-xs font-bold border transition text-center ${
+                    status === 'draft'
+                      ? 'bg-amber-50 dark:bg-amber-950/60 border-amber-500 text-amber-700 dark:text-amber-300 ring-1 ring-amber-500'
+                      : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50'
+                  }`}
+                >
+                  ✎ Draft (Hidden)
+                </button>
+              </div>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                {status === 'published' 
+                  ? 'Will appear immediately in Mock Test Center for students.' 
+                  : 'Stays hidden from students until published.'}
+              </p>
+            </div>
+
             <div className="pt-2">
               <button 
                 type="submit" 
