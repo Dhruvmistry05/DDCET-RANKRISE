@@ -69,8 +69,12 @@ export default function Sidebar({ isOpen, onClose }) {
       {/* Brand Logo Header */}
       <div className="flex items-center justify-between px-6 py-5 border-b border-slate-800/90">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-[#1E3A8A] flex items-center justify-center text-white font-bold text-sm tracking-tight shadow-xs border border-blue-600/30">
-            RR
+          <div className="w-10 h-10 rounded-xl bg-blue-950/60 flex items-center justify-center p-1.5 shadow-xs border border-blue-500/30 shrink-0">
+            <img 
+              src="/logo-icon-white.png" 
+              alt="DDCET RankRise" 
+              className="w-full h-full object-contain"
+            />
           </div>
           <div>
             <div className="flex items-center gap-1.5">

@@ -105,8 +105,17 @@ export default function LandingPage() {
           
           {/* Brand Logo */}
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-xl bg-[#1E3A8A] flex items-center justify-center text-white font-black text-base shadow-sm border border-blue-600/30 group-hover:scale-105 transition-transform">
-              RR
+            <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/60 flex items-center justify-center p-1 border border-blue-200 dark:border-blue-900 shadow-xs group-hover:scale-105 transition-transform overflow-hidden shrink-0">
+              <img 
+                src="/logo-icon.png" 
+                alt="DDCET RankRise Logo" 
+                className="w-full h-full object-contain dark:hidden" 
+              />
+              <img 
+                src="/logo-icon-white.png" 
+                alt="DDCET RankRise Logo" 
+                className="w-full h-full object-contain hidden dark:block" 
+              />
             </div>
             <div>
               <div className="flex items-center gap-1.5">
@@ -618,9 +627,18 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
             <div className="space-y-1">
-              <div className="flex items-center gap-2 font-bold text-slate-900 dark:text-white text-sm">
-                <div className="w-6 h-6 rounded-md bg-[#1E3A8A] flex items-center justify-center text-white text-[10px] font-black">
-                  RR
+              <div className="flex items-center gap-2.5 font-bold text-slate-900 dark:text-white text-sm">
+                <div className="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/60 flex items-center justify-center p-1 border border-blue-200 dark:border-blue-900 shrink-0">
+                  <img 
+                    src="/logo-icon.png" 
+                    alt="DDCET RankRise" 
+                    className="w-full h-full object-contain dark:hidden" 
+                  />
+                  <img 
+                    src="/logo-icon-white.png" 
+                    alt="DDCET RankRise" 
+                    className="w-full h-full object-contain hidden dark:block" 
+                  />
                 </div>
                 <span>DDCET RankRise Academic Portal</span>
               </div>

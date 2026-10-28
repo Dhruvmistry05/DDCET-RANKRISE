@@ -80,8 +80,17 @@ export default function Layout() {
 
             {/* Mobile Brand Title (When Sidebar is Hidden) */}
             <div className="lg:hidden flex items-center gap-2 shrink-0">
-              <div className="w-7 h-7 rounded-md bg-[#1E3A8A] flex items-center justify-center text-white font-bold text-xs shadow-xs">
-                RR
+              <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/60 flex items-center justify-center p-1 border border-blue-200 dark:border-blue-900 shadow-xs">
+                <img 
+                  src="/logo-icon.png" 
+                  alt="RankRise Logo" 
+                  className="w-full h-full object-contain dark:hidden" 
+                />
+                <img 
+                  src="/logo-icon-white.png" 
+                  alt="RankRise Logo" 
+                  className="w-full h-full object-contain hidden dark:block" 
+                />
               </div>
               <span className="font-bold text-slate-900 dark:text-white text-sm tracking-tight truncate">
                 RankRise

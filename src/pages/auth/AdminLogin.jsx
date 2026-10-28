@@ -100,8 +100,12 @@ export default function AdminLogin() {
         <div className="hidden lg:flex flex-col justify-between w-5/12 bg-[#0B1536] p-10 text-white border-r border-slate-800">
           <div className="space-y-6">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-white text-base tracking-tight shadow-md border border-blue-400/30">
-                RR
+              <div className="w-11 h-11 rounded-xl bg-blue-600/30 flex items-center justify-center p-1.5 shadow-md border border-blue-400/30 shrink-0">
+                <img 
+                  src="/logo-icon-white.png" 
+                  alt="DDCET RankRise Admin" 
+                  className="w-full h-full object-contain" 
+                />
               </div>
               <div>
                 <span className="text-[10px] font-bold tracking-widest text-blue-300 uppercase">DDCET 2027</span>
@@ -137,8 +141,12 @@ export default function AdminLogin() {
             
             {/* Mobile Brand Header */}
             <div className="lg:hidden flex items-center justify-center gap-2.5 pb-2">
-              <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-sm">
-                RR
+              <div className="w-9 h-9 rounded-lg bg-blue-950/80 flex items-center justify-center p-1 border border-blue-500/30 shrink-0">
+                <img 
+                  src="/logo-icon-white.png" 
+                  alt="RankRise Admin" 
+                  className="w-full h-full object-contain" 
+                />
               </div>
               <div>
                 <span className="text-[10px] font-bold tracking-widest text-blue-400 uppercase">DDCET ADMIN</span>

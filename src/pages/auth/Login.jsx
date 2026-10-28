@@ -151,8 +151,12 @@ export default function Login() {
         <div className="hidden lg:flex flex-col justify-between w-5/12 bg-[#1E3A8A] p-10 text-white border-r border-blue-900">
           <div className="space-y-6">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-white/15 flex items-center justify-center font-bold text-white text-base tracking-tight border border-white/20">
-                RR
+              <div className="w-11 h-11 rounded-xl bg-white/10 flex items-center justify-center p-1.5 border border-white/20 shadow-xs shrink-0">
+                <img 
+                  src="/logo-icon-white.png" 
+                  alt="DDCET RankRise" 
+                  className="w-full h-full object-contain" 
+                />
               </div>
               <div>
                 <span className="text-[10px] font-bold tracking-widest text-blue-200 uppercase">DDCET 2027</span>
@@ -185,8 +189,17 @@ export default function Login() {
             
             {/* Mobile Brand Header */}
             <div className="lg:hidden flex items-center justify-center gap-2.5 pb-2">
-              <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-sm">
-                RR
+              <div className="w-9 h-9 rounded-lg bg-blue-50 dark:bg-blue-950/60 flex items-center justify-center p-1 border border-blue-200 dark:border-blue-900 shrink-0">
+                <img 
+                  src="/logo-icon.png" 
+                  alt="RankRise" 
+                  className="w-full h-full object-contain dark:hidden" 
+                />
+                <img 
+                  src="/logo-icon-white.png" 
+                  alt="RankRise" 
+                  className="w-full h-full object-contain hidden dark:block" 
+                />
               </div>
               <div>
                 <span className="text-[10px] font-bold tracking-widest text-blue-600 dark:text-blue-400 uppercase">DDCET</span>

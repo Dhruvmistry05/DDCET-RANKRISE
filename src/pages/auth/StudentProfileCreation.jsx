@@ -247,8 +247,12 @@ export default function StudentProfileCreation() {
             
             {/* Brand Logo */}
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 bg-white/15 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-xs border border-white/20">
-                RR
+              <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center p-1.5 shadow-xs border border-white/20 shrink-0">
+                <img 
+                  src="/logo-icon-white.png" 
+                  alt="DDCET RankRise" 
+                  className="w-full h-full object-contain" 
+                />
               </div>
               <div>
                 <span className="text-[11px] tracking-wider text-blue-200 font-semibold uppercase">DDCET 2027</span>
