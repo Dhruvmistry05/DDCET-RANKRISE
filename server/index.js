@@ -1617,6 +1617,65 @@ app.delete('/api/tests/:id', requireUser, requireAdmin, async (req, res) => {
   }
 });
 
+// ============================================================================
+// Previous Year Questions (PYQ) API Endpoints
+// ============================================================================
+app.get('/api/pyq/papers', (req, res) => {
+  try {
+    const pyqPath = path.join(__dirname, 'data/pyq_papers.json');
+    if (fs.existsSync(pyqPath)) {
+      const data = JSON.parse(fs.readFileSync(pyqPath, 'utf8'));
+      const summaries = data.map(p => ({
+        id: p.id,
+        year: p.year,
+        exam_code: p.exam_code,
+        title: p.title,
+        subtitle: p.subtitle,
+        exam_date: p.exam_date,
+        booklet_code: p.booklet_code,
+        total_questions: p.total_questions,
+        duration_minutes: p.duration_minutes,
+        total_marks: p.total_marks,
+        marks_per_question: p.marks_per_question,
+        negative_marking: p.negative_marking,
+        sections: p.sections
+      }));
+      return res.json(summaries);
+    }
+    res.json([]);
+  } catch (err) {
+    console.error('Error fetching PYQ papers:', err);
+    res.status(500).json({ error: 'Failed to retrieve previous year papers' });
+  }
+});
+
+app.get('/api/pyq/papers/:id', (req, res) => {
+  try {
+    const pyqPath = path.join(__dirname, 'data/pyq_papers.json');
+    if (fs.existsSync(pyqPath)) {
+      const data = JSON.parse(fs.readFileSync(pyqPath, 'utf8'));
+      const paper = data.find(p => p.id === req.params.id || String(p.year) === req.params.id);
+      if (paper) {
+        const { section } = req.query;
+        if (section) {
+          const secNum = parseInt(section, 10);
+          const filteredQ = paper.questions.filter(q => q.section === secNum);
+          return res.json({
+            ...paper,
+            total_questions: filteredQ.length,
+            questions: filteredQ
+          });
+        }
+        return res.json(paper);
+      }
+    }
+    res.status(404).json({ error: 'Previous year paper not found' });
+  } catch (err) {
+    console.error('Error fetching PYQ paper by ID:', err);
+    res.status(500).json({ error: 'Failed to retrieve paper details' });
+  }
+});
+
 // Full DDCET syllabus endpoint for student view
 app.get('/api/student/syllabus', async (req, res) => {
   const { subjects, chapters, topics, materials, questions } = await db.getStudentSyllabus();
@@ -1871,6 +1930,33 @@ app.get('/api/search', async (req, res) => {
           });
         }
       });
+
+    // 6. Previous Year Papers (PYQ Practice)
+    const pyqPapers = [
+      { id: 'ddcet-2026', title: 'DDCET 2026 Question Paper (DE-2026)', year: 2026, subtitle: 'Official 100 MCQs with Verified Solutions' },
+      { id: 'ddcet-2025', title: 'DDCET 2025 Question Paper (DE-2025)', year: 2025, subtitle: 'Official 100 MCQs with Final Answer Key' }
+    ];
+    pyqPapers.forEach(pyq => {
+      const score = Math.max(
+        scoreText(pyq.title),
+        scoreText(`${pyq.year} pyq previous year paper`),
+        scoreText('previous year mcq practice')
+      );
+      if (score > 0) {
+        allMatches.push({
+          id: `pyq-${pyq.id}`,
+          rawId: pyq.id,
+          category: 'tests',
+          categoryLabel: 'Previous Year Paper',
+          title: pyq.title,
+          subtitle: pyq.subtitle,
+          badge: `PYQ ${pyq.year}`,
+          score: score + 25,
+          url: `/student/pyq?year=${pyq.year}`,
+          practiceUrl: `/student/pyq?year=${pyq.year}`
+        });
+      }
+    });
 
     // Sort by relevance score
     allMatches.sort((a, b) => b.score - a.score);

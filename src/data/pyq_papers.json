@@ -1,0 +1,3862 @@
+[
+  {
+    "id": "ddcet-2026",
+    "year": 2026,
+    "exam_code": "DE-2026",
+    "title": "DDCET 2026 Official Question Paper (Engineering & Technology)",
+    "subtitle": "Admission Committee for Professional Courses (ACPC) Gujarat",
+    "exam_date": "05/05/2026",
+    "booklet_code": "D",
+    "total_questions": 100,
+    "duration_minutes": 150,
+    "total_marks": 200,
+    "marks_per_question": 2.0,
+    "negative_marking": 0.5,
+    "sections": [
+      {
+        "id": 1,
+        "name": "Section 1: Basics of Science & Engineering",
+        "question_range": "1-50",
+        "count": 50
+      },
+      {
+        "id": 2,
+        "name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "question_range": "51-100",
+        "count": 50
+      }
+    ],
+    "questions": [
+      {
+        "id": "de2026-q1",
+        "number": 1,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Computer",
+        "text": "What is the shortcut key to start slide show in power point?",
+        "options": [
+          "Shift + F5",
+          "F5",
+          "Ctrl + S",
+          "Alt + S"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (B)."
+      },
+      {
+        "id": "de2026-q2",
+        "number": 2,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Computer",
+        "text": "Which of the following is an example of system software.",
+        "options": [
+          "Google Chrome",
+          "Microsoft Excel",
+          "Adobe Reader",
+          "Unix"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (D)."
+      },
+      {
+        "id": "de2026-q3",
+        "number": 3,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "By which heat transfer method heat will transfer in mercury?",
+        "options": [
+          "Conduction",
+          "Convection",
+          "Radiation",
+          "All the above"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (A)."
+      },
+      {
+        "id": "de2026-q4",
+        "number": 4,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "A metallic rod of length 2 m expands by 2 mm when its temperature increases from 100°C to 200 °C then what will be the value of coefficient of linear expansion for this rod?",
+        "options": [
+          "4 ×10–5 °C–1",
+          "1×10–5 °C–1",
+          "2×10–5 °C–1",
+          "5 ×10–5 °C–1"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (B)."
+      },
+      {
+        "id": "de2026-q5",
+        "number": 5,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "Specific heat of an object will depend on which of the following?",
+        "options": [
+          "H eat given",
+          "Mass of the object",
+          "Temperature of the object",
+          "All the above"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (D)."
+      },
+      {
+        "id": "de2026-q6",
+        "number": 6,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Environment",
+        "text": "Noise pollution is measured in ________",
+        "options": [
+          "Decibel",
+          "Newton",
+          "Dyne",
+          "Echo"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (A)."
+      },
+      {
+        "id": "de2026-q7",
+        "number": 7,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "Which of the following is not a unit of temperature?",
+        "options": [
+          "Celsius",
+          "Fahrenheit",
+          "Kelvin",
+          "Candella"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (D)."
+      },
+      {
+        "id": "de2026-q8",
+        "number": 8,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "Electric flux is maximum when the angle between electric field and surface area is ________",
+        "options": [
+          "90°",
+          "60 °",
+          "45 °",
+          "0 °"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (D)."
+      },
+      {
+        "id": "de2026-q9",
+        "number": 9,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "Reverberations time of a hall is 5 second. If volume of the hall and total absorption of sound both are doubled then what will be new reverberation time?",
+        "options": [
+          "2 Second",
+          "4 Second",
+          "9 Second",
+          "5 Second"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (D)."
+      },
+      {
+        "id": "de2026-q10",
+        "number": 10,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Chemistry",
+        "text": "Element X gets converted into red and brown colour affected with moistured air and new compound Y is formed what will be compound X and Y?",
+        "options": [
+          "X = Fe Y= Fe2O3",
+          "X = Ag Y= Ag2S",
+          "X = Cu Y= CuO",
+          "X = Al Y= Al2O3"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (A)."
+      },
+      {
+        "id": "de2026-q11",
+        "number": 11,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "Which of the following statements are correct for LASER light? i. It is monochromatic ii It is polychromatic iii. It has low divergence iv. It has very high divergence",
+        "options": [
+          "(i) & (iv)",
+          "(ii) & (iv)",
+          "(i), (ii), (iii) & (iv)",
+          "(i) & (iii)"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (D)."
+      },
+      {
+        "id": "de2026-q12",
+        "number": 12,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Chemistry",
+        "text": "What is PH value of human blood?",
+        "options": [
+          "8.5",
+          "7.4",
+          "2.4",
+          "4.7"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (B)."
+      },
+      {
+        "id": "de2026-q13",
+        "number": 13,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "According to Coulomb's law the force acting between two charges is ......... between them",
+        "options": [
+          "Inversely proportional to distance",
+          "Directly proportional to distance",
+          "Directly proportional to square of distance",
+          "Inversly proportional to square of distance"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (D)."
+      },
+      {
+        "id": "de2026-q14",
+        "number": 14,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "In which heat transfer method atoms will move from one place to the other in order to transfer the heat?",
+        "options": [
+          "Conduction",
+          "Convection",
+          "Radiation",
+          "All the above"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (B)."
+      },
+      {
+        "id": "de2026-q15",
+        "number": 15,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "Newton's first law of motion gives definition of which physical quantity?",
+        "options": [
+          "Work",
+          "Velocity",
+          "Force",
+          "Acceleration"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (C)."
+      },
+      {
+        "id": "de2026-q16",
+        "number": 16,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "When we connect both the jaws of Micrometer Screw Gauge and '0' on circular scale coincides with reference line then this Micrometer Screw Gauge has which type of error?",
+        "options": [
+          "Error less",
+          "Positive Error",
+          "Negative Error",
+          "Random Error"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (A)."
+      },
+      {
+        "id": "de2026-q17",
+        "number": 17,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "Linear momentum of an object represented by which of the following equation?",
+        "options": [
+          "p = mv",
+          "p = mv2",
+          "p = m/v",
+          "p = ma"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (A)."
+      },
+      {
+        "id": "de2026-q18",
+        "number": 18,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "In a parallel plate capacitor if we double the distance between two plates and make their area four times then what will happen to capacitance of this capacitors?",
+        "options": [
+          "Becomes half",
+          "Becomes double",
+          "Becomes four times",
+          "Becomes Zero"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (B)."
+      },
+      {
+        "id": "de2026-q19",
+        "number": 19,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "212 Fahrenheit = _________ Kelvin.",
+        "options": [
+          "373.15",
+          "273.15",
+          "212",
+          "32"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (A)."
+      },
+      {
+        "id": "de2026-q20",
+        "number": 20,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Environment",
+        "text": "Which of the following is NOT a Green House gas?",
+        "options": [
+          "CO 2",
+          "O2",
+          "NO2",
+          "CFC"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (B)."
+      },
+      {
+        "id": "de2026-q21",
+        "number": 21,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Chemistry",
+        "text": "Which main product is obtained by reaction of sodium hydroxide with Zn metal?",
+        "options": [
+          "NaZnO 2",
+          "NaZn2O",
+          "Na2ZnO2",
+          "Zn(OH) 2"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (C)."
+      },
+      {
+        "id": "de2026-q22",
+        "number": 22,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Chemistry",
+        "text": "By which reaction insoluble salts are produced?",
+        "options": [
+          "Precipitation",
+          "Combination",
+          "Corrosion",
+          "Redox"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (A)."
+      },
+      {
+        "id": "de2026-q23",
+        "number": 23,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "Four capacitors having same value of 4 µF are connected in series then what will be their equivalent capacitance?",
+        "options": [
+          "1 µF",
+          "16 µF",
+          "4 µF",
+          "44 µF"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (A)."
+      },
+      {
+        "id": "de2026-q24",
+        "number": 24,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Environment",
+        "text": "Which fuel is used in automobile produces least pollution?",
+        "options": [
+          "Petrol",
+          "Diesel",
+          "LPG",
+          "CNG"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (D)."
+      },
+      {
+        "id": "de2026-q25",
+        "number": 25,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "An object tied with a string is rotating on a circular path of radius 1 m. It completes 50 rotations in 5 seconds then what will be its angular velocity?",
+        "options": [
+          "10 rad/sec",
+          "31.41 rad/sec",
+          "62.83 rad/sec",
+          "25 rad/sec"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (C)."
+      },
+      {
+        "id": "de2026-q26",
+        "number": 26,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Chemistry",
+        "text": "For Reaction CuO+H2 → Cu+H2O. Which statement is correct?",
+        "options": [
+          "Cu is an oxidizing agent",
+          "H2 is oxidizing",
+          "This reaction is a displacement reaction",
+          "All of the given"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (D)."
+      },
+      {
+        "id": "de2026-q27",
+        "number": 27,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "When an object is projected upwards, at highest point which of the following statement is correct?",
+        "options": [
+          "Potential energy is zero & Kinetic energy is maximum",
+          "Kinetic energy is zero & Potential energy is maximum",
+          "Potential energy and Kinetic energy both are equal",
+          "Potential energy and Kinetic energy both are zero"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (B)."
+      },
+      {
+        "id": "de2026-q28",
+        "number": 28,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Computer",
+        "text": "Which of the following tag is used for inserting the largest heading in HTML?",
+        "options": [
+          "head",
+          "< h2 >",
+          "< h1 >",
+          "< h6 >"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (C)."
+      },
+      {
+        "id": "de2026-q29",
+        "number": 29,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Environment",
+        "text": "_________ is the largest ecosystem on the Earth.",
+        "options": [
+          "Desert",
+          "Forest",
+          "Sea",
+          "Grassland"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (C)."
+      },
+      {
+        "id": "de2026-q30",
+        "number": 30,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "Which type of wave propagates in medium by forming crest and trough?",
+        "options": [
+          "Longitudinal wave",
+          "Mechanical wave",
+          "Transverse wave",
+          "All the above"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (C)."
+      },
+      {
+        "id": "de2026-q31",
+        "number": 31,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Chemistry",
+        "text": "In Biogas plant, digestion takes place in the absence of _________ .",
+        "options": [
+          "Hydrogen",
+          "Carbon dioxide",
+          "Methane",
+          "Oxygen"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (D)."
+      },
+      {
+        "id": "de2026-q32",
+        "number": 32,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "If time taken for work increases then what happen to the value of power?",
+        "options": [
+          "Increases",
+          "Decreases",
+          "Remains same",
+          "Becomes zero"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (B)."
+      },
+      {
+        "id": "de2026-q33",
+        "number": 33,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "Which of the following statements are correct for an optical fiber? i. Optical fiber works on total internal reflection (TIR). ii. Core has higher refractive index than cladding. iii. Cladding is central region through which light propagates. iv. Core diameter is larger than cladding",
+        "options": [
+          "(i) & (ii)",
+          "(iii) & (iv)",
+          "(i) & (iii)",
+          "(i), (ii), (iii) & (iv)"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (A)."
+      },
+      {
+        "id": "de2026-q34",
+        "number": 34,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "Which of the following temperature is known as ''Absolute zero temperature''?",
+        "options": [
+          "– 273.15° F",
+          "0° C",
+          "– 273.15° C",
+          "273.15 K"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (C)."
+      },
+      {
+        "id": "de2026-q35",
+        "number": 35,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Chemistry",
+        "text": "Generally metal oxides are ________",
+        "options": [
+          "Acidic",
+          "Basic",
+          "Amphoteric",
+          "Not possible"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (B)."
+      },
+      {
+        "id": "de2026-q36",
+        "number": 36,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "Which of the following equation gives relationship between wave velocity, wave length and frequency?",
+        "options": [
+          "v = f / λ",
+          "v = λ /f",
+          "v = f . λ",
+          "v = f + λ"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (C)."
+      },
+      {
+        "id": "de2026-q37",
+        "number": 37,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "Which of the following statements are correct for a unit? i. Unit has to be easily transportable ii. Unit has to be precisely defined iii. Unit can't be converted in to smaller and bigger unit iv. Unit has to be easily replicable",
+        "options": [
+          "(i) & (iii)",
+          "(i), (iii) & (iv)",
+          "(i), (ii) & (iv)",
+          "(i), (ii), (iii) & (iv)"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (C)."
+      },
+      {
+        "id": "de2026-q38",
+        "number": 38,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "An object moves on a circular path with constant angular velocity. If radius of the circle is doubled then what happens to its centripetal force?",
+        "options": [
+          "Becomes double",
+          "Becomes half",
+          "Becomes zero",
+          "Remains same"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (A)."
+      },
+      {
+        "id": "de2026-q39",
+        "number": 39,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Computer",
+        "text": "How do you start a formula in Excel?",
+        "options": [
+          "By typing @",
+          "By typing #",
+          "By typing +",
+          "By typing ="
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (D)."
+      },
+      {
+        "id": "de2026-q40",
+        "number": 40,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Computer",
+        "text": "Which tab contains the options to change the font and paragraph formatting in MS word?",
+        "options": [
+          "Home",
+          "Insert",
+          "View",
+          "Review"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (A)."
+      },
+      {
+        "id": "de2026-q41",
+        "number": 41,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "Refractive index of glass is 1.5 and speed of light in vacuum is 3×108 m/s then the speed of light in glass is _________",
+        "options": [
+          "2 ×108 m/s",
+          "4.5 ×108 m/s",
+          "3 ×108 m/s",
+          "1.5 ×108 m/s"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (A)."
+      },
+      {
+        "id": "de2026-q42",
+        "number": 42,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "In a measurement experiment the measured observations are 22.40, 22.42, 22.44, 22.46 and 22.48 then what will be average absolute error?",
+        "options": [
+          "0.44",
+          "0.044",
+          "0.24",
+          "0.024"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (D)."
+      },
+      {
+        "id": "de2026-q43",
+        "number": 43,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Chemistry",
+        "text": "Which of following is not form of calcium carbonate?",
+        "options": [
+          "Lime stone",
+          "Chalk",
+          "Marble",
+          "Slaked lime"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (D)."
+      },
+      {
+        "id": "de2026-q44",
+        "number": 44,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Chemistry",
+        "text": "Which of the following is the lustrous non-metal?",
+        "options": [
+          "Iodine",
+          "Carbon",
+          "Nitrogen",
+          "Bromin"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (A)."
+      },
+      {
+        "id": "de2026-q45",
+        "number": 45,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "If temperature of a conductor increases then its resistance will _______",
+        "options": [
+          "Decrease",
+          "Increase",
+          "Remains same",
+          "Becomes zero"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (B)."
+      },
+      {
+        "id": "de2026-q46",
+        "number": 46,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "If total number of divisions on vernier scale is doubled then what will happen to its value of least count?",
+        "options": [
+          "Becomes double",
+          "Becomes half",
+          "Remains same",
+          "Becomes one fourth"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (B)."
+      },
+      {
+        "id": "de2026-q47",
+        "number": 47,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Chemistry",
+        "text": "Which of the following pairs is incorrect?",
+        "options": [
+          "Tomato-Tartaric acid",
+          "Sour fruit-Citric acid",
+          "Sting of bite of ant-Methanoic acid",
+          "Curd-Lactic acid"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (A)."
+      },
+      {
+        "id": "de2026-q48",
+        "number": 48,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "103 meter = ________ centimeter.",
+        "options": [
+          "10 5",
+          "10",
+          "106",
+          "10 2"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (A)."
+      },
+      {
+        "id": "de2026-q49",
+        "number": 49,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "For a conductor the ratio of voltage and current will give value of which physical quantity?",
+        "options": [
+          "Charge",
+          "Electric flux",
+          "Capacitance",
+          "Resistance"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (D)."
+      },
+      {
+        "id": "de2026-q50",
+        "number": 50,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Chemistry",
+        "text": "Which metal does not react with oxygen at higher temperature?",
+        "options": [
+          "Gold",
+          "Copper",
+          "Zinc",
+          "Aluminium"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (A)."
+      },
+      {
+        "id": "de2026-q51",
+        "number": 51,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "In a formal business letter the 'enclosure notation' is placed immediately after ________ .",
+        "options": [
+          "Complimentary close",
+          "Signature block",
+          "Subject line",
+          "Salutation"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (B)."
+      },
+      {
+        "id": "de2026-q52",
+        "number": 52,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "The full form of 'SMCR' in Berlo's model is ________ .",
+        "options": [
+          "Sender Message Channel Receiver",
+          "Signal Message Code Response",
+          "System Model Communication Result",
+          "Sender Mode Communication Receiver"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (A)."
+      },
+      {
+        "id": "de2026-q53",
+        "number": 53,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "cos2 sin 2 i ir - +r_ ^ i h + cottan 2 -+ iirr_^h i = ________ .",
+        "options": [
+          "0",
+          "–1",
+          "2",
+          "1"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (C)."
+      },
+      {
+        "id": "de2026-q54",
+        "number": 54,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "The approval of the bridge design was assigned to two engineers. Both approved the design, (Identify the underlined parts of speech)",
+        "options": [
+          "Adverb",
+          "Conjunction",
+          "Determiner",
+          "Pronoun"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (D)."
+      },
+      {
+        "id": "de2026-q55",
+        "number": 55,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "y = sin3 2x then ddx = ________ .",
+        "options": [
+          "6 cos 2x.sin2 2x",
+          "3 cos 2x.sin2 x",
+          "6 cos 2x.sin 2x",
+          "6 cos2 2x"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (A)."
+      },
+      {
+        "id": "de2026-q56",
+        "number": 56,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "Equation of line passing through point (1, –3) and having slope 2 is ______.",
+        "options": [
+          "2x + y + 5 = 0",
+          "2x – y + 5 = 0",
+          "2x – y – 5 = 0",
+          "x + y + 5 = 0"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (C)."
+      },
+      {
+        "id": "de2026-q57",
+        "number": 57,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "cos4 cos2sin4 sin2ii i+i - = _________ .",
+        "options": [
+          "2 tanθ",
+          "tan 3θ",
+          "cotθ",
+          "tanθ"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (D)."
+      },
+      {
+        "id": "de2026-q58",
+        "number": 58,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "While the engineers ________ the machine, the power went off. (Select the correct option)",
+        "options": [
+          "repair",
+          "are repairing",
+          "were repairing",
+          "have repaired"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (C)."
+      },
+      {
+        "id": "de2026-q59",
+        "number": 59,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "2 (4 )( 3)lim x xx2 \" - + 2x - = _______ .",
+        "options": [
+          "5",
+          "20",
+          "0",
+          "9"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (B)."
+      },
+      {
+        "id": "de2026-q60",
+        "number": 60,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "Principal period of sin 7 32x-ak is ________ .",
+        "options": [
+          "3π",
+          "3π/2",
+          "–3π",
+          "–3π/2"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (A)."
+      },
+      {
+        "id": "de2026-q61",
+        "number": 61,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "logb3a2 × loga2b9 = _________ .",
+        "options": [
+          "6",
+          "3",
+          "18",
+          "27"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (B)."
+      },
+      {
+        "id": "de2026-q62",
+        "number": 62,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "In a business letter, the 'Inside Address' refers to ________.",
+        "options": [
+          "Email Address",
+          "External Address",
+          "Sender's Address",
+          "Recipient's Address"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (D)."
+      },
+      {
+        "id": "de2026-q63",
+        "number": 63,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "1 2 dx x20 1 +# = ________ .",
+        "options": [
+          "0",
+          "π",
+          "2 π",
+          "π/2"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (D)."
+      },
+      {
+        "id": "de2026-q64",
+        "number": 64,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "0 lim es in 21 x x xx \" + - = _________",
+        "options": [
+          "0",
+          "2",
+          "3",
+          "–1"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (C)."
+      },
+      {
+        "id": "de2026-q65",
+        "number": 65,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "# 2x (sin (x2+1)) dx = ________.",
+        "options": [
+          "cos (x2+1) + C",
+          "cos (2x) + C",
+          "– cos (x2+1) + C",
+          "x cos (x2+1) + C"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (C)."
+      },
+      {
+        "id": "de2026-q66",
+        "number": 66,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "Identify the correct sentence.",
+        "options": [
+          "Gauri asked where I was going",
+          "Gauri asked that where I was going",
+          "Gauri asked where was I going",
+          "Gauri asked me where was I going"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (A)."
+      },
+      {
+        "id": "de2026-q67",
+        "number": 67,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "If [x 7] = [9 y-1] then x = ________, y = ________ .",
+        "options": [
+          "9, 8",
+          "9, 6",
+          "9, 7",
+          "9, 9"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (A)."
+      },
+      {
+        "id": "de2026-q68",
+        "number": 68,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "If 35 11 2 20 3 x - -- = 0 then x = ________ .",
+        "options": [
+          "0",
+          "–1",
+          "1",
+          "2"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (C)."
+      },
+      {
+        "id": "de2026-q69",
+        "number": 69,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "Select the correct spelling.",
+        "options": [
+          "Enviroment",
+          "Environment",
+          "Envoirment",
+          "Enviranment"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (B)."
+      },
+      {
+        "id": "de2026-q70",
+        "number": 70,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "If A = 41 23=G & B = 1136-=G then AB = ________ .",
+        "options": [
+          "16 20 81 6=G",
+          "4161 8-=G",
+          "71 0 11 20=G",
+          "72"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (D)."
+      },
+      {
+        "id": "de2026-q71",
+        "number": 71,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "Which of the following is not a type of communication?",
+        "options": [
+          "Verbal",
+          "Non Verbal",
+          "Written",
+          "Mechanical"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (D)."
+      },
+      {
+        "id": "de2026-q72",
+        "number": 72,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "If f (x) = 3x+x2 then f (0) + f (1) = ________.",
+        "options": [
+          "5",
+          "7",
+          "8",
+          "1"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (A)."
+      },
+      {
+        "id": "de2026-q73",
+        "number": 73,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "Select the correct spelling.",
+        "options": [
+          "Definately",
+          "Definetely",
+          "Definitely",
+          "Defenetly"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (C)."
+      },
+      {
+        "id": "de2026-q74",
+        "number": 74,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "Identify the correct sentence.",
+        "options": [
+          "By the time we will reach, the show will start",
+          "By the time we reached, the show will start",
+          "By the time we reach, the show will be started",
+          "By the time we reach, the show will have started"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (D)."
+      },
+      {
+        "id": "de2026-q75",
+        "number": 75,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "log3 14 + log3 2 + log5 5 = _________.",
+        "options": [
+          "1+log 3 28",
+          "log3 29",
+          "log15 140",
+          "log 3 140"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (A)."
+      },
+      {
+        "id": "de2026-q76",
+        "number": 76,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "# log x dx = ________.",
+        "options": [
+          "1/ x + C",
+          "x log x – x + C",
+          "log x – x + C",
+          "x log x + C"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (B)."
+      },
+      {
+        "id": "de2026-q77",
+        "number": 77,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "The team as well as the coaches _________ excited about the tournament (Select the correct option)",
+        "options": [
+          "are",
+          "were",
+          "have been",
+          "is"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (D)."
+      },
+      {
+        "id": "de2026-q78",
+        "number": 78,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "Equation of circle whose center is (4, –1) and radius 5 is _________ .",
+        "options": [
+          "x 2 + y2 + 8x – 2y – 8 = 0",
+          "x2 + y2 – 8x + 2y – 8 = 0",
+          "x2 – y2 + 8x – 2y – 8 = 0",
+          "x 2 + y2 – 8x + 2y + 8 = 0"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (B)."
+      },
+      {
+        "id": "de2026-q79",
+        "number": 79,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "Choose whichever option suits your project. (Identify the underlined part of speech)",
+        "options": [
+          "Interrogative Pronoun",
+          "Relative Pronoun",
+          "Conjunction",
+          "Adjective"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (D)."
+      },
+      {
+        "id": "de2026-q80",
+        "number": 80,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "Hardik __________ to Delhi twice this month.",
+        "options": [
+          "has gone",
+          "went",
+          "goes",
+          "had gone"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (A)."
+      },
+      {
+        "id": "de2026-q81",
+        "number": 81,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "ddx (x2ex) = ––––––––– .",
+        "options": [
+          "xex (x+1)",
+          "xex (x+3)",
+          "xex (x+2)",
+          "xex (x2+2)"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (C)."
+      },
+      {
+        "id": "de2026-q82",
+        "number": 82,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "The most effective type of communication is _________ .",
+        "options": [
+          "One-way",
+          "Two-way",
+          "Written only",
+          "Non-verbal only"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (B)."
+      },
+      {
+        "id": "de2026-q83",
+        "number": 83,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "| 3 (2, 1, –3) + (1, –1, 4) | = ________ .",
+        "options": [
+          "28",
+          "78",
+          "76",
+          "14"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (B)."
+      },
+      {
+        "id": "de2026-q84",
+        "number": 84,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "When a business apologizes for poor service, they send a _______ .",
+        "options": [
+          "Order letter",
+          "Complaint letter",
+          "Adjustment letter",
+          "Inquiry letter"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (C)."
+      },
+      {
+        "id": "de2026-q85",
+        "number": 85,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "# (3ex – 4x) dx = ________ .",
+        "options": [
+          "3e x – 4 + C",
+          "3ex – 4x2 + C",
+          "3ex – 2x2 + C",
+          "3e x – x2 + C"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (C)."
+      },
+      {
+        "id": "de2026-q86",
+        "number": 86,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "In Communication 'Noise' refers to ________ .",
+        "options": [
+          "Loud sound only",
+          "Any interference in the message",
+          "Feedback distortion",
+          "Misinterpreting symbols"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (B)."
+      },
+      {
+        "id": "de2026-q87",
+        "number": 87,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "For vectors u = (1, –1, 4) and v = (a, 2, 6) if u . v = 25 then a = ______ .",
+        "options": [
+          "–3",
+          "0",
+          "3",
+          "–1"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (C)."
+      },
+      {
+        "id": "de2026-q88",
+        "number": 88,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "Which inference can be drawn about Sreedharan's management style?",
+        "options": [
+          "It depended heavily on external funding",
+          "It avoided challenging projects",
+          "It combined technical expertise with ethical governance",
+          "It prioritized speed over quality"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (C)."
+      },
+      {
+        "id": "de2026-q89",
+        "number": 89,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "Which leadership quality of Sreedharan is most directly responsible for timely project completion?",
+        "options": [
+          "Flexibility in deadlines",
+          "Political networking",
+          "Delegation without supervision",
+          "Strict discipline and punctuality"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (D)."
+      },
+      {
+        "id": "de2026-q90",
+        "number": 90,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "Which organization did he lead successfully?",
+        "options": [
+          "DMRC",
+          "DRDO",
+          "ISRO",
+          "ONGC"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (A)."
+      },
+      {
+        "id": "de2026-q91",
+        "number": 91,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "Which railway project faced major challenges but was completed successfully?",
+        "options": [
+          "Golden Quadrilateral",
+          "Konkan Railway",
+          "Kolkata Metro",
+          "Delhi Metro"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (B)."
+      },
+      {
+        "id": "de2026-q92",
+        "number": 92,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "Why is E.Sreedharan called the Metro Man of India?",
+        "options": [
+          "He designed metro trains",
+          "He improved airport systems",
+          "He transformed metro rail systems",
+          "He worked on road transport systems"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (C)."
+      },
+      {
+        "id": "de2026-q93",
+        "number": 93,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "In an email the 'BCC' field is used when you want to ________ .",
+        "options": [
+          "Send a copy to every openly",
+          "Hide a recipient's address from other recipients",
+          "Send a high-priority message",
+          "Attach confidential files"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (B)."
+      },
+      {
+        "id": "de2026-q94",
+        "number": 94,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "A well-written enquiry letter must include ________ .",
+        "options": [
+          "Specific questions to gather information",
+          "Details of past complaints",
+          "Irrelevant background details",
+          "Personal experiences"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (A)."
+      },
+      {
+        "id": "de2026-q95",
+        "number": 95,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "If x y+ = a then ddxy = ________ .",
+        "options": [
+          "xy",
+          "xy",
+          "yx",
+          "xy-"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (D)."
+      },
+      {
+        "id": "de2026-q96",
+        "number": 96,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "Identify the correct sentence",
+        "options": [
+          "Each student, teacher and staff were informed",
+          "Each student, teacher and staff has informed",
+          "Each student, teacher and staff was informed",
+          "Every student, teacher and staff were informing"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (C)."
+      },
+      {
+        "id": "de2026-q97",
+        "number": 97,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "ddx ( cos2 x + sin2 x + 1) = ________ .",
+        "options": [
+          "2",
+          "1",
+          "3",
+          "0"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (D)."
+      },
+      {
+        "id": "de2026-q98",
+        "number": 98,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "For A = 14 3 2=G , B = 5102 --=G value of 2A – B = _________ .",
+        "options": [
+          "3964=G",
+          "39 66 -=G",
+          "3760-=G",
+          "364 9-=G"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (B)."
+      },
+      {
+        "id": "de2026-q99",
+        "number": 99,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "'Proxemics' deals with ________ .",
+        "options": [
+          "Smell",
+          "Touch",
+          "Use of space",
+          "Sound symbols"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (C)."
+      },
+      {
+        "id": "de2026-q100",
+        "number": 100,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "Mean of observations 7, 6, 8, 4, 3, 2, 1, 11 is _________ .",
+        "options": [
+          "5",
+          "6.25",
+          "5.25",
+          "6"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "The correct answer according to the official DDCET examination key is Option (C)."
+      }
+    ]
+  },
+  {
+    "id": "ddcet-2025",
+    "year": 2025,
+    "exam_code": "DE-2025",
+    "title": "DDCET 2025 Official Question Paper (Engineering & Technology)",
+    "subtitle": "Admission Committee for Professional Courses (ACPC) Gujarat",
+    "exam_date": "19/04/2025",
+    "booklet_code": "A",
+    "total_questions": 100,
+    "duration_minutes": 150,
+    "total_marks": 200,
+    "marks_per_question": 2.0,
+    "negative_marking": 0.5,
+    "sections": [
+      {
+        "id": 1,
+        "name": "Section 1: Basics of Science & Engineering",
+        "question_range": "1-50",
+        "count": 50
+      },
+      {
+        "id": 2,
+        "name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "question_range": "51-100",
+        "count": 50
+      }
+    ],
+    "questions": [
+      {
+        "id": "de2025-q1",
+        "number": 1,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Computer",
+        "text": "3( ) ( ) 2( )heats s gCaCO CaO CO¾¾¾ ® + , which kind of reaction is this ?",
+        "options": [
+          "Displacement reaction",
+          "Oxidation reaction",
+          "Thermal decomposition reaction",
+          "Precipitation reaction"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (C)."
+      },
+      {
+        "id": "de2025-q2",
+        "number": 2,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Computer",
+        "text": "What is the formula of lead sulphate ?",
+        "options": [
+          "Pb2SO4",
+          "Pb(SO4)2",
+          "PbSO4",
+          "Pb2(SO4)3"
+        ],
+        "answer_letter": "X",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (X). (Full marks awarded to all candidates for X)"
+      },
+      {
+        "id": "de2025-q3",
+        "number": 3,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "Which is the balance equation of 3 2Al HCl AlCl H+ ® + ?",
+        "options": [
+          "3 2 2Al HCl AlCl H+ ® +",
+          "3 22 6 2 3Al HCl AlCl H+ ® +",
+          "3 22 3 2 2Al HCl AlCl H+ ® +",
+          "3 22 4 3 3Al HCl AlCl H+ ® +"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (B)."
+      },
+      {
+        "id": "de2025-q4",
+        "number": 4,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "Which main product is obtained by reaction of sodium hydroxide with zinc metal?",
+        "options": [
+          "NaZnO2",
+          "NaZn2O",
+          "Na2ZnO2",
+          "Zn(OH)2"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (C)."
+      },
+      {
+        "id": "de2025-q5",
+        "number": 5,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "Which type of oxides is called basic oxide ?",
+        "options": [
+          "Non-metallic oxide",
+          "Metallic oxide",
+          "(A) and (B) both",
+          "Inactive oxide"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (B)."
+      },
+      {
+        "id": "de2025-q6",
+        "number": 6,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Environment",
+        "text": "Which of the following is known as milk of magnesia?",
+        "options": [
+          "Mn(OH)2",
+          "Mg(OH)2",
+          "MgO",
+          "Mg(OH)"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (B)."
+      },
+      {
+        "id": "de2025-q7",
+        "number": 7,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "Which of the following is the chemical formula of bleaching powder?",
+        "options": [
+          "Ca(OH)2",
+          "CaOCl2",
+          "Ca2OCl",
+          "CaCO3  2H2O"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (B)."
+      },
+      {
+        "id": "de2025-q8",
+        "number": 8,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "Which of the following is the lustrous non-metal ?",
+        "options": [
+          "Iodine",
+          "Carbon",
+          "Nirtogen",
+          "Bromine"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (A)."
+      },
+      {
+        "id": "de2025-q9",
+        "number": 9,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "Which of the following metals neither reacts with cold nor hot water, but reacts with vapour ?",
+        "options": [
+          "Aluminium",
+          "Iron",
+          "Zinc",
+          "All of the above"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (D)."
+      },
+      {
+        "id": "de2025-q10",
+        "number": 10,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Chemistry",
+        "text": "Which of the following is correct order of reactivity of metals ?",
+        "options": [
+          "Mg > Al > Zn > Fe",
+          "Mg > Fe > Zn > Al",
+          "Fe > Zn > Al > Mg",
+          "Mg > Al > Fe > Zn"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (A)."
+      },
+      {
+        "id": "de2025-q11",
+        "number": 11,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "The smallest unit of data in a computer is called a :",
+        "options": [
+          "Byte",
+          "Bit",
+          "Nibble",
+          "GB"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (B)."
+      },
+      {
+        "id": "de2025-q12",
+        "number": 12,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Chemistry",
+        "text": "Pressing Ctrl + Home keys on the Keyboard moves the cursor to the _______ in MS-Word.",
+        "options": [
+          "End of the document",
+          "Beginning of the line",
+          "Beginning of the paragraph",
+          "Beginning of the document"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (D)."
+      },
+      {
+        "id": "de2025-q13",
+        "number": 13,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "Which of the following can be classified as a relative link in the HTML ?",
+        "options": [
+          "<a href = \"http://www.blog.com/index.html\">",
+          "<a href = \"../index.html\">",
+          "<a href = \"http://index.html\">",
+          "All of the above"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (B)."
+      },
+      {
+        "id": "de2025-q14",
+        "number": 14,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "To find the total value of the cell values in A2, B2, C2 and D2 in MS-Excel, the correct formula is:",
+        "options": [
+          "sum (A2:D2)",
+          "sum (A2, B2, C2, D2)",
+          "Both (A) and (B)",
+          "None of the above"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (C)."
+      },
+      {
+        "id": "de2025-q15",
+        "number": 15,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "Which of the following is an incorrect option in the view menu of a Microsoft Powerpoint presentation ?",
+        "options": [
+          "Tree view",
+          "Outline view",
+          "Notes page",
+          "Reading view"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (A)."
+      },
+      {
+        "id": "de2025-q16",
+        "number": 16,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "The green plants manufacture their own food are known as _______.",
+        "options": [
+          "Heterotrophs",
+          "Autotrophs",
+          "Saprotrophs",
+          "Omnivores"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (B)."
+      },
+      {
+        "id": "de2025-q17",
+        "number": 17,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "Bag filters are used to _______.",
+        "options": [
+          "reduce noise pollution",
+          "reduce sludge from waste water",
+          "remove particulate matter for a contaminated gas stream",
+          "reduce soil pollution"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (C)."
+      },
+      {
+        "id": "de2025-q18",
+        "number": 18,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "The process of producing energy by utilizing heat trapped inside the earth surface is known as _______.",
+        "options": [
+          "Geo-Thermal energy",
+          "Hydrothermal energy",
+          "Solar energy",
+          "Wave energy"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (A)."
+      },
+      {
+        "id": "de2025-q19",
+        "number": 19,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "_______ is a device that converts solar energy directly into electricity.",
+        "options": [
+          "Fuel cell",
+          "Hydrogen cell",
+          "Solar array",
+          "Photovoltaic cell"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (D)."
+      },
+      {
+        "id": "de2025-q20",
+        "number": 20,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Environment",
+        "text": "The goal of the Paris Agreement is to keep the increase in global temperature well below _______ above Preindustrial levels.",
+        "options": [
+          "1.0°C",
+          "1.5°C",
+          "2.0°C",
+          "2.5°C"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (C)."
+      },
+      {
+        "id": "de2025-q21",
+        "number": 21,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Chemistry",
+        "text": "Number of significant digits in 2025 is _______.",
+        "options": [
+          "3",
+          "4",
+          "2",
+          "5"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (B)."
+      },
+      {
+        "id": "de2025-q22",
+        "number": 22,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Chemistry",
+        "text": "Zero error is an example of _______ error.",
+        "options": [
+          "Systematic",
+          "Random",
+          "Maximum",
+          "Minimum"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (A)."
+      },
+      {
+        "id": "de2025-q23",
+        "number": 23,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "1 joule = _______ erg.",
+        "options": [
+          "103",
+          "105",
+          "107",
+          "109"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (C)."
+      },
+      {
+        "id": "de2025-q24",
+        "number": 24,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Environment",
+        "text": "Density of water in CGS system is _______.",
+        "options": [
+          "1000",
+          "100",
+          "10",
+          "1"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (D)."
+      },
+      {
+        "id": "de2025-q25",
+        "number": 25,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "In equation density ms V , if percentage error in mass m is 0.3% and for radius r is 0.5% then percentage error in density of a Sphere is _______%.",
+        "options": [
+          "1.8",
+          "1.5",
+          "1.2",
+          "1. 1"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (A)."
+      },
+      {
+        "id": "de2025-q26",
+        "number": 26,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Chemistry",
+        "text": "The pitch of micrometer screw is 1 mm. There are 100 divisions on it’s circular scale. What will be the least count of the micrometer screw.",
+        "options": [
+          "1 mm",
+          "0.1 mm",
+          "0.01 mm",
+          "0.001 mm"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (C)."
+      },
+      {
+        "id": "de2025-q27",
+        "number": 27,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "The SI Unit of linear momentum is _______.",
+        "options": [
+          "Kg s / m",
+          "Kg m / s",
+          "m s / Kg",
+          "Kg s m"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (B)."
+      },
+      {
+        "id": "de2025-q28",
+        "number": 28,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Computer",
+        "text": "The centripetal force always acts _______.",
+        "options": [
+          "Away from the centre",
+          "In tangential direction",
+          "Perpendicular to the motion",
+          "Towards the centre"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (D)."
+      },
+      {
+        "id": "de2025-q29",
+        "number": 29,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Environment",
+        "text": "When external force acting on a body is zero then its acceleration is _______.",
+        "options": [
+          "increases",
+          "decreases",
+          "equal to zero",
+          "remains constant"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (C)."
+      },
+      {
+        "id": "de2025-q30",
+        "number": 30,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "The formula for angular velocity of a body moving with a constant speed v in a circle of radius r is given by _______",
+        "options": [
+          "v/r",
+          "vr",
+          "vr 2",
+          "vr 3"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (A)."
+      },
+      {
+        "id": "de2025-q31",
+        "number": 31,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Chemistry",
+        "text": "A body having 10 kg mass and 9.8 m/s 2 acceleration produces how much force ?",
+        "options": [
+          "9.8 newton",
+          "98 newton",
+          "0.98 newton",
+          "980 newton"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (B)."
+      },
+      {
+        "id": "de2025-q32",
+        "number": 32,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "If an object having mass 50 kg rotated in a circle with a radius of 2 m with a constant speed of 60 m/s then what is the value of centripetal acceleration ?",
+        "options": [
+          "6000 m/s2",
+          "3000 m/s2",
+          "1800 m/s2",
+          "1500 m/s2"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (C)."
+      },
+      {
+        "id": "de2025-q33",
+        "number": 33,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "The SI Unit of electric flux is _______.",
+        "options": [
+          "C2/Nm",
+          "Nm/C",
+          "Nm/C2",
+          "Nm2/C"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (D)."
+      },
+      {
+        "id": "de2025-q34",
+        "number": 34,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "The electric field lines are _______.",
+        "options": [
+          "Imaginary",
+          "Real",
+          "Ideal",
+          "None of the above"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (A)."
+      },
+      {
+        "id": "de2025-q35",
+        "number": 35,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Chemistry",
+        "text": "How many electrons are in 1 coulomb charge ?",
+        "options": [
+          "6.25  1017",
+          "6.25  1018",
+          "6.25  1019",
+          "6.25  1020"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (B)."
+      },
+      {
+        "id": "de2025-q36",
+        "number": 36,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "The capacitance of a capacitor _______ if an insulating dielectric material is placed between two plates of it.",
+        "options": [
+          "increases",
+          "decreases",
+          "remains constant",
+          "becomes zero"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (A)."
+      },
+      {
+        "id": "de2025-q37",
+        "number": 37,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "If the distance between two charges is doubled then electric force between them becomes _____.",
+        "options": [
+          "half",
+          "double",
+          "one fourth",
+          "four times"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (C)."
+      },
+      {
+        "id": "de2025-q38",
+        "number": 38,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "What is the effective value of resistance when three resistors 5 , 10  and 15  are connected in series combination?",
+        "options": [
+          "10 ",
+          "30 ",
+          "20 ",
+          "5.5 "
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (B)."
+      },
+      {
+        "id": "de2025-q39",
+        "number": 39,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Computer",
+        "text": "Heat capacity of a body per unit mass is known as _______.",
+        "options": [
+          "Specific heat",
+          "Relative heat",
+          "Cp",
+          "Cv"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (A)."
+      },
+      {
+        "id": "de2025-q40",
+        "number": 40,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Computer",
+        "text": "1 KCal = _______ J.",
+        "options": [
+          "4.186",
+          "4186",
+          "41.86",
+          "418.6"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (B)."
+      },
+      {
+        "id": "de2025-q41",
+        "number": 41,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "A big piece of glass is first heated and then is allowed to cool. On cooling down, a crack is developed in it. One of the possible reasons for this is _______.",
+        "options": [
+          "High melting point",
+          "Large thermal conductivity",
+          "Large specific heat",
+          "Small thermal conductivity"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (D)."
+      },
+      {
+        "id": "de2025-q42",
+        "number": 42,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "When heat is given to boiling water, the temperature of water _______.",
+        "options": [
+          "increases",
+          "decreases",
+          "remains constant",
+          "None of the above"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (C)."
+      },
+      {
+        "id": "de2025-q43",
+        "number": 43,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Chemistry",
+        "text": "37°C = _______ °F.",
+        "options": [
+          "98.6",
+          "98.8",
+          "97.6",
+          "96.8"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (A)."
+      },
+      {
+        "id": "de2025-q44",
+        "number": 44,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Chemistry",
+        "text": "The SI Unit of coefficient of thermal conductivity is _______.",
+        "options": [
+          "J / m K",
+          "N / m K",
+          "W / m K",
+          "m K / W"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (C)."
+      },
+      {
+        "id": "de2025-q45",
+        "number": 45,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "Audible waves have a frequency range from _______.",
+        "options": [
+          "20 Hz - 10 KHz",
+          "20 Hz - 20 KHz",
+          "10 Hz - 10 KHz",
+          "10 Hz - 20 KHz"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (B)."
+      },
+      {
+        "id": "de2025-q46",
+        "number": 46,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "The speed of light in a vacuum is _______.",
+        "options": [
+          "3  105 m/s",
+          "3  106 m/s",
+          "3  107 m/s",
+          "3  108 m/s"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (D)."
+      },
+      {
+        "id": "de2025-q47",
+        "number": 47,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Chemistry",
+        "text": "What is the periodic time of a wave having frequency of 20 Hz ?",
+        "options": [
+          "0.05 sec",
+          "0.5 sec",
+          "5 sec",
+          "50 sec"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (A)."
+      },
+      {
+        "id": "de2025-q48",
+        "number": 48,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "LASER is an extremely _______ radiation.",
+        "options": [
+          "Unidirectional",
+          "Focused",
+          "Coherent and Stimulated",
+          "All of above"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (D)."
+      },
+      {
+        "id": "de2025-q49",
+        "number": 49,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "A volume of an auditorium is 5000 m3. The total absorption by the surfaces is 900 O.W.U. Then calculate reverberation time.",
+        "options": [
+          "8.094",
+          "0.729",
+          "0.894",
+          "1.003"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (C)."
+      },
+      {
+        "id": "de2025-q50",
+        "number": 50,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Chemistry",
+        "text": "If n1 and n2 are refractive indices of core and cladding resp. Then what is the formula for numerical aperture for optical fiber?",
+        "options": [
+          "2 22 1n n",
+          "2 21 2n n",
+          "2 1n n",
+          "1 2n n"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (B)."
+      },
+      {
+        "id": "de2025-q51",
+        "number": 51,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "  e x ed x e edx +  = _______.",
+        "options": [
+          "e x",
+          "ex e + e x",
+          "ex e–1 + e x",
+          "ex e–1 + e x – e e–1"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (C)."
+      },
+      {
+        "id": "de2025-q52",
+        "number": 52,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": " log sind xdx = _______.",
+        "options": [
+          "cot x",
+          "– cot x",
+          "tanx",
+          "– tanx"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (A)."
+      },
+      {
+        "id": "de2025-q53",
+        "number": 53,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "If x + y = –2 then dydx = _______.",
+        "options": [
+          "0",
+          "1",
+          "2",
+          "–1"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (D)."
+      },
+      {
+        "id": "de2025-q54",
+        "number": 54,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "1 x dxe = _______ + C",
+        "options": [
+          "e – x",
+          "– e – x",
+          "e x",
+          "– e x"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (B)."
+      },
+      {
+        "id": "de2025-q55",
+        "number": 55,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "4 3 5 dx x = _______ + C",
+        "options": [
+          "3 3 5x ",
+          "5 12 5x ",
+          "3 3 20x",
+          "3 1 5x "
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (D)."
+      },
+      {
+        "id": "de2025-q56",
+        "number": 56,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "2 4 10 5 1 x dx x x   + = _______ + C",
+        "options": [
+          "2log 2 5x",
+          "22log 5 1x x +",
+          "2 log 2 5x",
+          "2 2 log 5 1x x +"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (B)."
+      },
+      {
+        "id": "de2025-q57",
+        "number": 57,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "2 sinx x dx    = _______.",
+        "options": [
+          "0",
+          "1",
+          "–1",
+          "–2"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (A)."
+      },
+      {
+        "id": "de2025-q58",
+        "number": 58,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "log125 log5 = _______.",
+        "options": [
+          "log125 – log5",
+          "log120",
+          "25",
+          "3"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (D)."
+      },
+      {
+        "id": "de2025-q59",
+        "number": 59,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "log2 + 2log3 = _______.",
+        "options": [
+          "2log6",
+          "log8",
+          "log18",
+          "log12"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (C)."
+      },
+      {
+        "id": "de2025-q60",
+        "number": 60,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "The mean of the first five negative integers is _______.",
+        "options": [
+          "15",
+          "–15",
+          "3",
+          "–3"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (D)."
+      },
+      {
+        "id": "de2025-q61",
+        "number": 61,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "tan cos sin cot x ecx x x    = _______.",
+        "options": [
+          "0",
+          "–1",
+          "–2",
+          "–3"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (C)."
+      },
+      {
+        "id": "de2025-q62",
+        "number": 62,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "The matrix 3 1 2 1 0 5 2 5 4          is a _______ matrix.",
+        "options": [
+          "Singular",
+          "Symmetric",
+          "Skew - symmetric",
+          "Diagonal"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (B)."
+      },
+      {
+        "id": "de2025-q63",
+        "number": 63,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "If  3 1 2A and 5 0 4 B          then AB = _______.",
+        "options": [
+          " 2 1 6",
+          " 15 0 8",
+          " 7",
+          "None"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (C)."
+      },
+      {
+        "id": "de2025-q64",
+        "number": 64,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "If 4 5 2 3A      then A–1 = _______.",
+        "options": [
+          "3 5 2 4      ",
+          "3 51 2 42      ",
+          "4 51 2 32      ",
+          "3 51 2 42      "
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (D)."
+      },
+      {
+        "id": "de2025-q65",
+        "number": 65,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "225° = _______ radian.",
+        "options": [
+          "34",
+          "54",
+          "74",
+          "94"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (B)."
+      },
+      {
+        "id": "de2025-q66",
+        "number": 66,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "If 2sin 5  then cot = _______.",
+        "options": [
+          "1",
+          "12",
+          "2",
+          "1 5"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (B)."
+      },
+      {
+        "id": "de2025-q67",
+        "number": 67,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "Principal period of cos(3 + 4x) = _______.",
+        "options": [
+          "4",
+          "4",
+          "2",
+          "2"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (C)."
+      },
+      {
+        "id": "de2025-q68",
+        "number": 68,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "ˆ ˆ ˆ2 2i j k  = _______.",
+        "options": [
+          "3",
+          "– 3",
+          " 3",
+          "9"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (A)."
+      },
+      {
+        "id": "de2025-q69",
+        "number": 69,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": " ˆ ˆ ˆi j k  = _______.",
+        "options": [
+          "ˆi",
+          "ˆk",
+          "0",
+          "1"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (D)."
+      },
+      {
+        "id": "de2025-q70",
+        "number": 70,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "If the lines x – 2y = 3 and 3y + px – 1 = 0 are perpendicular to each other then p = _______.",
+        "options": [
+          "32",
+          "32",
+          "6",
+          "– 6"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (C)."
+      },
+      {
+        "id": "de2025-q71",
+        "number": 71,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "The centre of the circle (x + 3)2 + y2 – 2 = 0 is _______.",
+        "options": [
+          "(3, 0)",
+          "(0, 3)",
+          "(–3, 0)",
+          "(0, –3)"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (C)."
+      },
+      {
+        "id": "de2025-q72",
+        "number": 72,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "If log( ) xf x e  then f(1) = ________.",
+        "options": [
+          "0",
+          "1",
+          "e",
+          "– e"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (B)."
+      },
+      {
+        "id": "de2025-q73",
+        "number": 73,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "0 sin 2lim tanx xx® = _______.",
+        "options": [
+          "1",
+          "12",
+          "2",
+          "3"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (C)."
+      },
+      {
+        "id": "de2025-q74",
+        "number": 74,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "8 5lim 1 2 n n n®  +   = _______.",
+        "options": [
+          "e13",
+          "e4",
+          "e10",
+          "e20"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (D)."
+      },
+      {
+        "id": "de2025-q75",
+        "number": 75,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "log 5 sin 3ddx   +   = _______.",
+        "options": [
+          "0",
+          "1 cos5 3 +",
+          "1 cos5 3 ",
+          "cos 3"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (A)."
+      },
+      {
+        "id": "de2025-q76",
+        "number": 76,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "The talented singer danced quickly. (Identify the adverb)",
+        "options": [
+          "talented",
+          "quickly",
+          "danced",
+          "singer"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (B)."
+      },
+      {
+        "id": "de2025-q77",
+        "number": 77,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "The captain along with ten players _______ arrived at the stadium. (Select the correct option)",
+        "options": [
+          "has",
+          "have",
+          "is",
+          "are"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (A)."
+      },
+      {
+        "id": "de2025-q78",
+        "number": 78,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "None of the products _______ up to the mark, so we returned them all. (Select the correct option)",
+        "options": [
+          "is",
+          "are",
+          "was",
+          "were"
+        ],
+        "answer_letter": "X",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (X). (Full marks awarded to all candidates for X)"
+      },
+      {
+        "id": "de2025-q79",
+        "number": 79,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "There is a church _______ the lake. (Select the correct option)",
+        "options": [
+          "over",
+          "on",
+          "between",
+          "above"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (D)."
+      },
+      {
+        "id": "de2025-q80",
+        "number": 80,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "He _______ to the gym every morning before work. (Select the correct option)",
+        "options": [
+          "goes",
+          "went",
+          "is going",
+          "go"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (A)."
+      },
+      {
+        "id": "de2025-q81",
+        "number": 81,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "Select the correct spelling.",
+        "options": [
+          "Fahrenhit",
+          "Ferrenhit",
+          "Fahrenheit",
+          "Fahrenheat"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (C)."
+      },
+      {
+        "id": "de2025-q82",
+        "number": 82,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "Select the correct spelling.",
+        "options": [
+          "Inconvenience",
+          "Inconveninse",
+          "Inconvinience",
+          "Inconviniance"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (A)."
+      },
+      {
+        "id": "de2025-q83",
+        "number": 83,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "Identify the correct sentence.",
+        "options": [
+          "The criminals arrested by police.",
+          "The police are arrested the criminals.",
+          "The police were arrested the criminals.",
+          "The police arrested the criminals."
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (D)."
+      },
+      {
+        "id": "de2025-q84",
+        "number": 84,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "Identify the correct sentence.",
+        "options": [
+          "Shreya is tired as she had worked since 7 o'clock.",
+          "Shreya is tired as she has been working since 7 o'clock.",
+          "Shreya was tired as she has worked since 7 o'clock.",
+          "Shreya is tired as she working since 7 o'clock."
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (B)."
+      },
+      {
+        "id": "de2025-q85",
+        "number": 85,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "Identify the correct sentence.",
+        "options": [
+          "The father purchased a vividly illustrated children’s dictionary for his daughter.",
+          "The father purchased a child’s vividly illustrated dictionary for her daughter.",
+          "The father purchased a children’s vividly illustrated dictionary for his daughter.",
+          "The father purchased an illustrated child’s vivid dictionary for his daughter. * Read the following passage carefully and answer the questions: (Question No. : 86 to 90) The ancient stepwell, Chand Baori, descended into the earth like a forgotten dream. Its geometric steps, a thousand precise cuts into the Sandstone, spiraled down towards the emerald depths of the water. The air within its shadowed walls was cool, a welcome respite from the scorching Rajasthani sun. Villagers, their colourful turbans and saris vibrant against the stone, gathered at the upper levels, drawing water in earthen pots. Legends whispered of a hidden chamber deep within the stepwell, a place where the spirits of the desert dwelled, guarding secrets of forgotten Kings. A traveling musician, his sitar echoing through the vast space, played haunting ragas, his melodies blending with the gentle splash of water. A lone scholar, his spectacles perched on his nose, meticulously studied the intricate carvings on the walls, searching for clues to the stepwell’s mysterious origins and the stories etched into its sandstone heart."
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (A)."
+      },
+      {
+        "id": "de2025-q86",
+        "number": 86,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "What was the purpose of the steps in Chand Baori ?",
+        "options": [
+          "To provide seating for spectators",
+          "To create a maze for tourists",
+          "To allow access to the water deep below",
+          "To form a decorative pattern"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (C)."
+      },
+      {
+        "id": "de2025-q87",
+        "number": 87,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "The “cool shadowed walls” of the stepwell provide :",
+        "options": [
+          "A place for loud celebrations.",
+          "A relief from the desert heat.",
+          "A place for modern art display.",
+          "A site for industrial activity."
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (B)."
+      },
+      {
+        "id": "de2025-q88",
+        "number": 88,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "According to legends, what was hidden deep within the stepwell ?",
+        "options": [
+          "A treasure vault",
+          "Sacred water",
+          "A secret passage to the fort",
+          "A chamber of desert spirit"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (D)."
+      },
+      {
+        "id": "de2025-q89",
+        "number": 89,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "The phrase “forgotten dream” used to describe Chand Baori suggests :",
+        "options": [
+          "The stepwell’s historical significance and potential obscurity.",
+          "The stepwell’s modern architectural design.",
+          "The stepwell’s role as a tourist attraction.",
+          "The stepwell’s frequent use by villagers."
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (A)."
+      },
+      {
+        "id": "de2025-q90",
+        "number": 90,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "What was the scholar searching for in the carvings ?",
+        "options": [
+          "Precious gems",
+          "Ancient map of desert",
+          "Clues to stepwell’s origin",
+          "Hidden doorways"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (C)."
+      },
+      {
+        "id": "de2025-q91",
+        "number": 91,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "While communicating, the process of understanding the original idea of the message is called _______.",
+        "options": [
+          "Decoding",
+          "Feedback",
+          "Encoding",
+          "Transmission"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (A)."
+      },
+      {
+        "id": "de2025-q92",
+        "number": 92,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "_______ is the study of body language and its effect on communication including facial expression, gestures, etc.",
+        "options": [
+          "Proxemics",
+          "Chronemics",
+          "Paralanguage",
+          "Kinesics"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (D)."
+      },
+      {
+        "id": "de2025-q93",
+        "number": 93,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "Which of the following is not an example of verbal communication ?",
+        "options": [
+          "A manager giving instructions to workers orally.",
+          "A man shaking hand with a foreigner.",
+          "A student writing a letter to the principal.",
+          "An oldman reading a news paper."
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (B)."
+      },
+      {
+        "id": "de2025-q94",
+        "number": 94,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "What is common result of socio-cultural barrier to communication ?",
+        "options": [
+          "Enhanced comprehension.",
+          "Improved content clarity.",
+          "Misinterpretation of intent.",
+          "Enriched social connection."
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (C)."
+      },
+      {
+        "id": "de2025-q95",
+        "number": 95,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "Factors such as person’s emotions, anxiety, stress and fear can form_______ barrier to communication.",
+        "options": [
+          "Personal Barrier",
+          "Psychological Barrier",
+          "Physical Barrier",
+          "Neurological Barrier"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (B)."
+      },
+      {
+        "id": "de2025-q96",
+        "number": 96,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "A letter of adjustment is generally written in response to _______.",
+        "options": [
+          "letter of inquiry",
+          "request letter",
+          "order letter",
+          "complaint letter"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (D)."
+      },
+      {
+        "id": "de2025-q97",
+        "number": 97,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "Which of the following statement is correct about letter of inquiry ?",
+        "options": [
+          "written to offer a product.",
+          "written to seek details about product or service.",
+          "written to start investigation.",
+          "written to raise a complaint."
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (B)."
+      },
+      {
+        "id": "de2025-q98",
+        "number": 98,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "Which of the following is an essential part of business letter ?",
+        "options": [
+          "Executive summary",
+          "Identification initials",
+          "Inside address",
+          "Carbon copy notation"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (C)."
+      },
+      {
+        "id": "de2025-q99",
+        "number": 99,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "Which of the following parts is used to take a courteous leave from a letter ?",
+        "options": [
+          "Greetings",
+          "Salutation",
+          "Complimentary close",
+          "Enclosure"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (C)."
+      },
+      {
+        "id": "de2025-q100",
+        "number": 100,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "Give the full form of ‘PS’ used in letter writing.",
+        "options": [
+          "Please",
+          "Post Service",
+          "Personnel Service",
+          "Post Script"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2025 Series A is Option (D)."
+      }
+    ]
+  }
+]

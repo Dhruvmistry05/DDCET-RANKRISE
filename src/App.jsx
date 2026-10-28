@@ -27,6 +27,7 @@ import AIMentor from './pages/student/AIMentor';
 import QuizGenerator from './pages/student/QuizGenerator';
 import AdminManagement from './pages/admin/AdminManagement';
 import StudentProfile from './pages/student/StudentProfile';
+import PreviousYearPractice from './pages/student/PreviousYearPractice';
 
 import Placeholder from './pages/Placeholder';
 
@@ -93,8 +94,9 @@ function App() {
           <Route path="/student/resources/papers" element={<Navigate to="/student/resources" replace />} />
           <Route path="/student/resources/keys" element={<Navigate to="/student/resources" replace />} />
           <Route path="/student/resources/links" element={<Navigate to="/student/resources" replace />} />
-          <Route path="/student/pyq" element={<Navigate to="/student/resources" replace />} />
-          <Route path="/pyq" element={<Navigate to="/student/resources" replace />} />
+          <Route path="/student/pyq" element={<ProtectedRoute allowedRole="student"><PreviousYearPractice /></ProtectedRoute>} />
+          <Route path="/student/practice/pyq" element={<ProtectedRoute allowedRole="student"><PreviousYearPractice /></ProtectedRoute>} />
+          <Route path="/pyq" element={<Navigate to="/student/pyq" replace />} />
           <Route path="/student/resources/official-syllabus" element={<OfficialSyllabus />} />
 
           {/* Admin Routes - Strictly Protected */}

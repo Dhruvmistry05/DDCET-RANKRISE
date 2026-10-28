@@ -6,7 +6,7 @@ import {
   FileText, Download, Eye, Calendar, Search, 
   RefreshCw, BookOpen, AlertCircle, FileCheck, Book,
   ChevronLeft, ChevronRight, X, Sparkles, 
-  Layers, CheckCircle2, Clock, ArrowRight, ShieldCheck
+  Layers, CheckCircle2, Clock, ArrowRight, ShieldCheck, PenTool
 } from 'lucide-react';
 
 export default function StudyMaterialLibrary({ defaultCategory = 'all' }) {
@@ -580,6 +580,20 @@ export default function StudyMaterialLibrary({ defaultCategory = 'all' }) {
                           <span className="text-[11px]">Official answer key will be published once released.</span>
                         </div>
                       )}
+                    </div>
+                  )}
+
+                  {/* Practice Paper as Interactive MCQs Button */}
+                  {isPairedPaper && (
+                    <div className="pt-2">
+                      <Link
+                        to={`/student/pyq?year=${item.exam_year || 2026}`}
+                        className="w-full py-2.5 px-3 rounded-xl bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/50 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                      >
+                        <PenTool size={13} />
+                        <span>Practice This Paper as Interactive MCQs</span>
+                        <ArrowRight size={13} />
+                      </Link>
                     </div>
                   )}
                 </div>

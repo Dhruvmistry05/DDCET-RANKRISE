@@ -6,7 +6,7 @@ import { useAuth } from '../../store/AuthContext';
 import { 
   CheckCircle, XCircle, ArrowLeft, ArrowRight, RotateCcw, 
   Lightbulb, BookOpen, Clock, Target, Layers, Grid, Play, 
-  AlertCircle, Check
+  AlertCircle, Check, FileText
 } from 'lucide-react';
 
 export default function PracticeLab() {
@@ -403,7 +403,7 @@ export default function PracticeLab() {
           </div>
 
           {/* Practice Mode Options Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
             {/* Option 1: Topic-wise Practice */}
             <div
               onClick={() => setPracticeMode('topic')}
@@ -450,7 +450,7 @@ export default function PracticeLab() {
                 </p>
               </div>
               <div className="pt-2 border-t border-slate-200 dark:border-slate-700/60 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
-                All Chapter MCQs (120–210)
+                All Chapter MCQs
               </div>
             </div>
 
@@ -475,9 +475,34 @@ export default function PracticeLab() {
                 </p>
               </div>
               <div className="pt-2 border-t border-slate-200 dark:border-slate-700/60 text-xs font-semibold text-purple-700 dark:text-purple-300">
-                All Subject MCQs (780)
+                All Subject MCQs
               </div>
             </div>
+
+            {/* Option 4: Previous Year MCQs */}
+            <Link
+              to="/student/pyq"
+              className="p-4 sm:p-5 rounded-xl border border-amber-300 dark:border-amber-700/80 bg-amber-50/60 dark:bg-amber-950/30 hover:border-amber-500 transition-all flex flex-col justify-between group shadow-2xs cursor-pointer"
+            >
+              <div>
+                <div className="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/60 text-amber-700 dark:text-amber-300 flex items-center justify-center mb-2.5">
+                  <FileText size={17} />
+                </div>
+                <div className="flex items-center gap-1.5 mb-1">
+                  <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                    Previous Year MCQs
+                  </h3>
+                  <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-amber-500 text-white">NEW</span>
+                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-3">
+                  Practice authentic DDCET 2026 & 2025 ACPC papers question-by-question with official answer keys.
+                </p>
+              </div>
+              <div className="pt-2 border-t border-amber-200/80 dark:border-amber-800/60 text-xs font-semibold text-amber-700 dark:text-amber-300 flex items-center justify-between">
+                <span>100 MCQs per Paper</span>
+                <ArrowRight size={13} className="group-hover:translate-x-1 transition-transform" />
+              </div>
+            </Link>
           </div>
 
           {/* Clean Selection Panel */}

@@ -290,9 +290,13 @@ export default function LandingPage() {
             <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
               Question papers paired with their matching official answer keys in one organized view. Preview and download certified PDFs freely with zero login requirement.
             </p>
-            <div className="pt-2">
+            <div className="pt-2 flex items-center gap-3">
               <Link to="/student/resources" className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 hover:underline">
-                <span>Browse Library</span>
+                <span>Browse PDFs</span>
+                <ArrowRight size={13} />
+              </Link>
+              <Link to="/student/pyq" className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:underline">
+                <span>Practice PYQ MCQs</span>
                 <ArrowRight size={13} />
               </Link>
             </div>

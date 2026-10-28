@@ -185,6 +185,13 @@ export default function MockTestCenter() {
             >
               Scheduled Live
             </button>
+            <Link
+              to="/student/pyq"
+              className="px-3 py-1 rounded-md text-amber-600 dark:text-amber-400 font-bold hover:bg-white dark:hover:bg-slate-700 transition flex items-center gap-1 shrink-0"
+            >
+              <span>Previous Year Papers</span>
+              <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500 text-white">2026/25</span>
+            </Link>
           </div>
         </div>
 
