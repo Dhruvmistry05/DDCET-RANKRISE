@@ -506,7 +506,7 @@ export default function PracticeLab() {
                   <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-amber-500 text-white">NEW</span>
                 </div>
                 <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-3">
-                  Practice authentic DDCET 2026 & 2025 ACPC papers question-by-question with official answer keys.
+                  Practice authentic DDCET 2026, 2025 & 2024 ACPC papers question-by-question with official answer keys.
                 </p>
               </div>
               <div className="pt-2 border-t border-amber-200/80 dark:border-amber-800/60 text-xs font-semibold text-amber-700 dark:text-amber-300 flex items-center justify-between">

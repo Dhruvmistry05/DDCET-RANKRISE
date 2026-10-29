@@ -3858,5 +3858,1939 @@
         "explanation": "Official final answer key for DE-2025 Series A is Option (D)."
       }
     ]
+  },
+  {
+    "id": "ddcet-2024",
+    "year": 2024,
+    "exam_code": "DE-2024",
+    "title": "DDCET 2024 Official Question Paper (Engineering & Technology)",
+    "subtitle": "Admission Committee for Professional Courses (ACPC) Gujarat",
+    "exam_date": "07/04/2024",
+    "booklet_code": "A",
+    "total_questions": 100,
+    "duration_minutes": 150,
+    "total_marks": 200,
+    "marks_per_question": 2.0,
+    "negative_marking": 0.5,
+    "sections": [
+      {
+        "id": 1,
+        "name": "Section 1: Basics of Science & Engineering",
+        "question_range": "1-50",
+        "count": 50
+      },
+      {
+        "id": 2,
+        "name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "question_range": "51-100",
+        "count": 50
+      }
+    ],
+    "questions": [
+      {
+        "id": "de2024-q1",
+        "number": 1,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "What is the S.I unit of power?",
+        "options": [
+          "Joule",
+          "Volt",
+          "Watt",
+          "Ampere"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (C): Watt."
+      },
+      {
+        "id": "de2024-q2",
+        "number": 2,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "The pitch of micrometer screw is 0.5 mm. There are 50 divisions on its circular scale. What will be the least count of the screw?",
+        "options": [
+          "0.1 mm",
+          "0.001 mm",
+          "1 mm",
+          "0.01 mm"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (D): 0.01 mm."
+      },
+      {
+        "id": "de2024-q3",
+        "number": 3,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "10 dyne = _______ N?",
+        "options": [
+          "10⁻⁵",
+          "10⁻⁴",
+          "10⁵",
+          "10⁷"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (B): 10⁻⁴."
+      },
+      {
+        "id": "de2024-q4",
+        "number": 4,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "What is the unit of Energy in CGS?",
+        "options": [
+          "Newton",
+          "Watt",
+          "Joule",
+          "Erg"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (D): Erg."
+      },
+      {
+        "id": "de2024-q5",
+        "number": 5,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "The refractive index of water is found to have the values 1.30, 1.32, 1.34, 1.35, 1.31. Calculate the mean absolute error.",
+        "options": [
+          "0.01254",
+          "0.1254",
+          "1.254",
+          "0.001254"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (A): 0.01254."
+      },
+      {
+        "id": "de2024-q6",
+        "number": 6,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "Which instrument is used to measure “Inner diameter of the ring”?",
+        "options": [
+          "Vernier caliper",
+          "Micrometer screw",
+          "Spherometer",
+          "Physical balance"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (A): Vernier caliper."
+      },
+      {
+        "id": "de2024-q7",
+        "number": 7,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "The mathematical expression for Newton’s second law is _______",
+        "options": [
+          "F = mv",
+          "P = mv",
+          "F = ma",
+          "P = ma"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (C): F = ma."
+      },
+      {
+        "id": "de2024-q8",
+        "number": 8,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "Find the acceleration produced by applying a force of 30 N on an object of mass of 5 kg.",
+        "options": [
+          "0.6 m/s²",
+          "6 m/s²",
+          "6 m/s",
+          "0.6 m/s"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (B): 6 m/s²."
+      },
+      {
+        "id": "de2024-q9",
+        "number": 9,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "_______ are the examples of impulse of force.",
+        "options": [
+          "China wares are wrapped in paper while packing.",
+          "Bogies of a train are provided with the buffers.",
+          "Both (A) and (B)",
+          "None of above"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (C): Both (A) and (B)."
+      },
+      {
+        "id": "de2024-q10",
+        "number": 10,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "A body is moving in a vertical circular motion, which one of the following forces does not experience?",
+        "options": [
+          "Force of gravity",
+          "Centripetal force",
+          "Friction force",
+          "Centrifugal force"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (C): Friction force."
+      },
+      {
+        "id": "de2024-q11",
+        "number": 11,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "_______ is the field force.",
+        "options": [
+          "Gravitational force",
+          "Magnetic force",
+          "Electrical force",
+          "All of above"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (D): All of above."
+      },
+      {
+        "id": "de2024-q12",
+        "number": 12,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "The work done by the external forces on a system equals the changes in _______",
+        "options": [
+          "Total energy",
+          "Kinetic energy",
+          "Potential energy",
+          "None of these"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (A): Total energy."
+      },
+      {
+        "id": "de2024-q13",
+        "number": 13,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "6V battery is connected across a resistance R. The current through R is 0.4 mA. What will be the value of R ?",
+        "options": [
+          "10 kΩ",
+          "15 kΩ",
+          "20 kΩ",
+          "24 kΩ"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (B): 15 kΩ."
+      },
+      {
+        "id": "de2024-q14",
+        "number": 14,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "______ is the Unit of permitivity.",
+        "options": [
+          "Nm²/C²",
+          "A/m",
+          "N/m²C",
+          "C²/Nm²"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (D): C²/Nm²."
+      },
+      {
+        "id": "de2024-q15",
+        "number": 15,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "The Electric flux depends on the _______",
+        "options": [
+          "Electric field intensity",
+          "Area",
+          "Angle between the surface and the electric field",
+          "All of these"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (D): All of these."
+      },
+      {
+        "id": "de2024-q16",
+        "number": 16,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "Inverse of Resistance is known as _______",
+        "options": [
+          "current",
+          "specific resistance",
+          "conductance",
+          "voltage"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (C): conductance."
+      },
+      {
+        "id": "de2024-q17",
+        "number": 17,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "What is the effective value of resistance when two resistors 10 Ω and 20 Ω are connected in parallel combination ?",
+        "options": [
+          "10 Ω",
+          "20 Ω",
+          "30 Ω",
+          "6.6 Ω"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (D): 6.6 Ω."
+      },
+      {
+        "id": "de2024-q18",
+        "number": 18,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "The Unit of capacitance is _______",
+        "options": [
+          "Q/C",
+          "C/V",
+          "Q/V",
+          "C"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (B): C/V."
+      },
+      {
+        "id": "de2024-q19",
+        "number": 19,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "Arrange the metals Aluminium, Copper, Iron and Silver in increasing order of thermal conductivity.",
+        "options": [
+          "Iron, Aluminium, Copper, Silver",
+          "Aluminium, Iron, Copper, Silver",
+          "Copper, Iron, Silver, Aluminium",
+          "Iron, Copper, Aluminium, Silver"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (A): Iron, Aluminium, Copper, Silver."
+      },
+      {
+        "id": "de2024-q20",
+        "number": 20,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "At what temperature are Celsius and Fahrenheit equal?",
+        "options": [
+          "40°C",
+          "40°F",
+          "–40°C and –40°F",
+          "None of above"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (C): –40°C and –40°F."
+      },
+      {
+        "id": "de2024-q21",
+        "number": 21,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "Unit of heat capacity is _______",
+        "options": [
+          "J/K",
+          "Cal/K",
+          "Cal/°C",
+          "All of above"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (D): All of above."
+      },
+      {
+        "id": "de2024-q22",
+        "number": 22,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "With rising temperatures, the thermal conductivity will be ______",
+        "options": [
+          "Decreased",
+          "Increased",
+          "Remain constant",
+          "Zero"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (B): Increased."
+      },
+      {
+        "id": "de2024-q23",
+        "number": 23,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "The mathematical formula of specific heat is ______",
+        "options": [
+          "C = Q / mΔT",
+          "Q = C / mΔT",
+          "Hc = Q / ΔL",
+          "Q = Hc / ΔL"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (A): C = Q / mΔT."
+      },
+      {
+        "id": "de2024-q24",
+        "number": 24,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "A person is having temperature of 104° F. Convert it in Celsius.",
+        "options": [
+          "38°C",
+          "40°C",
+          "– 40°C",
+          "– 38°C"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (B): 40°C."
+      },
+      {
+        "id": "de2024-q25",
+        "number": 25,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "Which of the following is not a type of electromagnetic wave ?",
+        "options": [
+          "Sound wave",
+          "Light wave",
+          "Gamma Ray",
+          "Micro wave"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (A): Sound wave."
+      },
+      {
+        "id": "de2024-q26",
+        "number": 26,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "Which type of wave is a light wave ?",
+        "options": [
+          "Longitudinal",
+          "Transverse",
+          "Both (A) and (B)",
+          "None of the above"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (B): Transverse."
+      },
+      {
+        "id": "de2024-q27",
+        "number": 27,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "The frequency of sound wave is 2kHz and its wave length is 2m. What is the speed of sound wave?",
+        "options": [
+          "2000 m/s",
+          "400 m/s",
+          "200 m/s",
+          "4000 m/s"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (D): 4000 m/s."
+      },
+      {
+        "id": "de2024-q28",
+        "number": 28,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "_______ is not the characteristics of LASER.",
+        "options": [
+          "Coherent",
+          "Monochromatics",
+          "Divergent",
+          "High intensity"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (C): Divergent."
+      },
+      {
+        "id": "de2024-q29",
+        "number": 29,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "Optical fibre works on the principle of ______",
+        "options": [
+          "Total internal reflection",
+          "Polarization",
+          "Refraction",
+          "Diffraction"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (A): Total internal reflection."
+      },
+      {
+        "id": "de2024-q30",
+        "number": 30,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Physics",
+        "text": "A volume of an auditorium is 6000 m³. The total absorption by the surfaces is 1000 O.W.U. Then calculate reverberation time.",
+        "options": [
+          "9 second",
+          "0.966 second",
+          "90 second",
+          "9.6 second"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (B): 0.966 second."
+      },
+      {
+        "id": "de2024-q31",
+        "number": 31,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Chemistry",
+        "text": "Burning of coal is a which type of process ?",
+        "options": [
+          "Double displacement",
+          "Decomposition",
+          "Combination",
+          "Displacement"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (C): Combination."
+      },
+      {
+        "id": "de2024-q32",
+        "number": 32,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Chemistry",
+        "text": "Na₂SO₄(aq) + BaCl₂(aq) → BaSO₄(s) + 2NaCl(aq). Which type of reaction is this?",
+        "options": [
+          "Combination",
+          "Double displacement",
+          "Decomposition",
+          "None of these"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (B): Double displacement."
+      },
+      {
+        "id": "de2024-q33",
+        "number": 33,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Chemistry",
+        "text": "Reaction of Zinc with Sulphuric acid gives Zinc Sulphate and Hydrogen. Which is the balanced equation for this chemical Change ?",
+        "options": [
+          "2Zn + 2H₂SO₄ → 2ZnSO₄ + H₂",
+          "2Zn + H₂SO₄ → ZnSO₄ + 2H₂",
+          "Zn + H₂SO₄ → ZnSO₄ + H₂",
+          "None of these"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (C): Zn + H₂SO₄ → ZnSO₄ + H₂."
+      },
+      {
+        "id": "de2024-q34",
+        "number": 34,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Chemistry",
+        "text": "The outer layer of the teeth is made-up of ______",
+        "options": [
+          "Calcium nitrate",
+          "Potassium phosphate",
+          "Calcium chloride",
+          "Calcium phosphate"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (D): Calcium phosphate."
+      },
+      {
+        "id": "de2024-q35",
+        "number": 35,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Chemistry",
+        "text": "The pH of aqueous solution of which salt is 7.0 ?",
+        "options": [
+          "KNO₃",
+          "NH₄Cl",
+          "CH₃COONa",
+          "Na₂CO₃"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (A): KNO₃."
+      },
+      {
+        "id": "de2024-q36",
+        "number": 36,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Chemistry",
+        "text": "Metal oxide + Acid → __?__",
+        "options": [
+          "Base + Water",
+          "Salt + Water",
+          "Acid + Salt",
+          "None of these"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (B): Salt + Water."
+      },
+      {
+        "id": "de2024-q37",
+        "number": 37,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Chemistry",
+        "text": "State the molecular formula of Sodium Zincate.",
+        "options": [
+          "Na₂ZnO₃",
+          "Na₂ZnO₂",
+          "NaZnO₂",
+          "Na₂Zn₂O₂"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (B): Na₂ZnO₂."
+      },
+      {
+        "id": "de2024-q38",
+        "number": 38,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Chemistry",
+        "text": "How many electrons are present in the outermost shell of fluorine?",
+        "options": [
+          "9",
+          "7",
+          "2",
+          "5"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (B): 7."
+      },
+      {
+        "id": "de2024-q39",
+        "number": 39,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Chemistry",
+        "text": "Which of the following methods is suitable for preventing an iron frying pan from rusting ?",
+        "options": [
+          "Applying grease",
+          "Applying paint",
+          "Applying a coating of zinc",
+          "All of the above"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (C): Applying a coating of zinc."
+      },
+      {
+        "id": "de2024-q40",
+        "number": 40,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Chemistry",
+        "text": "Which of following metals is highly malleable?",
+        "options": [
+          "Gold",
+          "Lead",
+          "Both (A) and (B)",
+          "None of these"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (A): Gold."
+      },
+      {
+        "id": "de2024-q41",
+        "number": 41,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Computer",
+        "text": "______ is not valid data type in MS-Excel ?",
+        "options": [
+          "Number",
+          "Character",
+          "Label",
+          "Date/Time"
+        ],
+        "answer_letter": "X",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (X). (Full marks awarded to all candidates for X)",
+        "is_bonus": true
+      },
+      {
+        "id": "de2024-q42",
+        "number": 42,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Computer",
+        "text": "What is the max zoom percentage in MS-PowerPoint?",
+        "options": [
+          "400",
+          "300",
+          "200",
+          "100"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (A): 400."
+      },
+      {
+        "id": "de2024-q43",
+        "number": 43,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Computer",
+        "text": "Which is not in MS-Word ?",
+        "options": [
+          "Italic",
+          "Magic tool",
+          "Font",
+          "Bold"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (B): Magic tool."
+      },
+      {
+        "id": "de2024-q44",
+        "number": 44,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Computer",
+        "text": "CPU consist of",
+        "options": [
+          "ALU + CU",
+          "ROM + ALU",
+          "RAM + ROM",
+          "None of the above"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (A): ALU + CU."
+      },
+      {
+        "id": "de2024-q45",
+        "number": 45,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Computer",
+        "text": "Which of the following is not OS (Operating System)",
+        "options": [
+          "UNIX",
+          "MS-DOS",
+          "LINUX",
+          "Microsoft Office"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (D): Microsoft Office."
+      },
+      {
+        "id": "de2024-q46",
+        "number": 46,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Environment",
+        "text": "Which pollutant is commonly associated with “blue baby Syndrome” in infants?",
+        "options": [
+          "Lead",
+          "Arsenic",
+          "Mercury",
+          "Nitrate"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (D): Nitrate."
+      },
+      {
+        "id": "de2024-q47",
+        "number": 47,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Environment",
+        "text": "Clouds are present in ______ layer of atmosphere.",
+        "options": [
+          "Stratosphere",
+          "Troposphere",
+          "Mesosphere",
+          "Thermosphere"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (B): Troposphere."
+      },
+      {
+        "id": "de2024-q48",
+        "number": 48,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Environment",
+        "text": "CFCs are not recommended to be used in refrigerators because they ______",
+        "options": [
+          "Increase temperature",
+          "Affect environment",
+          "Deplete ozone",
+          "Affect human body"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (C): Deplete ozone."
+      },
+      {
+        "id": "de2024-q49",
+        "number": 49,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Environment",
+        "text": "What is the approximate efficiency range of modern solar photovoltaic (PV) panels in converting Sunlight in to electricity?",
+        "options": [
+          "5 - 10%",
+          "15 - 20%",
+          "20 - 30%",
+          "40 - 50%"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (B): 15 - 20%."
+      },
+      {
+        "id": "de2024-q50",
+        "number": 50,
+        "section": 1,
+        "section_name": "Section 1: Basics of Science & Engineering",
+        "subject": "Environment",
+        "text": "Which pollutant is primarily responsible for causing respiratory problems and cardiovascular diseases in humans?",
+        "options": [
+          "Lead",
+          "Benzene",
+          "Particulate matter (PM10)",
+          "Carbon Monoxide (CO)"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (C): Particulate matter (PM10)."
+      },
+      {
+        "id": "de2024-q51",
+        "number": 51,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "If A = [[1, -1], [1, 2]] and B = [[2, 1], [-1, 3]], then (AB)ᵀ = ______ .",
+        "options": [
+          "[[-3, -2], [7, 0]]",
+          "[[-3, 0], [2, 7]]",
+          "[[-3, -2], [0, 7]]",
+          "[[-3, 0], [7, -2]]"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (B): [[-3, 0], [2, 7]]."
+      },
+      {
+        "id": "de2024-q52",
+        "number": 52,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "If A = [[1, 2, 1], [2, 1, 3], [1, 1, 0]], then |A| = ______ .",
+        "options": [
+          "– 3",
+          "3",
+          "– 4",
+          "4"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (D): 4."
+      },
+      {
+        "id": "de2024-q53",
+        "number": 53,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "If A = [[2, -1], [3, 1]], then A⁻¹ = ______ .",
+        "options": [
+          "(1/5) [[1, 1], [-3, 2]]",
+          "(1/5) [[2, 1], [-3, 1]]",
+          "(1/5) [[-1, 1], [3, 2]]",
+          "(1/5) [[-2, 3], [-1, -1]]"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (A): (1/5) [[1, 1], [-3, 2]]."
+      },
+      {
+        "id": "de2024-q54",
+        "number": 54,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "If A = [[2, -1], [1, 0]] and B = [[1, 0], [2, 3]], then 3B – 2A = ______ .",
+        "options": [
+          "[[-4, 3], [1, 6]]",
+          "[[-4, 3], [-1, -6]]",
+          "[[-1, 2], [4, -9]]",
+          "[[-1, 2], [4, 9]]"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (D): [[-1, 2], [4, 9]]."
+      },
+      {
+        "id": "de2024-q55",
+        "number": 55,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "Sin(225°) = _____",
+        "options": [
+          "-1/√2",
+          "1/√2",
+          "√3/2",
+          "-1/2"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (A): -1/√2."
+      },
+      {
+        "id": "de2024-q56",
+        "number": 56,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "If tan θ = -12/5, and 3π/2 < θ < 2π, then cos θ = ______ .",
+        "options": [
+          "-12/13",
+          "12/13",
+          "5/13",
+          "-5/13"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (C): 5/13."
+      },
+      {
+        "id": "de2024-q57",
+        "number": 57,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "cos⁻¹(-√3/2) = ______",
+        "options": [
+          "2π/3",
+          "-π/6",
+          "5π/3",
+          "5π/6"
+        ],
+        "answer_letter": "X",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (X). (Full marks awarded to all candidates for X)",
+        "is_bonus": true
+      },
+      {
+        "id": "de2024-q58",
+        "number": 58,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "If |x × y| = x · y = 2, then (x ^ y) = ______ .",
+        "options": [
+          "π/3",
+          "π/4",
+          "π/6",
+          "π/2"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (B): π/4."
+      },
+      {
+        "id": "de2024-q59",
+        "number": 59,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "If vectors (2, 3, a) and (3, –1, 4) are perpendicular then a = ______ .",
+        "options": [
+          "-3/4",
+          "3/4",
+          "4/3",
+          "-4/3"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (A): -3/4."
+      },
+      {
+        "id": "de2024-q60",
+        "number": 60,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "If the centre of the circle x² + y² – 6my + 11 = 0 is (0, –3) then m = ______ .",
+        "options": [
+          "2",
+          "–2",
+          "1",
+          "–1"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (D): –1."
+      },
+      {
+        "id": "de2024-q61",
+        "number": 61,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "Equation of line passing through the points (1, –1) and (–1, 1) is ______ .",
+        "options": [
+          "2x + y – 1 = 0",
+          "x + 2y – 1 = 0",
+          "x + y = 0",
+          "x + 2y + 1 = 0"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (C): x + y = 0."
+      },
+      {
+        "id": "de2024-q62",
+        "number": 62,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "lim_{x → 0} (10ˣ – 5ˣ) / x = ______",
+        "options": [
+          "log_e(1/2)",
+          "log_e(10)",
+          "log_e(5)",
+          "log_e(2)"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (D): log_e(2)."
+      },
+      {
+        "id": "de2024-q63",
+        "number": 63,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "lim_{n → ∞} (3n² – 11n – 13) / ((4n – 5)(7 – 6n)) = ______",
+        "options": [
+          "1/4",
+          "–1/8",
+          "1/6",
+          "–1/4"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (B): –1/8."
+      },
+      {
+        "id": "de2024-q64",
+        "number": 64,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "If f(x) = log₄(x) then f(64) = ______ .",
+        "options": [
+          "3",
+          "–3",
+          "6",
+          "1/3"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (A): 3."
+      },
+      {
+        "id": "de2024-q65",
+        "number": 65,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "d/dx (cos² x) = ______",
+        "options": [
+          "sin(2x)",
+          "–sin(2x)",
+          "cos(2x)",
+          "–cos(2x)"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (B): –sin(2x)."
+      },
+      {
+        "id": "de2024-q66",
+        "number": 66,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "d/dx [log(x² – 9)] = ______",
+        "options": [
+          "1 / (x² – 9)",
+          "x / (x² – 9)",
+          "9 / (x² – 9)",
+          "2x / (x² – 9)"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (D): 2x / (x² – 9)."
+      },
+      {
+        "id": "de2024-q67",
+        "number": 67,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "If x = cosec θ and y = cot θ then dy/dx = ______ .",
+        "options": [
+          "sec θ",
+          "cosec θ",
+          "sin θ",
+          "cos θ"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (A): sec θ."
+      },
+      {
+        "id": "de2024-q68",
+        "number": 68,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "The necessary condition for the function f(x) to be minimum at x = a is ______ .",
+        "options": [
+          "f''(a) > 0",
+          "f''(a) < 0",
+          "f'(a) > 0",
+          "f'(a) < 0"
+        ],
+        "answer_letter": "X",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (X). (Full marks awarded to all candidates for X)",
+        "is_bonus": true
+      },
+      {
+        "id": "de2024-q69",
+        "number": 69,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "∫ cos(10x – 17) dx = ______ + c",
+        "options": [
+          "10 sin(10x – 17)",
+          "–10 sin(10x – 17)",
+          "(1/10) sin(10x – 17)",
+          "–(1/10) sin(10x – 17)"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (C): (1/10) sin(10x – 17)."
+      },
+      {
+        "id": "de2024-q70",
+        "number": 70,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "∫_{-1}^{1} sin⁵(x) · cos⁸(x) dx = ______",
+        "options": [
+          "–1",
+          "0",
+          "1/2",
+          "1/4"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (B): 0."
+      },
+      {
+        "id": "de2024-q71",
+        "number": 71,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "∫ eˣ (cosec² x – cot x) dx = ______ + c",
+        "options": [
+          "eˣ cosec² x",
+          "–eˣ cosec² x",
+          "eˣ cot x",
+          "–eˣ cot x"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (D): –eˣ cot x."
+      },
+      {
+        "id": "de2024-q72",
+        "number": 72,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "∫ (x – 3) / (x² – 6x + 40) dx = ______ + c",
+        "options": [
+          "(1/2) log|x² – 6x + 40|",
+          "–(1/2) log|x² – 6x + 40|",
+          "2 log|x² – 6x + 40|",
+          "–2 log|x² – 6x + 40|"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (A): (1/2) log|x² – 6x + 40|."
+      },
+      {
+        "id": "de2024-q73",
+        "number": 73,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "log_{1/81}(1/9) = _______",
+        "options": [
+          "9",
+          "1/9",
+          "1/2",
+          "–1/2"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (C): 1/2."
+      },
+      {
+        "id": "de2024-q74",
+        "number": 74,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "4^{log₂ 3} + 2^{log₈ 27} = _______",
+        "options": [
+          "9",
+          "10",
+          "11",
+          "12"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (D): 12."
+      },
+      {
+        "id": "de2024-q75",
+        "number": 75,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "Mathematics",
+        "text": "If the mean of the observations 19, 15, 12, k, 8, 3 is 11 then k = _______ .",
+        "options": [
+          "8",
+          "9",
+          "10",
+          "11"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (B): 9."
+      },
+      {
+        "id": "de2024-q76",
+        "number": 76,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "[Read the following passage carefully and answer the questions (Q.No. 76 to 80):\n\"The science of fireworks is technically called 'pyrotechnics' - from the Greek word 'pyr' meaning fire and 'technics' meaning an art. Pyrotechnics includes not only fireworks but also a whole range of devices that use similar materials and principles, from safety matches that we use every day to solid fuel rocket boosters of space shuttle. The household match is considered a special pyrotechnic device, as all the pyrotechnic effect - heat, smoke, light, gas and sound are present in it.\n\nSome historians say that 'black powder', the basic material used in fireworks, was invented in India. Shukranti, written more than two thousand years ago, has references to weapons similar to guns and projectile weapons. However, the Chinese are generally considered the pioneers of pyrotechnics. They are said to have developed, black powder more than one thousand years ago. It took at least two thousand years for the knowledge to spread to the West, and it was only in 1242 that an English Monk, Roger Bacon, revealed the formula for 'black powder'. He considered it such a dangerous substance that he wrote of it in a code language.\"]\n\nAs per some historians 'Black Powder' was invented in ______",
+        "options": [
+          "India",
+          "China",
+          "Greek",
+          "None of the above"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (A): India."
+      },
+      {
+        "id": "de2024-q77",
+        "number": 77,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "[Based on the passage for Q.76-80]\nRoger Bacon was",
+        "options": [
+          "a Chinese writer",
+          "an Indian historian",
+          "an English Monk",
+          "a Greek philosopher"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (C): an English Monk."
+      },
+      {
+        "id": "de2024-q78",
+        "number": 78,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "[Based on the passage for Q.76-80]\nWho wrote about 'Black Powder' in code language?",
+        "options": [
+          "Shukranti",
+          "Roger Bacon",
+          "Chinese",
+          "Greek"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (B): Roger Bacon."
+      },
+      {
+        "id": "de2024-q79",
+        "number": 79,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "[Based on the passage for Q.76-80]\nWhen was Shukranti written?",
+        "options": [
+          "One thousand years ago",
+          "In 1242",
+          "Two thousand years ago",
+          "Modern times"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (C): Two thousand years ago."
+      },
+      {
+        "id": "de2024-q80",
+        "number": 80,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "[Based on the passage for Q.76-80]\nPyrotechnics word is from",
+        "options": [
+          "Indian language",
+          "Greek language",
+          "Chinese language",
+          "None of the above"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (B): Greek language."
+      },
+      {
+        "id": "de2024-q81",
+        "number": 81,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "Verbal communication can be in ______ form.",
+        "options": [
+          "written",
+          "oral and written",
+          "oral",
+          "none of these"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (B): oral and written."
+      },
+      {
+        "id": "de2024-q82",
+        "number": 82,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "Tone of voice, voice quality, style of speaking, stress, intonation are part of ______",
+        "options": [
+          "body language",
+          "sign language",
+          "paralanguage",
+          "code language"
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (C): paralanguage."
+      },
+      {
+        "id": "de2024-q83",
+        "number": 83,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "The process of communication is a ______",
+        "options": [
+          "two way",
+          "three way",
+          "one way",
+          "single way"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (A): two way."
+      },
+      {
+        "id": "de2024-q84",
+        "number": 84,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "“During the process of communication at every stage, there is hindrance which disturbs communication process.” Such hindrance is known as",
+        "options": [
+          "barrier",
+          "noise",
+          "sender",
+          "receiver"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (A): barrier."
+      },
+      {
+        "id": "de2024-q85",
+        "number": 85,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "Our physical appearance is an example of _______ communication",
+        "options": [
+          "oral",
+          "written",
+          "verbal",
+          "non-verbal"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (D): non-verbal."
+      },
+      {
+        "id": "de2024-q86",
+        "number": 86,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "What is written at the top of a business letter on the left hand side.",
+        "options": [
+          "Sender’s address",
+          "Receiver’s address",
+          "Date",
+          "Salutation"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (A): Sender’s address."
+      },
+      {
+        "id": "de2024-q87",
+        "number": 87,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "Where is the salutation placed in a business letter?",
+        "options": [
+          "Just above the date",
+          "Just below the date",
+          "Along with the subject",
+          "None of these"
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (D): None of these."
+      },
+      {
+        "id": "de2024-q88",
+        "number": 88,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "Which of the following is not a part of the business letter?",
+        "options": [
+          "Photo",
+          "Salutation",
+          "Date",
+          "Signature"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (A): Photo."
+      },
+      {
+        "id": "de2024-q89",
+        "number": 89,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "A letter is incomplete and worthless without ______",
+        "options": [
+          "Signature",
+          "Postscript",
+          "Enclosure",
+          "Photo"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (A): Signature."
+      },
+      {
+        "id": "de2024-q90",
+        "number": 90,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "Give the full form of C.O.D.",
+        "options": [
+          "Cash on delay",
+          "Cash on delivery",
+          "Cash on order",
+          "Cash on distance"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (B): Cash on delivery."
+      },
+      {
+        "id": "de2024-q91",
+        "number": 91,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "Hurrah! I have passed the examination. Identify the interjection.",
+        "options": [
+          "Examination",
+          "Passed",
+          "Hurrah!",
+          "The whole sentence."
+        ],
+        "answer_letter": "C",
+        "correctOptionIndex": 2,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (C): Hurrah!."
+      },
+      {
+        "id": "de2024-q92",
+        "number": 92,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "The dog is sitting ______ the cot. Select appropriate option.",
+        "options": [
+          "under",
+          "into",
+          "between",
+          "up"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (A): under."
+      },
+      {
+        "id": "de2024-q93",
+        "number": 93,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "The Sun ______ in the East. Select appropriate option",
+        "options": [
+          "raise",
+          "rises",
+          "rise",
+          "raised"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (B): rises."
+      },
+      {
+        "id": "de2024-q94",
+        "number": 94,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "Your family ______ a happy family. Select appropriate option",
+        "options": [
+          "are",
+          "is",
+          "has",
+          "have"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (B): is."
+      },
+      {
+        "id": "de2024-q95",
+        "number": 95,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "Do you have ______ doubt in this question paper? Select appropriate option.",
+        "options": [
+          "some",
+          "any",
+          "many",
+          "much"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (B): any."
+      },
+      {
+        "id": "de2024-q96",
+        "number": 96,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "Select the correct spelling",
+        "options": [
+          "Playwright",
+          "Playwrite",
+          "Playright",
+          "Playrite"
+        ],
+        "answer_letter": "A",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (A): Playwright."
+      },
+      {
+        "id": "de2024-q97",
+        "number": 97,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "Select the correct spelling",
+        "options": [
+          "Enterpeneur",
+          "Entrepreneur",
+          "Enterpreneur",
+          "Entrepeneur"
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (B): Entrepreneur."
+      },
+      {
+        "id": "de2024-q98",
+        "number": 98,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "Choose the correct grammatical sentence.",
+        "options": [
+          "People were coming, going and ignorant him.",
+          "People were coming, going and ignoring him.",
+          "People where coming, going and ignoring him",
+          "People were coming, going and ignored him."
+        ],
+        "answer_letter": "B",
+        "correctOptionIndex": 1,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (B): People were coming, going and ignoring him.."
+      },
+      {
+        "id": "de2024-q99",
+        "number": 99,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "Choose the correct grammatical sentence",
+        "options": [
+          "I like drawing my coworkers and my cat.",
+          "I Like drawing, my coworkers and my cat.",
+          "I like drawing, my coworkers, and, my cat.",
+          "I, Like, drawing, my coworkers, and, my, cat."
+        ],
+        "answer_letter": "X",
+        "correctOptionIndex": 0,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (X). (Full marks awarded to all candidates for X)",
+        "is_bonus": true
+      },
+      {
+        "id": "de2024-q100",
+        "number": 100,
+        "section": 2,
+        "section_name": "Section 2: Aptitude & Soft Skills (Maths & English)",
+        "subject": "English & Soft Skills",
+        "text": "Choose the correct grammatical sentence.",
+        "options": [
+          "The ship was wrecked, and every man, woman and child have drowned.",
+          "The ship was wrecked, and every man, woman, and child are drowned.",
+          "The ship was wrecked, and every man, woman and child is drowned.",
+          "The ship was wrecked, and every man, woman and child was drowned."
+        ],
+        "answer_letter": "D",
+        "correctOptionIndex": 3,
+        "marks": 2.0,
+        "negativeMarks": 0.5,
+        "explanation": "Official final answer key for DE-2024 Series A is Option (D): The ship was wrecked, and every man, woman and child was drowned.."
+      }
+    ]
   }
 ]

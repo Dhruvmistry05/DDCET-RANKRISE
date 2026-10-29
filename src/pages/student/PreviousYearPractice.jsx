@@ -408,7 +408,7 @@ export default function PreviousYearPractice() {
               Step 1: Choose Previous Year Examination Paper
             </h2>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {papers.map(paper => {
                 const isSelected = selectedPaperId === paper.id;
                 return (
@@ -1070,7 +1070,7 @@ export default function PreviousYearPractice() {
 
           {/* Section Breakdown Grid */}
           {sectionBreakdown && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <div className="bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xs space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="font-bold text-sm text-slate-900 dark:text-white">

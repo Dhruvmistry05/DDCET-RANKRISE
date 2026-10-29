@@ -85,7 +85,7 @@ export default function StudentHome() {
 
   const quickLinks = [
     { title: 'Study Library', desc: 'Notes, Papers & Keys', icon: BookOpen, path: '/student/resources' },
-    { title: 'Previous Year MCQs', desc: 'DDCET 2026 & 2025 Papers', icon: FileText, path: '/student/pyq' },
+    { title: 'Previous Year MCQs', desc: 'DDCET 2026, 2025 & 2024 Papers', icon: FileText, path: '/student/pyq' },
     { title: 'Practice Lab', desc: 'Topic & Chapter MCQs', icon: PenTool, path: '/student/practice' },
     { title: 'Leaderboard', desc: 'Statewide Mock Ranks', icon: Trophy, path: '/student/leaderboard' }
   ];

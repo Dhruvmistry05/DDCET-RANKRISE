@@ -34,7 +34,8 @@ export default function StudentSyllabus() {
   const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState('ALL'); // 'ALL' | 'BE-01' | 'BE-02'
   const [selectedSubjectId, setSelectedSubjectId] = useState('ALL'); // 'ALL' or subject.id
-  const [expandedChapters, setExpandedChapters] = useState(new Set());
+  const [expandedSubjects, setExpandedSubjects] = useState(new Set()); // ALL SUBJECTS COLLAPSED BY DEFAULT
+  const [expandedChapters, setExpandedChapters] = useState(new Set()); // ALL CHAPTERS COLLAPSED BY DEFAULT
   const [completedTopicIds, setCompletedTopicIds] = useState(new Set());
   const [searchQuery, setSearchQuery] = useState('');
   const [guestNotice, setGuestNotice] = useState(false);
@@ -53,25 +54,33 @@ export default function StudentSyllabus() {
       const parsed = isNaN(subjectParam) ? subjectParam : Number(subjectParam);
       setSelectedSubjectId(parsed);
       setActiveSection('ALL');
+      setExpandedSubjects(prev => new Set(prev).add(parsed));
     }
 
     if (chapterParam) {
-      setExpandedChapters(prev => {
-        const next = new Set(prev);
-        next.add(Number(chapterParam));
-        return next;
-      });
+      const parsedCh = Number(chapterParam);
+      setExpandedChapters(prev => new Set(prev).add(parsedCh));
+      if (syllabus.length > 0) {
+        syllabus.forEach(s => {
+          if ((s.chapters || []).some(c => Number(c.id) === parsedCh)) {
+            setExpandedSubjects(prev => new Set(prev).add(s.id));
+          }
+        });
+      }
     }
 
     if (searchParam) {
       setSearchQuery(searchParam);
-      // Auto-expand all chapters when searching for a keyword
+      // Auto-expand all subjects and chapters when searching for a keyword
       if (syllabus.length > 0) {
-        const allIds = new Set();
+        const allSubIds = new Set();
+        const allChapIds = new Set();
         syllabus.forEach(s => {
-          (s.chapters || []).forEach(c => allIds.add(c.id));
+          allSubIds.add(s.id);
+          (s.chapters || []).forEach(c => allChapIds.add(c.id));
         });
-        setExpandedChapters(allIds);
+        setExpandedSubjects(allSubIds);
+        setExpandedChapters(allChapIds);
       }
     }
   }, [searchParams, syllabus]);
@@ -82,12 +91,9 @@ export default function StudentSyllabus() {
       .then(data => {
         if (Array.isArray(data)) {
           setSyllabus(data);
-          // By default expand first 3 chapters of the first subject
-          const defaultExpanded = new Set();
-          if (data.length > 0 && data[0].chapters) {
-            data[0].chapters.slice(0, 3).forEach(c => defaultExpanded.add(c.id));
-          }
-          setExpandedChapters(defaultExpanded);
+          // By default, ALL subjects remain strictly COLLAPSED until student manually clicks
+          setExpandedSubjects(new Set());
+          setExpandedChapters(new Set());
         }
         setLoading(false);
       })
@@ -107,6 +113,18 @@ export default function StudentSyllabus() {
     }
   }, [token]);
 
+  const toggleSubject = (subjectId) => {
+    setExpandedSubjects(prev => {
+      const next = new Set(prev);
+      if (next.has(subjectId)) {
+        next.delete(subjectId);
+      } else {
+        next.add(subjectId);
+      }
+      return next;
+    });
+  };
+
   const toggleChapter = (chapterId) => {
     setExpandedChapters(prev => {
       const next = new Set(prev);
@@ -120,14 +138,18 @@ export default function StudentSyllabus() {
   };
 
   const expandAll = () => {
-    const allIds = new Set();
+    const allSubIds = new Set();
+    const allChapIds = new Set();
     syllabus.forEach(s => {
-      (s.chapters || []).forEach(c => allIds.add(c.id));
+      allSubIds.add(s.id);
+      (s.chapters || []).forEach(c => allChapIds.add(c.id));
     });
-    setExpandedChapters(allIds);
+    setExpandedSubjects(allSubIds);
+    setExpandedChapters(allChapIds);
   };
 
   const collapseAll = () => {
+    setExpandedSubjects(new Set());
     setExpandedChapters(new Set());
   };
 
@@ -593,6 +615,7 @@ export default function StudentSyllabus() {
             {/* Subjects in this Section */}
             <div className="space-y-6">
               {section.subjects.map(subject => {
+                const isSubjectExpanded = expandedSubjects.has(subject.id);
                 // Calculate subject completion
                 let subjectTopicsCount = 0;
                 let subjectDoneCount = 0;
@@ -605,10 +628,16 @@ export default function StudentSyllabus() {
                 const subPercent = subjectTopicsCount > 0 ? Math.round((subjectDoneCount / subjectTopicsCount) * 100) : 0;
 
                 return (
-                  <div key={subject.id} className="bg-white rounded-2xl border border-[#E2E8F0] shadow-xs overflow-hidden">
+                  <div key={subject.id} className="bg-white rounded-2xl border border-[#E2E8F0] shadow-xs overflow-hidden transition-all">
                     
-                    {/* Subject Header Card */}
-                    <div className="p-4 sm:p-5 bg-gradient-to-r from-slate-50 to-white border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    {/* Subject Header Card - Click to Expand / Collapse Subject */}
+                    <div 
+                      onClick={() => toggleSubject(subject.id)}
+                      className={`p-4 sm:p-5 bg-gradient-to-r from-slate-50 to-white flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer hover:bg-slate-100/70 transition select-none ${
+                        isSubjectExpanded ? 'border-b border-slate-200' : ''
+                      }`}
+                      title={isSubjectExpanded ? `Click to collapse ${subject.name}` : `Click to expand ${subject.name}`}
+                    >
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-[#1E3A8A] text-white flex items-center justify-center font-bold text-sm shadow-xs shrink-0">
                           {subject.name ? subject.name[0] : 'S'}
@@ -628,28 +657,43 @@ export default function StudentSyllabus() {
                         </div>
                       </div>
 
-                      {/* Subject Progress Pill */}
-                      <div className="flex items-center gap-3 bg-white px-3.5 py-2 rounded-xl border border-slate-200 shrink-0">
-                        <div className="text-right">
-                          <div className="text-[11px] font-bold text-slate-700">
-                            {subjectDoneCount} / {subjectTopicsCount} Points Studied
+                      <div className="flex items-center gap-3 shrink-0">
+                        {/* Subject Progress Pill */}
+                        <div className="flex items-center gap-3 bg-white px-3.5 py-2 rounded-xl border border-slate-200 shrink-0">
+                          <div className="text-right">
+                            <div className="text-[11px] font-bold text-slate-700">
+                              {subjectDoneCount} / {subjectTopicsCount} Points Studied
+                            </div>
+                            <div className="text-[10px] text-slate-400 font-medium">
+                              {subPercent}% Completed
+                            </div>
                           </div>
-                          <div className="text-[10px] text-slate-400 font-medium">
-                            {subPercent}% Completed
+                          <div className="w-16 bg-slate-100 h-2 rounded-full overflow-hidden border border-slate-200">
+                            <div 
+                              className="bg-emerald-600 h-full rounded-full transition-all duration-300"
+                              style={{ width: `${subPercent}%` }}
+                            />
                           </div>
                         </div>
-                        <div className="w-16 bg-slate-100 h-2 rounded-full overflow-hidden border border-slate-200">
-                          <div 
-                            className="bg-emerald-600 h-full rounded-full transition-all duration-300"
-                            style={{ width: `${subPercent}%` }}
-                          />
+
+                        {/* Expand / Collapse Indicator Icon */}
+                        <div
+                          className={`p-1.5 rounded-lg transition ${
+                            isSubjectExpanded 
+                              ? 'bg-blue-50 text-[#1E3A8A]' 
+                              : 'text-slate-400 hover:text-slate-700 hover:bg-slate-200/60'
+                          }`}
+                          aria-label={isSubjectExpanded ? `Collapse ${subject.name}` : `Expand ${subject.name}`}
+                        >
+                          {isSubjectExpanded ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
                         </div>
                       </div>
                     </div>
 
-                    {/* Chapters List inside Subject */}
-                    <div className="divide-y divide-slate-100">
-                      {(subject.chapters || []).map((chapter, chIdx) => {
+                    {/* Chapters List inside Subject — rendered only when student expands */}
+                    {isSubjectExpanded && (
+                      <div className="divide-y divide-slate-100">
+                        {(subject.chapters || []).map((chapter, chIdx) => {
                         const isExpanded = expandedChapters.has(chapter.id);
                         
                         // Chapter progress
@@ -926,6 +970,7 @@ export default function StudentSyllabus() {
                         );
                       })}
                     </div>
+                    )}
 
                   </div>
                 );

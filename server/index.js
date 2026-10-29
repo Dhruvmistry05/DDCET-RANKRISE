@@ -1943,7 +1943,8 @@ app.get('/api/search', async (req, res) => {
     // 6. Previous Year Papers (PYQ Practice)
     const pyqPapers = [
       { id: 'ddcet-2026', title: 'DDCET 2026 Question Paper (DE-2026)', year: 2026, subtitle: 'Official 100 MCQs with Verified Solutions' },
-      { id: 'ddcet-2025', title: 'DDCET 2025 Question Paper (DE-2025)', year: 2025, subtitle: 'Official 100 MCQs with Final Answer Key' }
+      { id: 'ddcet-2025', title: 'DDCET 2025 Question Paper (DE-2025)', year: 2025, subtitle: 'Official 100 MCQs with Final Answer Key' },
+      { id: 'ddcet-2024', title: 'DDCET 2024 Question Paper (DE-2024)', year: 2024, subtitle: 'Official 100 MCQs with Final Answer Key' }
     ];
     pyqPapers.forEach(pyq => {
       const score = Math.max(
