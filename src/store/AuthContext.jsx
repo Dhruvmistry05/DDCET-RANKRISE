@@ -22,8 +22,7 @@ export function AuthProvider({ children }) {
     if (saved && savedToken) {
       try { 
         const parsed = JSON.parse(saved); 
-        // Filter out any legacy hardcoded demo name
-        if (parsed && parsed.name !== 'Dhruv Mistry' && parsed.email !== 'dhruv@rankrise.edu') {
+        if (parsed && (parsed.id || parsed.email)) {
           return parsed;
         }
       } catch { 

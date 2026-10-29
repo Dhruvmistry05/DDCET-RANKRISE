@@ -319,15 +319,32 @@ export default function QuizGenerator() {
           },
           body: JSON.stringify({
             test_id: `gen-quiz-${questionCount}`,
+            test_title: `AI Generated Practice Quiz (${questionCount} Qs)`,
             score: netScore,
             max_score: totalPossibleMarks,
+            correct_count: correctCount,
+            wrong_count: wrongCount,
+            unattempted_count: unattemptedCount,
+            questions_attempted: attemptedCount,
+            accuracy: accuracy,
             time_spent_seconds: Math.max(10, timeSpentSeconds),
-            questions_attempted: attemptedCount
+            answers: quizAnswers
           })
         });
         if (res.ok) {
           const data = await res.json();
           recordedRank = data.rank;
+          if (typeof window !== 'undefined') if (typeof window !== 'undefined') {
+            try {
+              localStorage.setItem('rankrise_last_activity', Date.now().toString());
+              if (typeof BroadcastChannel !== 'undefined') {
+                const bc = new BroadcastChannel('rankrise_analytics_channel');
+                bc.postMessage({ type: 'test_submitted' });
+                bc.close();
+              }
+            } catch (e) {}
+            window.dispatchEvent(new Event('rankrise_test_submitted'));
+          }
         }
       } catch (err) {
         console.error('Error submitting generative quiz:', err);
@@ -527,7 +544,7 @@ export default function QuizGenerator() {
             <Bookmark size={16} className="text-amber-500" />
             <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">
               {quizResults.wrongCount > 0 
-                ? `${quizResults.wrongCount} incorrect questions were automatically added to your Mistake Notebook.`
+                ? `${quizResults.wrongCount} incorrect questions were automatically added to your Weak Spot.`
                 : 'Flawless attempt! No mistakes added to your notebook.'}
             </span>
           </div>
@@ -536,7 +553,7 @@ export default function QuizGenerator() {
               to="/student/mistakes"
               className="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-[#E2E8F0] dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:border-blue-400 transition-colors"
             >
-              Open Mistake Book
+              Open Weak Spot
             </Link>
             <Link
               to="/student/leaderboard"

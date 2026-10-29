@@ -135,6 +135,17 @@ export default function LiveTest() {
         if (res.ok) {
           const data = await res.json();
           recordedRank = data.stats?.current_rank;
+          if (typeof window !== 'undefined') if (typeof window !== 'undefined') {
+            try {
+              localStorage.setItem('rankrise_last_activity', Date.now().toString());
+              if (typeof BroadcastChannel !== 'undefined') {
+                const bc = new BroadcastChannel('rankrise_analytics_channel');
+                bc.postMessage({ type: 'test_submitted' });
+                bc.close();
+              }
+            } catch (e) {}
+            window.dispatchEvent(new Event('rankrise_test_submitted'));
+          }
         }
       } catch (err) {
         console.error('Error submitting test to server:', err);

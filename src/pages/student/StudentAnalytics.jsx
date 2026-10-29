@@ -24,8 +24,12 @@ export default function StudentAnalytics() {
     if (isManual) setIsRefreshing(true);
     try {
       const headers = {};
-      if (token) headers['Authorization'] = `Bearer ${token}`;
-      const res = await fetch(`${API_BASE_URL}/api/student/detailed-analytics`, { headers });
+      const authToken = token || localStorage.getItem('token');
+      if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+      const res = await fetch(`${API_BASE_URL}/api/student/detailed-analytics`, { 
+        headers,
+        cache: 'no-store'
+      });
       if (res.ok) {
         const json = await res.json();
         setData(json);
@@ -40,6 +44,42 @@ export default function StudentAnalytics() {
 
   useEffect(() => {
     fetchAnalytics();
+    const handleUpdate = () => fetchAnalytics();
+
+    // Auto-refresh on window focus & test submission events
+    window.addEventListener('focus', handleUpdate);
+    window.addEventListener('rankrise_test_submitted', handleUpdate);
+
+    // Cross-tab real-time sync
+    const handleStorage = (e) => {
+      if (e.key === 'rankrise_last_activity' || e.key === 'token') {
+        fetchAnalytics();
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+
+    let bc = null;
+    if (typeof BroadcastChannel !== 'undefined') {
+      try {
+        bc = new BroadcastChannel('rankrise_analytics_channel');
+        bc.onmessage = () => fetchAnalytics();
+      } catch (e) {}
+    }
+
+    // Real-time automatic polling every 5 seconds
+    const interval = setInterval(() => {
+      fetchAnalytics();
+    }, 5000);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', handleUpdate);
+      window.removeEventListener('rankrise_test_submitted', handleUpdate);
+      window.removeEventListener('storage', handleStorage);
+      if (bc) {
+        try { bc.close(); } catch (e) {}
+      }
+    };
   }, [token]);
 
   // Clean Zero-State Default: strictly starts from zero, no fake data
@@ -290,7 +330,7 @@ export default function StudentAnalytics() {
           >
             <div className="flex items-center gap-2">
               <AlertCircle size={14} />
-              <span>Revise Mistakes</span>
+              <span>Review Weak Spot</span>
             </div>
             <ArrowRight size={13} className="text-rose-400" />
           </Link>
@@ -1051,7 +1091,7 @@ export default function StudentAnalytics() {
               to="/student/mistakes"
               className="text-xs font-semibold text-rose-600 dark:text-rose-400 hover:underline flex items-center gap-1"
             >
-              <span>Revise Mistakes</span>
+              <span>Review Weak Spot</span>
               <ArrowRight size={13} />
             </Link>
           </div>
@@ -1106,7 +1146,7 @@ export default function StudentAnalytics() {
                 DDCET Negative Marking Impact: -{mistakeAnalysis.marks_deducted} Marks Lost
               </span>
               <p className="text-[11px] text-amber-700 dark:text-amber-300 leading-relaxed">
-                Each wrong answer incurs a -0.25 mark penalty. Reviewing your mistake notebook regularly eliminates recurring mistakes and guards your state rank.
+                Each wrong answer incurs a -0.25 mark penalty. Reviewing your Weak Spot regularly eliminates recurring mistakes and guards your state rank.
               </p>
             </div>
           </div>
@@ -1334,7 +1374,7 @@ export default function StudentAnalytics() {
                   <th className="py-2.5 px-3">Percentage</th>
                   <th className="py-2.5 px-3">Accuracy</th>
                   <th className="py-2.5 px-3">Time Spent</th>
-                  <th className="py-2.5 px-3 text-right">Review Mistakes</th>
+                  <th className="py-2.5 px-3 text-right">Weak Spot</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-750">
@@ -1367,7 +1407,7 @@ export default function StudentAnalytics() {
                         to="/student/mistakes"
                         className="inline-flex items-center gap-1 text-blue-600 dark:text-blue-400 font-semibold hover:underline"
                       >
-                        <span>Mistakes</span>
+                        <span>Weak Spot</span>
                         <ArrowUpRight size={12} />
                       </Link>
                     </td>

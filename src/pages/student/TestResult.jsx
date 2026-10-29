@@ -1,5 +1,5 @@
 import { useLocation, Link } from 'react-router-dom';
-import { Trophy, Target, AlertCircle, CheckCircle, XCircle, MinusCircle, ArrowRight, Home } from 'lucide-react';
+import { Trophy, Target, AlertCircle, CheckCircle, XCircle, MinusCircle, ArrowRight, Home, TrendingUp } from 'lucide-react';
 
 export default function TestResult() {
   const location = useLocation();
@@ -32,13 +32,22 @@ export default function TestResult() {
               Performance breakdown and provisional merit standing
             </p>
           </div>
-          <Link 
-            to="/student" 
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 transition-colors"
-          >
-            <Home size={15} />
-            <span>Dashboard</span>
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link 
+              to="/student/analytics" 
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold transition-colors shadow-xs"
+            >
+              <TrendingUp size={14} />
+              <span>Analytics</span>
+            </Link>
+            <Link 
+              to="/student" 
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 transition-colors"
+            >
+              <Home size={14} />
+              <span>Dashboard</span>
+            </Link>
+          </div>
         </div>
 
         {/* Score Card */}
@@ -114,7 +123,7 @@ export default function TestResult() {
             to="/student/mistakes"
             className="w-full py-2.5 px-4 bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white rounded-lg font-medium text-xs sm:text-sm transition-colors flex items-center justify-center gap-2 mt-2 shadow-xs"
           >
-            <span>Review Incorrect Questions in Mistake Book</span>
+            <span>Review Incorrect Questions in Weak Spot</span>
             <ArrowRight size={14} />
           </Link>
         </div>

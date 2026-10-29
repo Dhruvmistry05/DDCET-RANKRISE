@@ -5,6 +5,7 @@ const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 const db = require('./db-adapter'); // CHANGED to adapter
+const { generateDdcetAcademicResponse } = require('./ai-mentor-engine');
 
 const app = express();
 
@@ -1364,10 +1365,16 @@ app.get('/api/tests', async (req, res) => {
     // CRITICAL SECURITY & VISIBILITY ENFORCEMENT:
     // If not admin, or if publishedOnly is requested, strictly return ONLY published tests!
     // Draft/unpublished tests MUST remain completely hidden from students.
+    const isPublishedCheck = (t) => t.status === 'published' || t.is_published === true || t.is_published === 'true' || t.is_published === 1;
+
     if (!isUserAdmin || publishedOnly === 'true' || status === 'published') {
-      filtered = filtered.filter(t => t.status === 'published');
+      filtered = filtered.filter(isPublishedCheck);
     } else if (status) {
-      filtered = filtered.filter(t => t.status === status);
+      if (status === 'published') {
+        filtered = filtered.filter(isPublishedCheck);
+      } else {
+        filtered = filtered.filter(t => t.status === status && !isPublishedCheck(t));
+      }
     }
 
     if (type) {
@@ -1410,7 +1417,8 @@ app.get('/api/tests', async (req, res) => {
         scheduledStartTime: t.scheduled_start_time || null,
         scheduled_end_time: t.scheduled_end_time || null,
         scheduledEndTime: t.scheduled_end_time || null,
-        status: t.status || 'draft',
+        status: isPublishedCheck(t) ? 'published' : (t.status || 'draft'),
+        is_published: isPublishedCheck(t),
         question_count: count,
         questions_count: count,
         total_marks: count * 2,
@@ -1464,7 +1472,8 @@ app.get('/api/tests/:id', async (req, res) => {
     }
 
     // Security check: draft tests are forbidden for students
-    if (!isUserAdmin && test.status !== 'published') {
+    const isTestPublished = test.status === 'published' || test.is_published === true || test.is_published === 'true' || test.is_published === 1;
+    if (!isUserAdmin && !isTestPublished) {
       return res.status(403).json({ error: 'This assessment is currently in draft and not published for students.' });
     }
 
@@ -2098,12 +2107,16 @@ const computeLeaderboardData = async () => {
     }
 
     for (const act of s.activities) {
-      totalTime += parseInt(act.time_spent_seconds) || 0;
-      totalQuestionsAttempted += parseInt(act.questions_attempted) || 0;
+      if (!act.attempt_id && act.type !== 'mock_test' && act.type !== 'test') {
+        totalTime += parseInt(act.time_spent_seconds) || 0;
+        totalQuestionsAttempted += parseInt(act.questions_attempted) || 0;
+      }
     }
 
-    // Include practice points: 0.2 points per question attempted
-    const practicePoints = s.activities.reduce((acc, x) => acc + (parseInt(x.questions_attempted) || 0), 0) * 0.2;
+    // Include practice points: 0.2 points per standalone question attempted
+    const practicePoints = s.activities
+      .filter(act => !act.attempt_id && act.type !== 'mock_test' && act.type !== 'test')
+      .reduce((acc, x) => acc + (parseInt(x.questions_attempted) || 0), 0) * 0.2;
     const netPoints = Math.round((totalScore + practicePoints) * 10) / 10;
 
     // Only students who have taken tests or performed practice appear in ranking
@@ -2195,15 +2208,14 @@ const computeStudentStats = async (userId) => {
   let scorePercentageSum = 0;
 
   for (const a of userAttempts) {
-    let answersObj = {};
-    if (typeof a.answers === 'string') {
-      try { answersObj = JSON.parse(a.answers); } catch (e) {}
-    } else if (a.answers && typeof a.answers === 'object') {
-      answersObj = a.answers;
+    let answersObj = a.answers;
+    while (typeof answersObj === 'string') {
+      try { answersObj = JSON.parse(answersObj); } catch (e) { break; }
     }
+    if (!answersObj || typeof answersObj !== 'object') answersObj = {};
 
-    const qCount = parseInt(a.questions_attempted) || (parseInt(answersObj.questions_attempted) || (answersObj.answers ? Object.keys(answersObj.answers).length : 0));
-    const parsedTime = parseInt(a.time_spent_seconds) || (parseInt(answersObj.time_spent_seconds) || 0);
+    const qCount = parseInt(a.questions_attempted) || parseInt(answersObj.questions_attempted) || (answersObj.answers ? Object.keys(answersObj.answers).length : 0);
+    const parsedTime = parseInt(a.time_spent_seconds) || parseInt(answersObj.time_spent_seconds) || 0;
     const parsedScore = a.score !== undefined && a.score !== null ? parseFloat(a.score) : (parseFloat(answersObj.score) || 0);
     const parsedMax = a.max_score !== undefined && a.max_score !== null ? parseFloat(a.max_score) : (parseFloat(answersObj.max_score) || 20);
 
@@ -2220,8 +2232,10 @@ const computeStudentStats = async (userId) => {
   }
   const userActivity = allActivity.filter(act => String(act.user_id) === String(userId));
   for (const act of userActivity) {
-    totalQuestions += parseInt(act.questions_attempted) || 0;
-    totalTime += parseInt(act.time_spent_seconds) || 0;
+    if (!act.attempt_id && act.type !== 'mock_test' && act.type !== 'test') {
+      totalQuestions += parseInt(act.questions_attempted) || 0;
+      totalTime += parseInt(act.time_spent_seconds) || 0;
+    }
   }
 
   const tests_completed = userAttempts.length;
@@ -2294,6 +2308,21 @@ app.get('/api/student/leaderboard', optionalUser, async (req, res) => {
 app.get('/api/student/detailed-analytics', optionalUser, async (req, res) => {
   try {
     const userId = req.user?.id;
+
+    const toDateKey = (val) => {
+      if (!val) return '';
+      if (val instanceof Date) {
+        try { return val.toISOString().split('T')[0]; } catch(e) { return ''; }
+      }
+      if (typeof val === 'string') {
+        return val.split('T')[0];
+      }
+      try {
+        return new Date(val).toISOString().split('T')[0];
+      } catch(e) {
+        return '';
+      }
+    };
     let allUsers = [];
     try { allUsers = await db.getAll('users'); } catch (e) { allUsers = []; }
     const students = allUsers.filter(u => u.role === 'student');
@@ -2514,7 +2543,7 @@ app.get('/api/student/detailed-analytics', optionalUser, async (req, res) => {
           { name: 'Practice Lab (MCQs)', minutes: 0, count: 0, percent: 0, color: '#2563EB' },
           { name: 'Mock Exam Assessments', minutes: 0, count: 0, percent: 0, color: '#7C3AED' },
           { name: 'Study Materials & PDFs', minutes: 0, count: 0, percent: 0, color: '#059669' },
-          { name: 'Mistake Notebook Revision', minutes: 0, count: 0, percent: 0, color: '#F43F5E' }
+          { name: 'Weak Spot Revision', minutes: 0, count: 0, percent: 0, color: '#F43F5E' }
         ],
         time_of_day_habits: [
           { window: 'Morning (06:00 – 12:00)', count: 0, percent: 0, label: 'Early Focus' },
@@ -2597,6 +2626,34 @@ app.get('/api/student/detailed-analytics', optionalUser, async (req, res) => {
     const qMap = {};
     questions.forEach(q => { qMap[q.id] = q; });
 
+    // Include PYQ questions so previous year practice attempts reflect in analytics
+    try {
+      const pyqPath = path.join(__dirname, 'data/pyq_papers.json');
+      if (fs.existsSync(pyqPath)) {
+        const pyqData = JSON.parse(fs.readFileSync(pyqPath, 'utf8'));
+        if (Array.isArray(pyqData)) {
+          pyqData.forEach(paper => {
+            if (Array.isArray(paper.questions)) {
+              paper.questions.forEach(q => {
+                if (q.id && !qMap[q.id]) {
+                  const sName = q.subject || (q.section === 1 ? 'Physics' : 'Mathematics');
+                  qMap[q.id] = {
+                    id: q.id,
+                    text: q.question,
+                    options: q.options,
+                    answer_index: q.correctOptionIndex !== undefined ? q.correctOptionIndex : (q.answer_index !== undefined ? q.answer_index : 0),
+                    subject: sName,
+                    topic: q.topic || sName,
+                    chapter: q.topic || sName
+                  };
+                }
+              });
+            }
+          });
+        }
+      }
+    } catch (e) {}
+
     // 1. Syllabus Tracker
     const completedTopicIds = new Set(userTopicProgress.filter(p => p.completed).map(p => p.topic_id));
     const publishedTopics = topics.filter(t => t.published !== false);
@@ -2669,22 +2726,22 @@ app.get('/api/student/detailed-analytics', optionalUser, async (req, res) => {
     const chapterQuestionStats = {};
 
     const scoreTrend = userAttempts.map((a, idx) => {
-      let answersObj = {};
-      if (typeof a.answers === 'string') {
-        try { answersObj = JSON.parse(a.answers); } catch (e) {}
-      } else if (a.answers && typeof a.answers === 'object') {
-        answersObj = a.answers;
+      let answersObj = a.answers;
+      while (typeof answersObj === 'string') {
+        try { answersObj = JSON.parse(answersObj); } catch (e) { break; }
       }
+      if (!answersObj || typeof answersObj !== 'object') answersObj = {};
 
-      const c = parseInt(answersObj.correct_count) || 0;
-      const w = parseInt(answersObj.wrong_count) || 0;
-      const u = parseInt(answersObj.unattempted_count) || 0;
-      const q = parseInt(answersObj.questions_attempted) || (c + w);
+      const c = parseInt(a.correct_count) || parseInt(answersObj.correct_count) || 0;
+      const w = parseInt(a.wrong_count) || parseInt(answersObj.wrong_count) || 0;
+      const u = parseInt(a.unattempted_count) || parseInt(answersObj.unattempted_count) || 0;
+      const q = parseInt(a.questions_attempted) || parseInt(answersObj.questions_attempted) || (c + w);
       const s = a.score !== undefined && a.score !== null ? parseFloat(a.score) : (parseFloat(answersObj.score) || 0);
-      const maxScore = parseFloat(answersObj.max_score) || parseFloat(a.max_score) || 100;
+      const maxScore = parseFloat(a.max_score) || parseFloat(answersObj.max_score) || (s > 20 ? 100 : 20);
       const pct = maxScore > 0 ? Math.round((s / maxScore) * 100) : Math.round(s);
-      const acc = answersObj.accuracy !== undefined ? parseFloat(answersObj.accuracy) : (c + w > 0 ? Math.round((c / (c + w)) * 100) : 0);
-      const tSec = parseInt(answersObj.time_spent_seconds) || parseInt(a.time_spent_seconds) || 0;
+      const acc = a.accuracy !== undefined ? parseFloat(a.accuracy) : (answersObj.accuracy !== undefined ? parseFloat(answersObj.accuracy) : (c + w > 0 ? Math.round((c / (c + w)) * 100) : 0));
+      const tSec = parseInt(a.time_spent_seconds) || parseInt(answersObj.time_spent_seconds) || 0;
+      const testTitle = a.test_title || answersObj.test_title || `Assessment #${idx + 1}`;
 
       totalCorrect += c;
       totalWrong += w;
@@ -2693,16 +2750,23 @@ app.get('/api/student/detailed-analytics', optionalUser, async (req, res) => {
       totalSeconds += tSec;
 
       // Question-level answers attribution
-      const qAnswers = answersObj.answers || (typeof a.answers === 'object' && !a.answers.answers ? a.answers : {});
-      let hasDetailedAnswers = false;
+      let qAnswers = answersObj.answers;
+      if (!qAnswers || typeof qAnswers !== 'object' || Array.isArray(qAnswers)) {
+        if (answersObj && typeof answersObj === 'object' && !answersObj.correct_count && !answersObj.score) {
+          qAnswers = answersObj;
+        } else {
+          qAnswers = {};
+        }
+      }
 
+      let hasDetailedAnswers = false;
       if (qAnswers && typeof qAnswers === 'object' && Object.keys(qAnswers).length > 0) {
         for (const [qIdStr, chosenOpt] of Object.entries(qAnswers)) {
-          const qRecord = qMap[qIdStr];
+          const qRecord = qMap[qIdStr] || qMap[parseInt(qIdStr)];
           if (qRecord) {
             hasDetailedAnswers = true;
-            const isCorr = chosenOpt === qRecord.answer_index;
-            const sName = qRecord.subject || subMap[qRecord.subject_id];
+            const isCorr = Number(chosenOpt) === Number(qRecord.answer_index);
+            const sName = qRecord.subject || subMap[qRecord.subject_id] || 'General';
             if (sName && subQuestionStats[sName]) {
               subQuestionStats[sName].attempted++;
               if (isCorr) subQuestionStats[sName].correct++;
@@ -2710,14 +2774,18 @@ app.get('/api/student/detailed-analytics', optionalUser, async (req, res) => {
             }
 
             // Topic stats
-            const tId = qRecord.topic_id;
-            const tInfo = topicMap[tId] || { name: qRecord.topic || `Topic ${tId}`, chapter_name: qRecord.chapter || 'General', subject_name: sName };
+            const tId = qRecord.topic_id || (qRecord.topic ? `topic_${qRecord.topic}` : `topic_${sName}`);
+            const tInfo = topicMap[tId] || { 
+              name: qRecord.topic || (sName ? `${sName} Practice` : 'General Practice'), 
+              chapter_name: qRecord.chapter || qRecord.topic || 'Core Curriculum', 
+              subject_name: sName 
+            };
             if (!topicQuestionStats[tId]) {
               topicQuestionStats[tId] = {
                 topic_id: tId,
                 topic_name: tInfo.name,
                 chapter_name: tInfo.chapter_name,
-                subject_name: tInfo.subject_name,
+                subject_name: tInfo.subject_name || sName,
                 correct: 0,
                 wrong: 0,
                 attempted: 0,
@@ -2730,13 +2798,16 @@ app.get('/api/student/detailed-analytics', optionalUser, async (req, res) => {
             topicQuestionStats[tId].last_practiced = a.submitted_at;
 
             // Chapter stats
-            const chId = qRecord.chapter_id;
-            const chInfo = chMap[chId] || { name: qRecord.chapter || `Chapter ${chId}`, subject_name: sName };
+            const chId = qRecord.chapter_id || (qRecord.chapter ? `chap_${qRecord.chapter}` : `chap_${sName}`);
+            const chInfo = chMap[chId] || { 
+              name: qRecord.chapter || qRecord.topic || `${sName} Unit`, 
+              subject_name: sName 
+            };
             if (!chapterQuestionStats[chId]) {
               chapterQuestionStats[chId] = {
                 chapter_id: chId,
                 chapter_name: chInfo.name,
-                subject_name: chInfo.subject_name,
+                subject_name: chInfo.subject_name || sName,
                 correct: 0,
                 wrong: 0,
                 attempted: 0
@@ -2751,13 +2822,30 @@ app.get('/api/student/detailed-analytics', optionalUser, async (req, res) => {
 
       // Title-based attribution fallback
       if (!hasDetailedAnswers) {
-        const titleLower = (answersObj.test_title || a.test_title || '').toLowerCase();
+        const titleLower = testTitle.toLowerCase();
+        let matchedSubject = false;
         for (const s of subjectsMeta) {
           if (titleLower.includes(s.name.toLowerCase())) {
             subQuestionStats[s.name].attempted += q;
             subQuestionStats[s.name].correct += c;
             subQuestionStats[s.name].wrong += w;
+            matchedSubject = true;
             break;
+          }
+        }
+        if (!matchedSubject && (titleLower.includes('pyq') || titleLower.includes('section 1') || titleLower.includes('section 2') || titleLower.includes('official') || titleLower.includes('full paper') || titleLower.includes('mock'))) {
+          const halfQ = Math.round(q / 2);
+          const halfC = Math.round(c / 2);
+          const halfW = Math.round(w / 2);
+          if (subQuestionStats['Mathematics']) {
+            subQuestionStats['Mathematics'].attempted += halfQ;
+            subQuestionStats['Mathematics'].correct += halfC;
+            subQuestionStats['Mathematics'].wrong += halfW;
+          }
+          if (subQuestionStats['Physics']) {
+            subQuestionStats['Physics'].attempted += Math.max(0, q - halfQ);
+            subQuestionStats['Physics'].correct += Math.max(0, c - halfC);
+            subQuestionStats['Physics'].wrong += Math.max(0, w - halfW);
           }
         }
       }
@@ -2766,7 +2854,7 @@ app.get('/api/student/detailed-analytics', optionalUser, async (req, res) => {
 
       return {
         id: a.id || idx + 1,
-        test_title: answersObj.test_title || a.test_title || `Assessment #${idx + 1}`,
+        test_title: testTitle,
         date: dateStr,
         score: s,
         max_score: maxScore,
@@ -2777,13 +2865,15 @@ app.get('/api/student/detailed-analytics', optionalUser, async (req, res) => {
       };
     });
 
-    // Also include activity seconds and practice questions
+    // Also include standalone activity seconds and practice questions (not duplicated from tests!)
     userActivity.forEach(act => {
-      const s = parseInt(act.time_spent_seconds) || 0;
-      totalSeconds += s;
-      if (act.type === 'practice') {
-        const q = parseInt(act.questions_attempted) || 0;
-        totalAttempted += q;
+      if (!act.attempt_id && act.type !== 'mock_test' && act.type !== 'test') {
+        const s = parseInt(act.time_spent_seconds) || 0;
+        totalSeconds += s;
+        if (act.type === 'practice') {
+          const q = parseInt(act.questions_attempted) || 0;
+          totalAttempted += q;
+        }
       }
     });
 
@@ -2935,17 +3025,26 @@ app.get('/api/student/detailed-analytics', optionalUser, async (req, res) => {
     let todaySeconds = 0;
     let todayQuestions = 0;
 
-    userActivity.forEach(a => {
-      if (a.created_at && a.created_at.startsWith(todayStr)) {
-        todaySeconds += parseInt(a.time_spent_seconds) || 0;
-        todayQuestions += parseInt(a.questions_attempted) || 0;
+    userAttempts.forEach(a => {
+      const aDateKey = toDateKey(a.submitted_at);
+      if (aDateKey && aDateKey === todayStr) {
+        let aObj = a.answers;
+        while (typeof aObj === 'string') {
+          try { aObj = JSON.parse(aObj); } catch (e) { break; }
+        }
+        if (!aObj || typeof aObj !== 'object') aObj = {};
+        todaySeconds += parseInt(a.time_spent_seconds) || parseInt(aObj.time_spent_seconds) || 0;
+        todayQuestions += parseInt(a.questions_attempted) || parseInt(aObj.questions_attempted) || 0;
       }
     });
-    userAttempts.forEach(a => {
-      if (a.submitted_at && a.submitted_at.startsWith(todayStr)) {
-        let aObj = typeof a.answers === 'string' ? JSON.parse(a.answers) : (a.answers || {});
-        todaySeconds += parseInt(aObj.time_spent_seconds) || parseInt(a.time_spent_seconds) || 0;
-        todayQuestions += parseInt(aObj.questions_attempted) || 0;
+
+    userActivity.forEach(a => {
+      const actDateKey = toDateKey(a.created_at);
+      if (actDateKey && actDateKey === todayStr) {
+        if (!a.attempt_id && a.type !== 'mock_test' && a.type !== 'test' && a.type !== 'practice') {
+          todaySeconds += parseInt(a.time_spent_seconds) || 0;
+          todayQuestions += parseInt(a.questions_attempted) || 0;
+        }
       }
     });
 
@@ -2971,19 +3070,28 @@ app.get('/api/student/detailed-analytics', optionalUser, async (req, res) => {
       const dateKey = d.toISOString().split('T')[0];
       let dSecs = 0, dQs = 0, dActions = 0;
 
-      userActivity.forEach(a => {
-        if (a.created_at && a.created_at.startsWith(dateKey)) {
-          dSecs += parseInt(a.time_spent_seconds) || 0;
-          dQs += parseInt(a.questions_attempted) || 0;
+      userAttempts.forEach(a => {
+        const aDateKey = toDateKey(a.submitted_at);
+        if (aDateKey && aDateKey === dateKey) {
+          let aObj = a.answers;
+          while (typeof aObj === 'string') {
+            try { aObj = JSON.parse(aObj); } catch (e) { break; }
+          }
+          if (!aObj || typeof aObj !== 'object') aObj = {};
+          dSecs += parseInt(a.time_spent_seconds) || parseInt(aObj.time_spent_seconds) || 0;
+          dQs += parseInt(a.questions_attempted) || parseInt(aObj.questions_attempted) || 0;
           dActions++;
         }
       });
-      userAttempts.forEach(a => {
-        if (a.submitted_at && a.submitted_at.startsWith(dateKey)) {
-          let aObj = typeof a.answers === 'string' ? JSON.parse(a.answers) : (a.answers || {});
-          dSecs += parseInt(aObj.time_spent_seconds) || parseInt(a.time_spent_seconds) || 0;
-          dQs += parseInt(aObj.questions_attempted) || 0;
-          dActions++;
+
+      userActivity.forEach(a => {
+        const actDateKey = toDateKey(a.created_at);
+        if (actDateKey && actDateKey === dateKey) {
+          if (!a.attempt_id && a.type !== 'mock_test' && a.type !== 'test' && a.type !== 'practice') {
+            dSecs += parseInt(a.time_spent_seconds) || 0;
+            dQs += parseInt(a.questions_attempted) || 0;
+            dActions++;
+          }
         }
       });
 
@@ -3004,19 +3112,28 @@ app.get('/api/student/detailed-analytics', optionalUser, async (req, res) => {
       const dateKey = d.toISOString().split('T')[0];
       let dSecs = 0, dQs = 0, dActions = 0;
 
-      userActivity.forEach(a => {
-        if (a.created_at && a.created_at.startsWith(dateKey)) {
-          dSecs += parseInt(a.time_spent_seconds) || 0;
-          dQs += parseInt(a.questions_attempted) || 0;
+      userAttempts.forEach(a => {
+        const aDateKey = toDateKey(a.submitted_at);
+        if (aDateKey && aDateKey === dateKey) {
+          let aObj = a.answers;
+          while (typeof aObj === 'string') {
+            try { aObj = JSON.parse(aObj); } catch (e) { break; }
+          }
+          if (!aObj || typeof aObj !== 'object') aObj = {};
+          dSecs += parseInt(a.time_spent_seconds) || parseInt(aObj.time_spent_seconds) || 0;
+          dQs += parseInt(a.questions_attempted) || parseInt(aObj.questions_attempted) || 0;
           dActions++;
         }
       });
-      userAttempts.forEach(a => {
-        if (a.submitted_at && a.submitted_at.startsWith(dateKey)) {
-          let aObj = typeof a.answers === 'string' ? JSON.parse(a.answers) : (a.answers || {});
-          dSecs += parseInt(aObj.time_spent_seconds) || parseInt(a.time_spent_seconds) || 0;
-          dQs += parseInt(aObj.questions_attempted) || 0;
-          dActions++;
+
+      userActivity.forEach(a => {
+        const actDateKey = toDateKey(a.created_at);
+        if (actDateKey && actDateKey === dateKey) {
+          if (!a.attempt_id && a.type !== 'mock_test' && a.type !== 'test' && a.type !== 'practice') {
+            dSecs += parseInt(a.time_spent_seconds) || 0;
+            dQs += parseInt(a.questions_attempted) || 0;
+            dActions++;
+          }
         }
       });
 
@@ -3116,10 +3233,10 @@ app.get('/api/student/detailed-analytics', optionalUser, async (req, res) => {
         const marksLost = Math.round(totalWrong * 0.25 * 100) / 100;
         smartRecommendations.push({
           title: `Recover ${marksLost} Marks Lost to Negative Marking`,
-          description: `You missed ${totalWrong} questions (-0.25 mark penalty each). Review your mistake notebook to avoid repeating errors.`,
+          description: `You missed ${totalWrong} questions (-0.25 mark penalty each). Review your Weak Spot to avoid repeating errors.`,
           priority: 'high',
           action_url: '/student/mistakes',
-          action_text: 'Revise Mistakes'
+          action_text: 'Review Weak Spot'
         });
       }
 
@@ -3161,10 +3278,12 @@ app.get('/api/student/detailed-analytics', optionalUser, async (req, res) => {
 
     const activeDateStrings = new Set();
     userActivity.forEach(a => {
-      if (a.created_at) activeDateStrings.add(a.created_at.split('T')[0]);
+      const dk = toDateKey(a.created_at);
+      if (dk) activeDateStrings.add(dk);
     });
     userAttempts.forEach(a => {
-      if (a.submitted_at) activeDateStrings.add(a.submitted_at.split('T')[0]);
+      const dk = toDateKey(a.submitted_at);
+      if (dk) activeDateStrings.add(dk);
     });
 
     let activeStreakDays = 0;
@@ -3230,7 +3349,7 @@ app.get('/api/student/detailed-analytics', optionalUser, async (req, res) => {
         color: '#059669' 
       },
       { 
-        name: 'Mistake Notebook Revision', 
+        name: 'Weak Spot Revision', 
         minutes: Math.round(mistakeTime / 60), 
         count: mistakeCount, 
         percent: totalActiveSeconds > 0 ? Math.round((mistakeTime / totalActiveSeconds) * 100) : 0, 
@@ -3284,13 +3403,14 @@ app.get('/api/student/detailed-analytics', optionalUser, async (req, res) => {
         icon = 'material';
         badge = 'Syllabus';
       } else if (act.type === 'mistake_review') {
-        title = 'Reviewed Mistake Notebook Questions';
+        title = 'Reviewed Weak Spot Questions';
         icon = 'mistake';
         badge = 'Revision';
       }
 
       const d = act.created_at ? new Date(act.created_at) : new Date();
-      const timeStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+      const timeStr = !isNaN(d.getTime()) ? d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Recently';
+      const createdStr = act.created_at instanceof Date ? act.created_at.toISOString() : (act.created_at || new Date().toISOString());
 
       return {
         id: act.id || idx + 1,
@@ -3301,7 +3421,7 @@ app.get('/api/student/detailed-analytics', optionalUser, async (req, res) => {
         time_spent_minutes: Math.round((act.time_spent_seconds || 0) / 60),
         questions_attempted: act.questions_attempted || 0,
         timestamp: timeStr,
-        created_at: act.created_at
+        created_at: createdStr
       };
     });
 
@@ -3418,10 +3538,13 @@ app.get('/api/student/detailed-analytics', optionalUser, async (req, res) => {
 
 app.get('/api/admin/analytics', requireUser, requireAdmin, async (req, res) => {
   try {
-    const allUsers = await db.getAll('users');
+    let allUsers = [];
+    try { allUsers = await db.getAll('users'); } catch (e) { allUsers = []; }
     const students = allUsers.filter(u => u.role === 'student');
-    const allAttempts = await db.getAll('student_attempts');
-    const allQuestions = await db.getAll('questions');
+    let allAttempts = [];
+    try { allAttempts = await db.getAll('student_attempts'); } catch (e) { allAttempts = []; }
+    let allQuestions = [];
+    try { allQuestions = await db.getAll('questions'); } catch (e) { allQuestions = []; }
 
     let allActivity = [];
     try {
@@ -3533,7 +3656,7 @@ app.get('/api/admin/analytics', requireUser, requireAdmin, async (req, res) => {
       { type: 'Candidate Logins', count: totalLogins, percent: totalActions > 0 ? Math.round((totalLogins / totalActions) * 100) : 0, color: '#3B82F6' },
       { type: 'Full Mock Assessments', count: totalMockActs, percent: totalActions > 0 ? Math.round((totalMockActs / totalActions) * 100) : 0, color: '#7C3AED' },
       { type: 'Study Materials & PDFs', count: totalMaterialActs, percent: totalActions > 0 ? Math.round((totalMaterialActs / totalActions) * 100) : 0, color: '#059669' },
-      { type: 'Mistake Reviews', count: totalMistakeActs, percent: totalActions > 0 ? Math.round((totalMistakeActs / totalActions) * 100) : 0, color: '#F43F5E' }
+      { type: 'Weak Spot Reviews', count: totalMistakeActs, percent: totalActions > 0 ? Math.round((totalMistakeActs / totalActions) * 100) : 0, color: '#F43F5E' }
     ];
 
     // Real Live Activity Stream
@@ -3543,7 +3666,7 @@ app.get('/api/admin/analytics', requireUser, requireAdmin, async (req, res) => {
       if (act.type === 'practice') actionLabel = `Solved ${act.questions_attempted || 0} MCQs in Practice Lab`;
       else if (act.type === 'mock_test') actionLabel = 'Submitted Timed Assessment';
       else if (act.type === 'material_view') actionLabel = 'Viewed Official Syllabus PDF & Notes';
-      else if (act.type === 'mistake_review') actionLabel = 'Reviewed Mistake Notebook Questions';
+      else if (act.type === 'mistake_review') actionLabel = 'Reviewed Weak Spot Questions';
 
       const d = act.created_at ? new Date(act.created_at) : new Date();
       return {
@@ -3569,7 +3692,14 @@ app.get('/api/admin/analytics', requireUser, requireAdmin, async (req, res) => {
         total_logins: totalLogins,
         daily_active_students: activeStudentIds.size,
         weekly_active_students: totalStudents,
-        avg_session_duration_minutes: totalLogins > 0 ? Math.round(totalScores / totalLogins) : 0,
+        avg_session_duration_minutes: (() => {
+          const totalActivitySeconds = allActivity.reduce((acc, a) => acc + (parseInt(a.time_spent_seconds) || 0), 0) +
+                                       allAttempts.reduce((acc, a) => {
+                                         let aObj = typeof a.answers === 'string' ? JSON.parse(a.answers) : (a.answers || {});
+                                         return acc + (parseInt(aObj.time_spent_seconds) || parseInt(a.time_spent_seconds) || 0);
+                                       }, 0);
+          return totalLogins > 0 ? Math.round(totalActivitySeconds / (totalLogins * 60)) : (totalAttempts > 0 ? Math.round(totalActivitySeconds / (totalAttempts * 60)) : 0);
+        })(),
         total_actions_logged: totalActions,
         hourly_traffic_curve: hourlyTrafficCurve,
         action_breakdown: actionBreakdown,
@@ -3603,24 +3733,50 @@ app.post('/api/student/tests/submit', requireUser, async (req, res) => {
       answers 
     } = req.body;
 
+    const parsedScore = parseFloat(score) || 0;
+    const parsedMaxScore = parseFloat(max_score) || (parsedScore > 20 ? 100 : 20);
+    let parsedCorrect = parseInt(correct_count);
+    let parsedWrong = parseInt(wrong_count);
+    let parsedUnattempted = parseInt(unattempted_count);
+    let parsedAttempted = parseInt(questions_attempted);
+    let parsedTime = parseInt(time_spent_seconds) || 0;
+
+    if (isNaN(parsedCorrect)) parsedCorrect = 0;
+    if (isNaN(parsedWrong)) parsedWrong = 0;
+    if (isNaN(parsedAttempted)) parsedAttempted = parsedCorrect + parsedWrong;
+    if (isNaN(parsedUnattempted)) parsedUnattempted = 0;
+
+    let parsedAcc = parseFloat(accuracy);
+    if (isNaN(parsedAcc)) {
+      parsedAcc = parsedAttempted > 0 ? Math.round((parsedCorrect / parsedAttempted) * 100) : 0;
+    }
+
+    const answersMap = (answers && typeof answers === 'object') ? answers : {};
+
     const payload = {
       test_id: test_id !== undefined ? String(test_id) : 'test',
-      test_title: test_title || 'Mock Test',
-      score: parseFloat(score) || 0,
-      max_score: parseFloat(max_score) || 20,
-      correct_count: parseInt(correct_count) || 0,
-      wrong_count: parseInt(wrong_count) || 0,
-      unattempted_count: parseInt(unattempted_count) || 0,
-      questions_attempted: parseInt(questions_attempted) || 0,
-      accuracy: parseFloat(accuracy) || 0,
-      time_spent_seconds: parseInt(time_spent_seconds) || 0,
-      answers: answers || {},
+      test_title: test_title || 'Assessment Test',
+      score: parsedScore,
+      max_score: parsedMaxScore,
+      correct_count: parsedCorrect,
+      wrong_count: parsedWrong,
+      unattempted_count: parsedUnattempted,
+      questions_attempted: parsedAttempted,
+      accuracy: parsedAcc,
+      time_spent_seconds: parsedTime,
+      answers: answersMap,
       submitted_at: new Date().toISOString()
     };
 
     let numericTestId = null;
     if (test_id && !isNaN(test_id)) {
-      numericTestId = parseInt(test_id);
+      const parsed = parseInt(test_id);
+      try {
+        const found = await db.findOne('tests', { id: parsed });
+        if (found) numericTestId = parsed;
+      } catch (e) {
+        numericTestId = null;
+      }
     }
 
     const USE_PG = !!process.env.DATABASE_URL;
@@ -3632,17 +3788,33 @@ app.post('/api/student/tests/submit', requireUser, async (req, res) => {
       submitted_at: payload.submitted_at
     };
 
+    if (!USE_PG) {
+      attemptRecord.test_title = payload.test_title;
+      attemptRecord.max_score = payload.max_score;
+      attemptRecord.correct_count = payload.correct_count;
+      attemptRecord.wrong_count = payload.wrong_count;
+      attemptRecord.unattempted_count = payload.unattempted_count;
+      attemptRecord.questions_attempted = payload.questions_attempted;
+      attemptRecord.accuracy = payload.accuracy;
+      attemptRecord.time_spent_seconds = payload.time_spent_seconds;
+    }
+
     const newAttempt = await db.insert('student_attempts', attemptRecord);
     try {
+      const titleLower = (payload.test_title || '').toLowerCase();
+      const isMock = titleLower.includes('mock') || titleLower.includes('assessment') || titleLower.includes('official');
       await db.insert('student_activity', {
         user_id: userId,
-        type: (payload.test_title && payload.test_title.toLowerCase().includes('mock')) ? 'mock_test' : 'practice',
+        type: isMock ? 'mock_test' : 'practice',
+        action_name: payload.test_title,
+        attempt_id: newAttempt.id,
         topic_id: numericTestId,
-        time_spent_seconds: payload.time_spent_seconds || 1800,
-        questions_attempted: payload.questions_attempted || 20,
+        time_spent_seconds: payload.time_spent_seconds,
+        questions_attempted: payload.questions_attempted,
         created_at: payload.submitted_at
       });
     } catch (actErr) {}
+
     const updatedStats = await computeStudentStats(userId);
 
     res.status(201).json({
@@ -3744,6 +3916,162 @@ app.post('/api/student/activity/log', optionalUser, async (req, res) => {
   }
 });
 
+// ============================================================================
+// AI ACADEMIC MENTOR FOR DDCET 2027
+// ============================================================================
+app.post('/api/student/mentor/chat', optionalUser, async (req, res) => {
+  try {
+    const rawQuery = req.body.query || req.body.message;
+    const history = req.body.history;
+    if (!rawQuery || typeof rawQuery !== 'string' || !rawQuery.trim()) {
+      return res.status(400).json({ error: 'Query is required.' });
+    }
+
+    const cleanQuery = rawQuery.trim();
+    const userId = req.user?.id;
+    let studentContext = null;
+
+    if (userId) {
+      try {
+        const u = await db.findOne('users', { id: userId });
+        const stats = await computeStudentStats(userId);
+        studentContext = {
+          name: u ? getStudentDisplayName(u) : 'Student',
+          branch: u?.branch || 'Diploma Engineering',
+          college: u?.college || 'Polytechnic College',
+          semester: u?.semester || 6,
+          tests_completed: stats.tests_completed,
+          average_score: stats.average_score,
+          current_rank: stats.current_rank,
+          syllabus_progress: stats.syllabus_progress,
+          practice_time: stats.practice_time
+        };
+      } catch (err) {
+        console.warn('Could not load student context for mentor:', err.message);
+      }
+    }
+
+    // 1. Try Gemini API if key is present
+    const geminiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+    if (geminiKey) {
+      try {
+        const systemPrompt = `You are the official AI Academic Mentor of DDCET RankRise, dedicated to helping Gujarat Diploma to Degree engineering students prepare for the DDCET 2027 entrance exam (GTU / ACPC admission).
+Exam blueprint & syllabus:
+- Total: 100 MCQs, 120 minutes (2 hours), 200 marks.
+- Marking: +2.0 marks per correct answer, -0.5 marks deduction for incorrect answers (negative marking).
+- Section 1 (50 Qs, 100 Marks): Basics of Science & Engineering (Physics, Chemistry, Environmental Sciences).
+- Section 2 (50 Qs, 100 Marks): Aptitude & Mathematics (Engineering Mathematics, Computer / IT Basics, Technical English & Soft Skills).
+
+${studentContext ? `Active Student Context:
+- Name: ${studentContext.name}
+- Diploma Branch: ${studentContext.branch}
+- Current Semester: ${studentContext.semester}
+- Tests Completed: ${studentContext.tests_completed}
+- Current Average Score: ${studentContext.average_score}
+- Leaderboard Rank: ${studentContext.current_rank}
+- Syllabus Coverage: ${studentContext.syllabus_progress}` : 'Student is currently browsing as Guest.'}
+
+Your response must be:
+- Accurate, encouraging, and focused on DDCET 2027 preparation.
+- Provide step-by-step mathematical derivations or formula explanations when requested.
+- Provide realistic time-management, paper-solving strategies, and guidance on avoiding negative marks.
+- Mention portal features like Practice Lab, PYQ Question Papers, Weak Spot, and Syllabus Progress when relevant.
+- Format neatly using clean Markdown with bullet points where appropriate.`;
+
+        const geminiPayload = {
+          system_instruction: {
+            parts: [{ text: systemPrompt }]
+          },
+          contents: [
+            ...(Array.isArray(history) ? history.slice(-6).map(h => ({
+              role: h.role === 'model' || h.role === 'mentor' ? 'model' : 'user',
+              parts: [{ text: h.text || h.parts?.[0]?.text || '' }]
+            })) : []),
+            {
+              role: 'user',
+              parts: [{ text: cleanQuery }]
+            }
+          ],
+          generationConfig: {
+            temperature: 0.6,
+            maxOutputTokens: 800
+          }
+        };
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 7000);
+
+        const geminiRes = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(geminiPayload),
+            signal: controller.signal
+          }
+        );
+        clearTimeout(timeoutId);
+
+        if (geminiRes.ok) {
+          const geminiData = await geminiRes.json();
+          const candidateText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (candidateText && candidateText.trim()) {
+            // Log interaction
+            if (userId) {
+              try {
+                await db.insert('student_activity', {
+                  user_id: userId,
+                  type: 'portal_action',
+                  topic_id: null,
+                  time_spent_seconds: 60,
+                  questions_attempted: 0,
+                  created_at: new Date().toISOString()
+                });
+              } catch (e) {}
+            }
+            return res.json({
+              success: true,
+              reply: candidateText.trim(),
+              source: 'gemini',
+              personalized: Boolean(studentContext)
+            });
+          }
+        }
+      } catch (geminiErr) {
+        console.warn('Gemini API call skipped or timed out, using built-in reasoning engine:', geminiErr.message);
+      }
+    }
+
+    // 2. Built-in DDCET Academic Intelligence Engine
+    const reply = generateDdcetAcademicResponse(cleanQuery, studentContext);
+
+    // Log interaction
+    if (userId) {
+      try {
+        await db.insert('student_activity', {
+          user_id: userId,
+          type: 'portal_action',
+          topic_id: null,
+          time_spent_seconds: 60,
+          questions_attempted: 0,
+          created_at: new Date().toISOString()
+        });
+      } catch (e) {}
+    }
+
+    return res.json({
+      success: true,
+      reply,
+      source: 'rankrise_ai_engine',
+      personalized: Boolean(studentContext)
+    });
+
+  } catch (err) {
+    console.error('Error in AI Mentor chat:', err);
+    res.status(500).json({ error: 'Failed to generate mentor response.' });
+  }
+});
+
 app.get('/api/health', async (req, res) => {
   try {
     await db.testConnection();
@@ -3796,4 +4124,8 @@ const startServer = async () => {
   });
 };
 
-startServer();
+if (require.main === module) {
+  startServer();
+}
+
+module.exports = app;

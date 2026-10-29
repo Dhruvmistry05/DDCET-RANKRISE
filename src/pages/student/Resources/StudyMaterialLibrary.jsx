@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../../store/AuthContext';
 import { API_BASE_URL } from '../../../config/api';
+import { logPortalActivity } from '../../../utils/activityTracker';
 import { 
   FileText, Download, Eye, Calendar, Search, 
   RefreshCw, BookOpen, AlertCircle, FileCheck, Book,
@@ -46,6 +47,15 @@ export default function StudyMaterialLibrary({ defaultCategory = 'all' }) {
 
   // Modal States
   const [previewPdfItem, setPreviewPdfItem] = useState(null);
+
+  useEffect(() => {
+    if (previewPdfItem) {
+      logPortalActivity({
+        type: 'material_view',
+        action_name: previewPdfItem.title ? `Viewed ${previewPdfItem.title}` : 'Viewed Study Material'
+      });
+    }
+  }, [previewPdfItem]);
 
   const { token, user } = useAuth();
   const isAuthenticated = Boolean(user && token);

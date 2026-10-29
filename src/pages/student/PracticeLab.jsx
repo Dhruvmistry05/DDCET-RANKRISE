@@ -305,9 +305,7 @@ export default function PracticeLab() {
           },
           body: JSON.stringify({
             topic_id: currentQ.topic_id || 1,
-            completed: false,
-            time_spent_seconds: 30,
-            questions_attempted: 1
+            completed: false
           })
         });
       } catch (err) {
@@ -335,7 +333,7 @@ export default function PracticeLab() {
     if (token) {
       const elapsedSeconds = testStartTime ? Math.max(15, Math.round((Date.now() - testStartTime) / 1000)) : 180;
       try {
-        await fetch(`${API_BASE_URL}/api/student/tests/submit`, {
+        const submitRes = await fetch(`${API_BASE_URL}/api/student/tests/submit`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -355,6 +353,19 @@ export default function PracticeLab() {
             answers: userAnswers
           })
         });
+        if (submitRes.ok && typeof window !== 'undefined') {
+          if (typeof window !== 'undefined') {
+            try {
+              localStorage.setItem('rankrise_last_activity', Date.now().toString());
+              if (typeof BroadcastChannel !== 'undefined') {
+                const bc = new BroadcastChannel('rankrise_analytics_channel');
+                bc.postMessage({ type: 'test_submitted' });
+                bc.close();
+              }
+            } catch (e) {}
+            window.dispatchEvent(new Event('rankrise_test_submitted'));
+          }
+        }
       } catch (err) {
         console.error('Error recording practice test attempt:', err);
       }

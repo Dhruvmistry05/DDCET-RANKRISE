@@ -260,7 +260,7 @@ export default function PreviousYearPractice() {
     // Submit attempt to backend analytics
     if (token) {
       try {
-        await fetch(`${API_BASE_URL}/api/student/tests/submit`, {
+        const submitRes = await fetch(`${API_BASE_URL}/api/student/tests/submit`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -280,6 +280,19 @@ export default function PreviousYearPractice() {
             answers: userAnswers
           })
         });
+        if (submitRes.ok && typeof window !== 'undefined') {
+          if (typeof window !== 'undefined') {
+            try {
+              localStorage.setItem('rankrise_last_activity', Date.now().toString());
+              if (typeof BroadcastChannel !== 'undefined') {
+                const bc = new BroadcastChannel('rankrise_analytics_channel');
+                bc.postMessage({ type: 'test_submitted' });
+                bc.close();
+              }
+            } catch (e) {}
+            window.dispatchEvent(new Event('rankrise_test_submitted'));
+          }
+        }
       } catch (err) {
         console.error('Failed to submit PYQ to analytics:', err);
       }
@@ -1118,7 +1131,7 @@ export default function PreviousYearPractice() {
                   Detailed Solution Review
                 </h3>
                 <p className="text-xs text-slate-500">
-                  Compare your answers against the official ACPC answer key. Incorrect answers are automatically saved to your Mistake Book.
+                  Compare your answers against the official ACPC answer key. Incorrect answers are automatically saved to your Weak Spot.
                 </p>
               </div>
 

@@ -60,8 +60,27 @@ export default function StudentHome() {
     };
 
     fetchStats();
-    const interval = setInterval(fetchStats, 15000);
-    return () => clearInterval(interval);
+    const handleUpdate = () => fetchStats();
+    window.addEventListener('focus', handleUpdate);
+    window.addEventListener('rankrise_test_submitted', handleUpdate);
+
+    let bc = null;
+    if (typeof BroadcastChannel !== 'undefined') {
+      try {
+        bc = new BroadcastChannel('rankrise_analytics_channel');
+        bc.onmessage = () => fetchStats();
+      } catch (e) {}
+    }
+
+    const interval = setInterval(fetchStats, 5000);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', handleUpdate);
+      window.removeEventListener('rankrise_test_submitted', handleUpdate);
+      if (bc) {
+        try { bc.close(); } catch (e) {}
+      }
+    };
   }, [token]);
 
   const quickLinks = [

@@ -37,3 +37,6 @@ backups/
 # Local uploads
 server/uploads/*
 !server/uploads/.gitkeep
+
+# Scratch and temporary test scripts
+scratch/

@@ -598,7 +598,7 @@ export default function LandingPage() {
               Ready to Claim Your Merit Rank in DDCET 2027?
             </h2>
             <p className="text-xs sm:text-sm text-blue-100/90 leading-relaxed">
-              Create your student profile to save your practice history, track test analytics, and revise from your personalized mistake notebook.
+              Create your student profile to save your practice history, track test analytics, and revise from your personalized Weak Spot notebook.
             </p>
           </div>
 

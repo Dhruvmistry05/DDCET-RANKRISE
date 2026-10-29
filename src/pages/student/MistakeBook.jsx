@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getProgressStore, saveProgressStore } from '../../store/mockData';
 import { AlertTriangle, Trash2, ArrowRight, BookOpen, CheckCircle, XCircle } from 'lucide-react';
+import { logPortalActivity } from '../../utils/activityTracker';
 
 export default function MistakeBook() {
   const [mistakes, setMistakes] = useState([]);
@@ -8,6 +9,10 @@ export default function MistakeBook() {
   useEffect(() => {
     const store = getProgressStore();
     setMistakes(store.mistakes || []);
+    logPortalActivity({
+      type: 'mistake_review',
+      action_name: 'Reviewed Mistake Notebook'
+    });
   }, []);
 
   const handleRemove = (qid) => {
@@ -24,7 +29,7 @@ export default function MistakeBook() {
           Diagnostic Revision Log
         </div>
         <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
-          Mistake Notebook
+          Weak Spot
         </h1>
         <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
           Every question answered incorrectly during live mock tests is cataloged here for focused revision.
@@ -37,7 +42,7 @@ export default function MistakeBook() {
             <div className="w-12 h-12 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-2.5 border border-emerald-200 dark:border-emerald-800">
               <CheckCircle size={24} />
             </div>
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-1">Your Mistake Book is Empty</h3>
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-1">Your Weak Spot is Empty</h3>
             <p className="text-xs max-w-sm mx-auto text-slate-500">
               Whenever you attempt a live assessment, questions requiring revision will be added here automatically.
             </p>
@@ -60,7 +65,7 @@ export default function MistakeBook() {
                   <button 
                     onClick={() => handleRemove(m.qid)}
                     className="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-md transition-colors shrink-0"
-                    title="Remove from notebook"
+                    title="Remove from Weak Spot"
                   >
                     <Trash2 size={15} />
                   </button>

@@ -51,7 +51,7 @@ export default function MockTestCenter() {
   // Filter tests by active category
   const filteredTests = tests.filter(test => {
     if (activeCategory === 'full') {
-      return test.type === 'mock_paper' || test.type === 'combined';
+      return test.type === 'mock_paper' || test.type === 'combined' || test.type === 'mock_test' || test.type === 'mock' || !test.type;
     }
     if (activeCategory === 'subject') {
       return test.type === 'subject_wise' || test.type === 'chapter_wise' || test.type === 'sectional';
