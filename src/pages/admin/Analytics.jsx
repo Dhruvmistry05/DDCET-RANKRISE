@@ -59,7 +59,7 @@ export default function Analytics() {
       { type: 'Candidate Logins', count: 0, percent: 0, color: '#3B82F6' },
       { type: 'Full Mock Assessments', count: 0, percent: 0, color: '#7C3AED' },
       { type: 'Study Materials & PDFs', count: 0, percent: 0, color: '#059669' },
-      { type: 'Weak Spot Reviews', count: 0, percent: 0, color: '#F43F5E' }
+      { type: 'My Mistake Reviews', count: 0, percent: 0, color: '#F43F5E' }
     ],
     live_activity_stream: []
   };

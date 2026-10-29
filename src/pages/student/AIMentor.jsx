@@ -23,8 +23,8 @@ const SUGGESTED_QUERIES = [
   },
   {
     topic: 'Revision Technique',
-    question: 'How should I use Weak Spot effectively?',
-    answer: 'After every mock test:\n1. Do not just look at your score — inspect your incorrect attempts in Weak Spot.\n2. Identify whether the mistake was conceptual, calculation-based, or due to rushing.\n3. Write down the one-line formula or "Memory Cheat Code" in your notes before taking the next test.'
+    question: 'How should I use My Mistake effectively?',
+    answer: 'After every mock test:\n1. Do not just look at your score — inspect your incorrect attempts in My Mistake.\n2. Identify whether the mistake was conceptual, calculation-based, or due to rushing.\n3. Write down the one-line formula or "Memory Cheat Code" in your notes before taking the next test.'
   }
 ];
 
@@ -41,7 +41,7 @@ function getLocalFallbackResponse(query) {
   if (/syllabus|topics|chapters|pattern/i.test(q)) {
     return 'DDCET 2027 Official Structure:\n• 100 MCQs in 120 minutes | 200 Total Marks\n• Marking: +2.0 marks for correct, -0.5 marks for wrong attempt.\n• Section 1 (50 Qs): Physics, Chemistry, Environmental Sciences.\n• Section 2 (50 Qs): Engineering Mathematics, Computer Basics, Technical English.\nVisit the Syllabus tab to track your unit-by-unit progress!';
   }
-  return `That is an important topic for DDCET preparation. To master "${query}", I recommend solving 10-15 targeted MCQs in the Practice Lab and checking related notes in the Study Library. Remember to review incorrect answers in your Weak Spot.`;
+  return `That is an important topic for DDCET preparation. To master "${query}", I recommend solving 10-15 targeted MCQs in the Practice Lab and checking related notes in the Study Library. Remember to review incorrect answers in your My Mistake section.`;
 }
 
 export default function AIMentor() {

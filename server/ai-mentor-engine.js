@@ -30,7 +30,7 @@ function generateDdcetAcademicResponse(query, studentContext) {
       } else {
         diagnosticText += `**Personalized Recommendations**:\n`;
         diagnosticText += `1. **Target Weak Areas**: Check your **Analytics** dashboard to inspect chapters with accuracy below 60%.\n`;
-        diagnosticText += `2. **Weak Spot**: Review incorrect attempts in your **Weak Spot** to recover marks lost to the -0.5 penalty.\n`;
+        diagnosticText += `2. **My Mistake**: Review incorrect attempts in **My Mistake** to recover marks lost to the -0.5 penalty.\n`;
         diagnosticText += `3. **Timed Full Papers**: Practice full 100-MCQ question papers in the **Previous Year Papers** section to build 120-minute exam endurance.`;
       }
       return diagnosticText;

@@ -2543,7 +2543,7 @@ app.get('/api/student/detailed-analytics', optionalUser, async (req, res) => {
           { name: 'Practice Lab (MCQs)', minutes: 0, count: 0, percent: 0, color: '#2563EB' },
           { name: 'Mock Exam Assessments', minutes: 0, count: 0, percent: 0, color: '#7C3AED' },
           { name: 'Study Materials & PDFs', minutes: 0, count: 0, percent: 0, color: '#059669' },
-          { name: 'Weak Spot Revision', minutes: 0, count: 0, percent: 0, color: '#F43F5E' }
+          { name: 'My Mistake Revision', minutes: 0, count: 0, percent: 0, color: '#F43F5E' }
         ],
         time_of_day_habits: [
           { window: 'Morning (06:00 – 12:00)', count: 0, percent: 0, label: 'Early Focus' },
@@ -3233,10 +3233,10 @@ app.get('/api/student/detailed-analytics', optionalUser, async (req, res) => {
         const marksLost = Math.round(totalWrong * 0.25 * 100) / 100;
         smartRecommendations.push({
           title: `Recover ${marksLost} Marks Lost to Negative Marking`,
-          description: `You missed ${totalWrong} questions (-0.25 mark penalty each). Review your Weak Spot to avoid repeating errors.`,
+          description: `You missed ${totalWrong} questions (-0.25 mark penalty each). Review your My Mistake section to avoid repeating errors.`,
           priority: 'high',
           action_url: '/student/mistakes',
-          action_text: 'Review Weak Spot'
+          action_text: 'Review My Mistake'
         });
       }
 
@@ -3349,7 +3349,7 @@ app.get('/api/student/detailed-analytics', optionalUser, async (req, res) => {
         color: '#059669' 
       },
       { 
-        name: 'Weak Spot Revision', 
+        name: 'My Mistake Revision', 
         minutes: Math.round(mistakeTime / 60), 
         count: mistakeCount, 
         percent: totalActiveSeconds > 0 ? Math.round((mistakeTime / totalActiveSeconds) * 100) : 0, 
@@ -3403,7 +3403,7 @@ app.get('/api/student/detailed-analytics', optionalUser, async (req, res) => {
         icon = 'material';
         badge = 'Syllabus';
       } else if (act.type === 'mistake_review') {
-        title = 'Reviewed Weak Spot Questions';
+        title = 'Reviewed My Mistake Questions';
         icon = 'mistake';
         badge = 'Revision';
       }
@@ -3656,7 +3656,7 @@ app.get('/api/admin/analytics', requireUser, requireAdmin, async (req, res) => {
       { type: 'Candidate Logins', count: totalLogins, percent: totalActions > 0 ? Math.round((totalLogins / totalActions) * 100) : 0, color: '#3B82F6' },
       { type: 'Full Mock Assessments', count: totalMockActs, percent: totalActions > 0 ? Math.round((totalMockActs / totalActions) * 100) : 0, color: '#7C3AED' },
       { type: 'Study Materials & PDFs', count: totalMaterialActs, percent: totalActions > 0 ? Math.round((totalMaterialActs / totalActions) * 100) : 0, color: '#059669' },
-      { type: 'Weak Spot Reviews', count: totalMistakeActs, percent: totalActions > 0 ? Math.round((totalMistakeActs / totalActions) * 100) : 0, color: '#F43F5E' }
+      { type: 'My Mistake Reviews', count: totalMistakeActs, percent: totalActions > 0 ? Math.round((totalMistakeActs / totalActions) * 100) : 0, color: '#F43F5E' }
     ];
 
     // Real Live Activity Stream
@@ -3666,7 +3666,7 @@ app.get('/api/admin/analytics', requireUser, requireAdmin, async (req, res) => {
       if (act.type === 'practice') actionLabel = `Solved ${act.questions_attempted || 0} MCQs in Practice Lab`;
       else if (act.type === 'mock_test') actionLabel = 'Submitted Timed Assessment';
       else if (act.type === 'material_view') actionLabel = 'Viewed Official Syllabus PDF & Notes';
-      else if (act.type === 'mistake_review') actionLabel = 'Reviewed Weak Spot Questions';
+      else if (act.type === 'mistake_review') actionLabel = 'Reviewed My Mistake Questions';
 
       const d = act.created_at ? new Date(act.created_at) : new Date();
       return {
@@ -3975,7 +3975,7 @@ Your response must be:
 - Accurate, encouraging, and focused on DDCET 2027 preparation.
 - Provide step-by-step mathematical derivations or formula explanations when requested.
 - Provide realistic time-management, paper-solving strategies, and guidance on avoiding negative marks.
-- Mention portal features like Practice Lab, PYQ Question Papers, Weak Spot, and Syllabus Progress when relevant.
+- Mention portal features like Practice Lab, PYQ Question Papers, My Mistake, and Syllabus Progress when relevant.
 - Format neatly using clean Markdown with bullet points where appropriate.`;
 
         const geminiPayload = {

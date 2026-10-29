@@ -33,7 +33,7 @@ export default function Sidebar({ isOpen, onClose }) {
     { name: 'Previous Year MCQs', path: '/student/pyq', icon: History, requiresAuth: true },
     { name: 'Mock Tests', path: '/student/mock', icon: ClipboardCheck, requiresAuth: true },
     { name: 'Analytics', path: '/student/analytics', icon: PieChart, requiresAuth: true },
-    { name: 'Weak Spot', path: '/student/mistakes', icon: AlertTriangle, requiresAuth: true },
+    { name: 'My Mistake', path: '/student/mistakes', icon: AlertTriangle, requiresAuth: true },
     { name: 'Leaderboard', path: '/student/leaderboard', icon: Trophy, requiresAuth: true },
   ];
 
@@ -46,7 +46,7 @@ export default function Sidebar({ isOpen, onClose }) {
     { name: 'Mock Test', path: '/student/mock', icon: ClipboardCheck },
     { name: 'Generative Quiz', path: '/student/quiz', icon: Sparkles },
     { name: 'Analytics', path: '/student/analytics', icon: PieChart },
-    { name: 'Weak Spot', path: '/student/mistakes', icon: AlertTriangle },
+    { name: 'My Mistake', path: '/student/mistakes', icon: AlertTriangle },
     { name: 'AI Mentor', path: '/student/mentor', icon: MessageCircle },
     { name: 'My Profile', path: '/student/profile', icon: User },
   ];

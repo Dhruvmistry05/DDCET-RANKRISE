@@ -544,7 +544,7 @@ export default function QuizGenerator() {
             <Bookmark size={16} className="text-amber-500" />
             <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">
               {quizResults.wrongCount > 0 
-                ? `${quizResults.wrongCount} incorrect questions were automatically added to your Weak Spot.`
+                ? `${quizResults.wrongCount} incorrect questions were automatically added to your My Mistake section.`
                 : 'Flawless attempt! No mistakes added to your notebook.'}
             </span>
           </div>
@@ -553,7 +553,7 @@ export default function QuizGenerator() {
               to="/student/mistakes"
               className="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-[#E2E8F0] dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:border-blue-400 transition-colors"
             >
-              Open Weak Spot
+              Open My Mistake
             </Link>
             <Link
               to="/student/leaderboard"

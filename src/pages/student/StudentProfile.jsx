@@ -469,7 +469,7 @@ export default function StudentProfile() {
                   to="/student/mistakes"
                   className="flex items-center justify-between p-2.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-750 text-xs font-semibold text-slate-700 dark:text-slate-200 transition"
                 >
-                  <span>Weak Spot</span>
+                  <span>My Mistake</span>
                   <span className="text-rose-600 font-bold">Review →</span>
                 </Link>
               </div>

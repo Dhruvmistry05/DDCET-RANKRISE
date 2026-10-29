@@ -330,7 +330,7 @@ export default function StudentAnalytics() {
           >
             <div className="flex items-center gap-2">
               <AlertCircle size={14} />
-              <span>Review Weak Spot</span>
+              <span>Review My Mistake</span>
             </div>
             <ArrowRight size={13} className="text-rose-400" />
           </Link>
@@ -1091,7 +1091,7 @@ export default function StudentAnalytics() {
               to="/student/mistakes"
               className="text-xs font-semibold text-rose-600 dark:text-rose-400 hover:underline flex items-center gap-1"
             >
-              <span>Review Weak Spot</span>
+              <span>Review My Mistake</span>
               <ArrowRight size={13} />
             </Link>
           </div>
@@ -1146,7 +1146,7 @@ export default function StudentAnalytics() {
                 DDCET Negative Marking Impact: -{mistakeAnalysis.marks_deducted} Marks Lost
               </span>
               <p className="text-[11px] text-amber-700 dark:text-amber-300 leading-relaxed">
-                Each wrong answer incurs a -0.25 mark penalty. Reviewing your Weak Spot regularly eliminates recurring mistakes and guards your state rank.
+                Each wrong answer incurs a -0.25 mark penalty. Reviewing your My Mistake section regularly eliminates recurring mistakes and guards your state rank.
               </p>
             </div>
           </div>
@@ -1374,7 +1374,7 @@ export default function StudentAnalytics() {
                   <th className="py-2.5 px-3">Percentage</th>
                   <th className="py-2.5 px-3">Accuracy</th>
                   <th className="py-2.5 px-3">Time Spent</th>
-                  <th className="py-2.5 px-3 text-right">Weak Spot</th>
+                  <th className="py-2.5 px-3 text-right">My Mistake</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-750">
@@ -1407,7 +1407,7 @@ export default function StudentAnalytics() {
                         to="/student/mistakes"
                         className="inline-flex items-center gap-1 text-blue-600 dark:text-blue-400 font-semibold hover:underline"
                       >
-                        <span>Weak Spot</span>
+                        <span>My Mistake</span>
                         <ArrowUpRight size={12} />
                       </Link>
                     </td>

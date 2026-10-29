@@ -1131,7 +1131,7 @@ export default function PreviousYearPractice() {
                   Detailed Solution Review
                 </h3>
                 <p className="text-xs text-slate-500">
-                  Compare your answers against the official ACPC answer key. Incorrect answers are automatically saved to your Weak Spot.
+                  Compare your answers against the official ACPC answer key. Incorrect answers are automatically saved to your My Mistake section.
                 </p>
               </div>
 

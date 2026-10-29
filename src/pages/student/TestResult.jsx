@@ -123,7 +123,7 @@ export default function TestResult() {
             to="/student/mistakes"
             className="w-full py-2.5 px-4 bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white rounded-lg font-medium text-xs sm:text-sm transition-colors flex items-center justify-center gap-2 mt-2 shadow-xs"
           >
-            <span>Review Incorrect Questions in Weak Spot</span>
+            <span>Review Incorrect Questions in My Mistake</span>
             <ArrowRight size={14} />
           </Link>
         </div>
