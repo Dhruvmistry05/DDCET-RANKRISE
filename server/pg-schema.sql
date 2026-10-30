@@ -136,7 +136,7 @@ CREATE TABLE IF NOT EXISTS student_activity (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Admin Security & Two-Admin Maximum Enforcement Trigger
+-- Admin Security & Three-Admin Maximum Enforcement Trigger
 CREATE OR REPLACE FUNCTION enforce_admin_constraints()
 RETURNS TRIGGER AS $$
 DECLARE
@@ -165,8 +165,8 @@ BEGIN
     WHERE role IN ('admin', 'superadmin')
       AND id != COALESCE(NEW.id, -1);
     
-    IF admin_count >= 2 THEN
-      RAISE EXCEPTION 'Security Policy: Maximum of 2 administrator accounts allowed.';
+    IF admin_count >= 3 THEN
+      RAISE EXCEPTION 'Security Policy: Maximum of 3 administrator accounts allowed.';
     END IF;
   END IF;
 

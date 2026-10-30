@@ -60,7 +60,7 @@ export default function AdminDashboard() {
       {/* Metric Cards Grid */}
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {isSuperAdmin && (
-          <DashboardCard title="Administrators" value={`${stats?.admins || 1} / 2 Active`} icon={ShieldCheck} to="/admin/admins" />
+          <DashboardCard title="Administrators" value={`${stats?.admins || 1} / 3 Active`} icon={ShieldCheck} to="/admin/admins" />
         )}
         <DashboardCard title="Students" value={stats?.students} icon={Users} to="/admin" />
         <DashboardCard title="Assessments" value={stats?.tests} icon={FileText} to="/admin/tests" />

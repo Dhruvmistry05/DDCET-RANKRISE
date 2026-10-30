@@ -17,7 +17,7 @@ export default function AdminManagement() {
     admins: [],
     students: [],
     currentCount: 1,
-    maxAdmins: 2,
+    maxAdmins: 3,
     canPromote: true
   });
 
@@ -131,7 +131,9 @@ export default function AdminManagement() {
   }, [data.students, studentSearch]);
 
   const superAdmin = data.admins.find(a => a.isSuperAdmin);
-  const secondaryAdmin = data.admins.find(a => !a.isSuperAdmin);
+  const secondaryAdmins = data.admins.filter(a => !a.isSuperAdmin);
+  const maxSlots = data.maxAdmins || 3;
+  const emptySlotsCount = Math.max(0, maxSlots - data.admins.length);
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto space-y-6 font-sans">
@@ -202,11 +204,11 @@ export default function AdminManagement() {
           <div className="flex items-center gap-2">
             <ShieldCheck size={20} className="text-[#1E3A8A]" />
             <h2 className="text-base font-bold text-slate-900">
-              Two-Administrator Capacity Policy
+              Three-Administrator Capacity Policy
             </h2>
           </div>
           <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-            DDCET RankRise enforces a strict policy of at most <strong className="text-slate-900">2 administrators</strong>: exactly 1 permanent Super Administrator and 1 secondary Administrator. This limit is enforced both at the application level and via PostgreSQL database triggers.
+            DDCET RankRise enforces a strict policy of at most <strong className="text-slate-900">3 administrators</strong>: exactly 1 permanent Super Administrator and up to 2 trusted Administrators. This limit is enforced both at the application level and via PostgreSQL database triggers.
           </p>
         </div>
 
@@ -227,7 +229,7 @@ export default function AdminManagement() {
                 : 'bg-amber-100 text-amber-800 border border-amber-300'
             }`}>
               <span className={`w-2 h-2 rounded-full ${data.canPromote ? 'bg-emerald-600' : 'bg-amber-600'}`} />
-              {data.canPromote ? '1 Slot Open' : 'Capacity Full (2/2)'}
+              {data.canPromote ? `${(data.maxAdmins || 3) - data.currentCount} Slot${((data.maxAdmins || 3) - data.currentCount) > 1 ? 's' : ''} Open` : 'Capacity Full (3/3)'}
             </span>
           </div>
         </div>
@@ -237,10 +239,10 @@ export default function AdminManagement() {
       <div className="space-y-3">
         <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
           <Users size={16} className="text-slate-600" />
-          Active Administrators ({data.admins.length} / 2)
+          Active Administrators ({data.admins.length} / {data.maxAdmins || 3})
         </h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           
           {/* Card 1: Super Admin */}
           <div className="p-5 rounded-2xl bg-white border-2 border-blue-600/40 shadow-xs relative overflow-hidden flex flex-col justify-between">
@@ -285,19 +287,19 @@ export default function AdminManagement() {
             </div>
           </div>
 
-          {/* Card 2: Secondary Admin OR Empty Slot */}
-          {secondaryAdmin ? (
-            <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs flex flex-col justify-between">
+          {/* Cards for Trusted Secondary Administrators */}
+          {secondaryAdmins.map((secAdmin) => (
+            <div key={secAdmin.id} className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs flex flex-col justify-between">
               <div>
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-xl bg-blue-100 text-blue-800 flex items-center justify-center font-bold text-base">
-                      {secondaryAdmin.name ? secondaryAdmin.name[0] : 'A'}
+                      {secAdmin.name ? secAdmin.name[0] : 'A'}
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
                         <h4 className="text-base font-bold text-slate-900">
-                          {secondaryAdmin.name || 'Secondary Administrator'}
+                          {secAdmin.name || 'Administrator'}
                         </h4>
                         <span className="text-[10px] font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded uppercase">
                           Admin
@@ -305,7 +307,7 @@ export default function AdminManagement() {
                       </div>
                       <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-0.5">
                         <Mail size={12} className="text-slate-400" />
-                        <span>{secondaryAdmin.email}</span>
+                        <span>{secAdmin.email}</span>
                       </div>
                     </div>
                   </div>
@@ -314,8 +316,8 @@ export default function AdminManagement() {
                 <div className="mt-4 pt-3 border-t border-slate-100 text-xs text-slate-600 space-y-1.5">
                   <div className="flex justify-between">
                     <span className="text-slate-400">Branch / College:</span>
-                    <span className="font-semibold text-slate-700">
-                      {secondaryAdmin.branch || 'Engineering'} {secondaryAdmin.college ? `• ${secondaryAdmin.college}` : ''}
+                    <span className="font-semibold text-slate-700 truncate max-w-[170px]" title={`${secAdmin.branch || 'Engineering'} • ${secAdmin.college || ''}`}>
+                      {secAdmin.branch || 'Engineering'} {secAdmin.college ? `• ${secAdmin.college}` : ''}
                     </span>
                   </div>
                   <div className="flex justify-between">
@@ -326,14 +328,14 @@ export default function AdminManagement() {
               </div>
 
               <div className="mt-5 pt-3 border-t border-slate-100">
-                {confirmDemoteId === secondaryAdmin.id ? (
+                {confirmDemoteId === secAdmin.id ? (
                   <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl space-y-2">
                     <p className="text-xs font-semibold text-rose-800">
-                      Are you sure you want to demote {secondaryAdmin.name || secondaryAdmin.email} back to Student?
+                      Are you sure you want to demote {secAdmin.name || secAdmin.email} back to Student?
                     </p>
                     <div className="flex gap-2">
                       <button
-                        onClick={() => handleDemote(secondaryAdmin.id)}
+                        onClick={() => handleDemote(secAdmin.id)}
                         disabled={actionLoading}
                         className="px-3 py-1.5 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-lg transition disabled:opacity-50"
                       >
@@ -350,7 +352,7 @@ export default function AdminManagement() {
                   </div>
                 ) : (
                   <button
-                    onClick={() => setConfirmDemoteId(secondaryAdmin.id)}
+                    onClick={() => setConfirmDemoteId(secAdmin.id)}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg transition"
                   >
                     <UserMinus size={14} />
@@ -359,17 +361,25 @@ export default function AdminManagement() {
                 )}
               </div>
             </div>
-          ) : (
-            <div className="p-6 rounded-2xl bg-slate-50 border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-center">
+          ))}
+
+          {/* Cards for Available Open Slots */}
+          {Array.from({ length: emptySlotsCount }).map((_, slotIdx) => (
+            <div 
+              key={`empty-slot-${slotIdx}`}
+              className="p-6 rounded-2xl bg-slate-50 border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-center min-h-[220px]"
+            >
               <div className="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mb-3">
                 <UserPlus size={22} />
               </div>
-              <h4 className="text-sm font-bold text-slate-800">Available Administrator Slot</h4>
+              <h4 className="text-sm font-bold text-slate-800">
+                Available Administrator Slot {emptySlotsCount > 1 ? `(#${data.admins.length + slotIdx + 1})` : ''}
+              </h4>
               <p className="text-xs text-slate-500 max-w-xs mt-1">
-                You have 1 open slot. You can promote your friend's registered student account to Administrator below.
+                Open administrator slot. You can promote a trusted registered student account to Administrator below.
               </p>
             </div>
-          )}
+          ))}
 
         </div>
       </div>
@@ -392,7 +402,7 @@ export default function AdminManagement() {
           <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs sm:text-sm flex items-center gap-3">
             <AlertCircle size={18} className="text-amber-600 shrink-0" />
             <div>
-              <strong>Administrator limit reached (2/2).</strong> To promote a different student, first demote the current secondary administrator using the button above.
+              <strong>Administrator limit reached (3/3).</strong> To promote a different student, first demote one of the current administrators using the demote button above.
             </div>
           </div>
         ) : (

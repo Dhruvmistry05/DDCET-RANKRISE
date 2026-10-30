@@ -428,7 +428,7 @@ app.get('/api/admin/system-admins', requireUser, requireSuperAdmin, async (req, 
       }))
       .sort((a, b) => (a.name || a.email).localeCompare(b.name || b.email));
 
-    const maxAdmins = 2;
+    const maxAdmins = 3;
     const currentCount = admins.length;
     const canPromote = currentCount < maxAdmins;
 
@@ -445,7 +445,7 @@ app.get('/api/admin/system-admins', requireUser, requireSuperAdmin, async (req, 
   }
 });
 
-// Promote Student to Admin (Super Admin only, strictly capped at 2 admins total)
+// Promote Student to Admin (Super Admin only, strictly capped at 3 admins total)
 app.post('/api/admin/promote-admin', requireUser, requireSuperAdmin, async (req, res) => {
   try {
     const { studentId, email } = req.body;
@@ -456,9 +456,9 @@ app.post('/api/admin/promote-admin', requireUser, requireSuperAdmin, async (req,
     const allUsers = await db.getAll('users');
     const currentAdminCount = allUsers.filter(u => u.role === 'admin' || u.role === 'superadmin').length;
     
-    if (currentAdminCount >= 2) {
+    if (currentAdminCount >= 3) {
       return res.status(400).json({ 
-        error: 'Administrator capacity reached. A maximum of 2 administrators (1 Super Admin and 1 Admin) is permitted. Demote the secondary admin first before promoting another user.' 
+        error: 'Administrator capacity reached. A maximum of 3 administrators (1 Super Admin and 2 Admins) is permitted. Demote an administrator first before promoting another user.' 
       });
     }
 
@@ -479,7 +479,7 @@ app.post('/api/admin/promote-admin', requireUser, requireSuperAdmin, async (req,
       return res.status(400).json({ error: 'User is already an administrator.' });
     }
 
-    // Update role to 'admin' (database trigger ensures admin_count <= 2)
+    // Update role to 'admin' (database trigger ensures admin_count <= 3)
     const updated = await db.update('users', targetUser.id, { role: 'admin' });
 
     res.json({
@@ -525,7 +525,7 @@ app.post('/api/admin/demote-admin', requireUser, requireSuperAdmin, async (req, 
     }
 
     if (targetUser.role !== 'admin') {
-      return res.status(400).json({ error: 'User is not a secondary administrator.' });
+      return res.status(400).json({ error: 'User is not an administrator.' });
     }
 
     // Demote role to 'student'
