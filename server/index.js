@@ -5,7 +5,7 @@ const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 const db = require('./db-adapter'); // CHANGED to adapter
-const { generateDdcetAcademicResponse } = require('./ai-mentor-engine');
+const { askGroqMentor, isGroqConfigured } = require('./groq-service');
 
 const app = express();
 
@@ -3979,159 +3979,102 @@ app.post('/api/student/activity/log', optionalUser, async (req, res) => {
 });
 
 // ============================================================================
-// AI ACADEMIC MENTOR FOR DDCET 2027
+// AI ACADEMIC MENTOR & STUDY ASSISTANT (POWERED BY GROQ API)
 // ============================================================================
+
+// Lightweight in-memory rate limiting: 25 requests per minute per user/IP
+const mentorRateLimits = new Map();
+const checkMentorRateLimit = (key, limit = 25, windowMs = 60000) => {
+  const now = Date.now();
+  const timestamps = mentorRateLimits.get(key) || [];
+  const validTimestamps = timestamps.filter(t => now - t < windowMs);
+  if (validTimestamps.length >= limit) {
+    return false;
+  }
+  validTimestamps.push(now);
+  mentorRateLimits.set(key, validTimestamps);
+  if (mentorRateLimits.size > 1000) {
+    for (const [k, ts] of mentorRateLimits.entries()) {
+      if (ts.every(t => now - t >= windowMs)) mentorRateLimits.delete(k);
+    }
+  }
+  return true;
+};
+
+// Main AI Mentor Chat Endpoint
 app.post('/api/student/mentor/chat', optionalUser, async (req, res) => {
   try {
     const rawQuery = req.body.query || req.body.message;
     const history = req.body.history;
+
+    // 1. Validation
     if (!rawQuery || typeof rawQuery !== 'string' || !rawQuery.trim()) {
       return res.status(400).json({ error: 'Query is required.' });
     }
-
     const cleanQuery = rawQuery.trim();
-    const userId = req.user?.id;
-    let studentContext = null;
-
-    if (userId) {
-      try {
-        const u = await db.findOne('users', { id: userId });
-        const stats = await computeStudentStats(userId);
-        studentContext = {
-          name: u ? getStudentDisplayName(u) : 'Student',
-          branch: u?.branch || 'Diploma Engineering',
-          college: u?.college || 'Polytechnic College',
-          semester: u?.semester || 6,
-          tests_completed: stats.tests_completed,
-          average_score: stats.average_score,
-          current_rank: stats.current_rank,
-          syllabus_progress: stats.syllabus_progress,
-          practice_time: stats.practice_time
-        };
-      } catch (err) {
-        console.warn('Could not load student context for mentor:', err.message);
-      }
+    if (cleanQuery.length > 2500) {
+      return res.status(400).json({ error: 'Query is too long. Please limit your question to 2,500 characters.' });
     }
 
-    // 1. Try Gemini API if key is present
-    const geminiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
-    if (geminiKey) {
-      try {
-        const systemPrompt = `You are the official AI Academic Mentor of DDCET RankRise, dedicated to helping Gujarat Diploma to Degree engineering students prepare for the DDCET 2027 entrance exam (GTU / ACPC admission).
-Exam blueprint & syllabus:
-- Total: 100 MCQs, 120 minutes (2 hours), 200 marks.
-- Marking: +2.0 marks per correct answer, -0.5 marks deduction for incorrect answers (negative marking).
-- Section 1 (50 Qs, 100 Marks): Basics of Science & Engineering (Physics, Chemistry, Environmental Sciences).
-- Section 2 (50 Qs, 100 Marks): Aptitude & Mathematics (Engineering Mathematics, Computer / IT Basics, Technical English & Soft Skills).
-
-${studentContext ? `Active Student Context:
-- Name: ${studentContext.name}
-- Diploma Branch: ${studentContext.branch}
-- Current Semester: ${studentContext.semester}
-- Tests Completed: ${studentContext.tests_completed}
-- Current Average Score: ${studentContext.average_score}
-- Leaderboard Rank: ${studentContext.current_rank}
-- Syllabus Coverage: ${studentContext.syllabus_progress}` : 'Student is currently browsing as Guest.'}
-
-Your response must be:
-- Accurate, encouraging, and focused on DDCET 2027 preparation.
-- Provide step-by-step mathematical derivations or formula explanations when requested.
-- Provide realistic time-management, paper-solving strategies, and guidance on avoiding negative marks.
-- Mention portal features like Practice Lab, PYQ Question Papers, My Mistake, and Syllabus Progress when relevant.
-- Format neatly using clean Markdown with bullet points where appropriate.`;
-
-        const geminiPayload = {
-          system_instruction: {
-            parts: [{ text: systemPrompt }]
-          },
-          contents: [
-            ...(Array.isArray(history) ? history.slice(-6).map(h => ({
-              role: h.role === 'model' || h.role === 'mentor' ? 'model' : 'user',
-              parts: [{ text: h.text || h.parts?.[0]?.text || '' }]
-            })) : []),
-            {
-              role: 'user',
-              parts: [{ text: cleanQuery }]
-            }
-          ],
-          generationConfig: {
-            temperature: 0.6,
-            maxOutputTokens: 800
-          }
-        };
-
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 7000);
-
-        const geminiRes = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(geminiPayload),
-            signal: controller.signal
-          }
-        );
-        clearTimeout(timeoutId);
-
-        if (geminiRes.ok) {
-          const geminiData = await geminiRes.json();
-          const candidateText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (candidateText && candidateText.trim()) {
-            // Log interaction
-            if (userId) {
-              try {
-                await db.insert('student_activity', {
-                  user_id: userId,
-                  type: 'portal_action',
-                  topic_id: null,
-                  time_spent_seconds: 60,
-                  questions_attempted: 0,
-                  created_at: new Date().toISOString()
-                });
-              } catch (e) {}
-            }
-            return res.json({
-              success: true,
-              reply: candidateText.trim(),
-              source: 'gemini',
-              personalized: Boolean(studentContext)
-            });
-          }
-        }
-      } catch (geminiErr) {
-        console.warn('Gemini API call skipped or timed out, using built-in reasoning engine:', geminiErr.message);
-      }
+    // 2. Rate limiting check
+    const rateLimitKey = req.user?.id ? `user_${req.user.id}` : `ip_${req.ip || 'guest'}`;
+    if (!checkMentorRateLimit(rateLimitKey, 25, 60000)) {
+      return res.status(429).json({ 
+        error: 'Rate limit reached. Please wait a moment before sending more messages.' 
+      });
     }
 
-    // 2. Built-in DDCET Academic Intelligence Engine
-    const reply = generateDdcetAcademicResponse(cleanQuery, studentContext);
+    // 3. Check if Groq API key is configured
+    if (!isGroqConfigured()) {
+      return res.status(503).json({
+        error: 'Groq API is not configured. Please ensure GROQ_API_KEY is configured in your server environment variables.'
+      });
+    }
 
-    // Log interaction
-    if (userId) {
-      try {
-        await db.insert('student_activity', {
-          user_id: userId,
-          type: 'portal_action',
-          topic_id: null,
-          time_spent_seconds: 60,
-          questions_attempted: 0,
-          created_at: new Date().toISOString()
+    // 4. Query Groq API
+    try {
+      const groqResult = await askGroqMentor({
+        query: cleanQuery,
+        history: Array.isArray(history) ? history.slice(-10) : []
+      });
+
+      if (groqResult && groqResult.reply) {
+        return res.json({
+          success: true,
+          reply: groqResult.reply,
+          model: groqResult.model,
+          source: groqResult.source || 'groq'
         });
-      } catch (e) {}
-    }
+      }
 
-    return res.json({
-      success: true,
-      reply,
-      source: 'rankrise_ai_engine',
-      personalized: Boolean(studentContext)
-    });
+      throw new Error('No reply received from Groq API.');
+    } catch (groqErr) {
+      console.error('[AI Mentor] Groq API error:', groqErr.message);
+
+      if (groqErr.message && (groqErr.message.includes('429') || groqErr.message.includes('rate limit'))) {
+        return res.status(429).json({
+          error: 'Rate limit reached on AI server. Please wait a few seconds and try again.'
+        });
+      }
+
+      return res.status(502).json({
+        error: groqErr.message || 'AI service temporarily unavailable. Please try again in a moment.'
+      });
+    }
 
   } catch (err) {
     console.error('Error in AI Mentor chat:', err);
-    res.status(500).json({ error: 'Failed to generate mentor response.' });
+    res.status(500).json({ error: 'Failed to process chat query.' });
   }
+});
+
+// AI Mentor Status Endpoint
+app.get('/api/student/mentor/status', (req, res) => {
+  res.json({
+    configured: isGroqConfigured(),
+    model: process.env.GROQ_MODEL || 'qwen/qwen3.8-27b',
+    endpoint: 'https://api.groq.com/openai/v1/chat/completions'
+  });
 });
 
 app.get('/api/health', async (req, res) => {

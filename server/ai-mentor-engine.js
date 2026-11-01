@@ -9,34 +9,142 @@ function generateDdcetAcademicResponse(query, studentContext) {
   // 1. Student Personal Performance & Diagnostic Insights
   if (/my (score|performance|rank|progress|weak|readiness|status|standing)|how am i doing|what should i (study|revise|focus|do)|recommend|my analytics/i.test(q)) {
     if (studentContext && studentContext.name) {
+      if (!studentContext.has_activity || studentContext.tests_completed === 0) {
+        return `Hello ${studentContext.name}! You currently have **0 recorded mock test attempts** in your RankRise profile.
+
+To identify your weak and strong subjects and unlock your personalized DDCET 2027 diagnostic recommendations:
+1. Take a 15-minute diagnostic session in **Practice Lab**.
+2. Attempt a subject-wise assessment in the **Syllabus** or **Mock Test Center**.
+3. Once you complete at least one test, I will analyze your accuracy and recommend targeted chapters for revision!`;
+      }
+
       const tests = studentContext.tests_completed || 0;
       const avg = studentContext.average_score || '0%';
       const rank = studentContext.current_rank || '-';
       const coverage = studentContext.syllabus_progress || '0%';
+      const accuracy = studentContext.accuracy_percent || 0;
       const branch = studentContext.branch || 'Diploma Engineering';
 
       let diagnosticText = `Hello ${studentContext.name}! Here is your current DDCET 2027 diagnostic profile:\n\n`;
       diagnosticText += `• **Diploma Branch**: ${branch}\n`;
       diagnosticText += `• **Assessments Completed**: ${tests} ${tests === 1 ? 'test' : 'tests'}\n`;
+      diagnosticText += `• **Overall Accuracy**: ${accuracy}%\n`;
       diagnosticText += `• **Average Score**: ${avg}\n`;
       diagnosticText += `• **Statewide Leaderboard Rank**: ${rank}\n`;
       diagnosticText += `• **Syllabus Coverage**: ${coverage}\n\n`;
 
-      if (tests === 0) {
-        diagnosticText += `**Academic Next Steps**:\n`;
-        diagnosticText += `1. Take a 15-question diagnostic session in **Practice Lab** to establish your baseline accuracy.\n`;
-        diagnosticText += `2. Review the **Official DDCET 2027 Syllabus** to mark topics you've covered in diploma coursework.\n`;
-        diagnosticText += `3. Spend at least 30-45 minutes today practicing core Engineering Mathematics or Physics.`;
-      } else {
-        diagnosticText += `**Personalized Recommendations**:\n`;
-        diagnosticText += `1. **Target Weak Areas**: Check your **Analytics** dashboard to inspect chapters with accuracy below 60%.\n`;
-        diagnosticText += `2. **My Mistake**: Review incorrect attempts in **My Mistake** to recover marks lost to the -0.5 penalty.\n`;
-        diagnosticText += `3. **Timed Full Papers**: Practice full 100-MCQ question papers in the **Previous Year Papers** section to build 120-minute exam endurance.`;
+      if (studentContext.strong_subjects && studentContext.strong_subjects.length > 0) {
+        diagnosticText += `**Verified Strong Subjects**: ${studentContext.strong_subjects.join(', ')}\n`;
       }
+      if (studentContext.weak_subjects && studentContext.weak_subjects.length > 0) {
+        diagnosticText += `**Weak Subjects (Needs Priority Revision)**: ${studentContext.weak_subjects.join(', ')}\n\n`;
+      } else {
+        diagnosticText += `\n`;
+      }
+
+      diagnosticText += `**Personalized Recommendations**:\n`;
+      diagnosticText += `1. **Target Weak Areas**: Check your **Analytics** dashboard to inspect chapters with accuracy below 60%.\n`;
+      diagnosticText += `2. **My Mistake**: Review incorrect attempts in **My Mistake** to recover marks lost to the -0.5 penalty.\n`;
+      diagnosticText += `3. **Timed Full Papers**: Practice full 100-MCQ question papers in the **Previous Year Papers** section to build 120-minute exam endurance.`;
       return diagnosticText;
     } else {
       return `To view personalized diagnostics and recommendations:\n• Log in or create your student profile.\n• Once authenticated, I can analyze your practice test attempts, track weak topics, and evaluate your statewide merit rank!`;
     }
+  }
+
+  // 1.1 Multilingual Support: Gujarati
+  if (/[\u0A80-\u0AFF]/.test(query) || /in gujarati|ગુજરાતી/i.test(q)) {
+    if (/નિયમ|ન્યુટન|ગતિ|બળ|physics|સાયન્સ/i.test(query)) {
+      return `### DDCET ભૌતિકવિજ્ઞાન (Physics) માર્ગદર્શન
+
+**ન્યૂટનના ગતિના નિયમો (Newton's Laws of Motion)**:
+1. **પ્રથમ નિયમ**: જ્યાં સુધી કોઈ પદાર્થ પર બાહ્ય અસંતુલિત બળ ન લાગે ત્યાં સુધી તે સ્થિર પદાર્થ સ્થિર રહે છે અને ગતિમાન પદાર્થ અચળ વેગથી ગતિ ચાલુ રાખે છે (જડત્વનો નિયમ).
+2. **બીજો નિયમ**: વેગમાનના ફેરફારનો દર લાગુ પાડેલા બાહ્ય બળના સમપ્રમાણમાં હોય છે ($F = m \\times a$).
+3. **ત્રીજો નિયમ**: દરેક ક્રિયાબળને હંમેશા સમાન મૂલ્યનું અને પરસ્પર વિરુદ્ધ દિશામાં પ્રતિક્રિયાબળ હોય છે.
+
+**DDCET પરીક્ષા ટિપ**:
+• DDCET માં સાચા જવાબ માટે **+2.0 ગુણ** મળે છે, જ્યારે ખોટા જવાબ માટે **-0.5 ગુણ (નેગેટિવ માર્કિંગ)** કપાય છે.
+• વધુ પ્રેક્ટિસ માટે **Practice Lab** માં જાઓ અને પ્રશ્નો સોલ્વ કરો!`;
+    }
+    if (/ગણિત|શ્રેણિક|સંકલન|વિકલન|mathematics|maths/i.test(query)) {
+      return `### DDCET એન્જિનિયરિંગ ગણિત (Mathematics) માર્ગદર્શન
+
+**શ્રેણિક અને નિશ્ચાયક (Matrices & Determinants)**:
+• $2 \\times 2$ નિશ્ચાયક: $\\begin{vmatrix} a & b \\\\ c & d \\end{vmatrix} = ad - bc$
+• જો $|A| = 0$ હોય, તો તે અસામાન્ય શ્રેણિક (Singular Matrix) કહેવાય અને તેનો વ્યસ્ત ($A^{-1}$) શક્ય નથી.
+• આઇગન મૂલ્યોનો સરવાળો (Sum of Eigenvalues) = Trace(A) (મુખ્ય વિકર્ણ ઘટકોનો સરવાળો).
+• આઇગન મૂલ્યોનો ગુણાકાર (Product of Eigenvalues) = Det(A).
+
+DDCET માં ગણિતના પ્રશ્નો ઝડપથી ઉકેલવા શોર્ટકટ ફોર્મ્યુલા યાદ રાખો!`;
+    }
+    return `નમસ્તે! હું DDCET RankRise નો AI અભ્યાસ સહાયક છું. 
+હું તમને DDCET 2027 પરીક્ષાની સંપૂર્ણ તૈયારીમાં મદદ કરી શકું છું:
+• **વિષયવાર સમજૂતી**: ભૌતિકવિજ્ઞાન, રસાયણવિજ્ઞાન, ગણિત, કોમ્પ્યુટર અને અંગ્રેજી.
+• **નેગેટિવ માર્કિંગ ટાળવાની રીતો**: +2.0 સાચા અને -0.5 ખોટા ગુણની ગણતરી.
+• **MCQ પ્રેક્ટિસ**: ચાર વિકલ્પો સાથેના મહત્વના પ્રશ્નો.
+
+તમને કયા વિષય અથવા પ્રકરણમાં માર્ગદર્શન જોઈએ છે? મને પૂછો!`;
+  }
+
+  // 1.2 Multilingual Support: Hindi
+  if (/[\u0900-\u097F]/.test(query) || /in hindi|हिंदी में|हिन्दी/i.test(q)) {
+    if (/नियम|न्यूटन|गति|बल|भौतिकी|science/i.test(query)) {
+      return `### DDCET भौतिक विज्ञान (Physics) मार्गदर्शन
+
+**न्यूटन के गति नियम (Newton's Laws of Motion)**:
+1. **प्रथम नियम (जड़त्व का नियम)**: कोई वस्तु अपनी विरामावस्था या सरल रेखा में एकसमान गति की अवस्था में तब तक बनी रहती है, जब तक कि उस पर कोई बाह्य बल न लगाया जाए।
+2. **द्वितीय नियम**: संवेग परिवर्तन की दर लगाए गए बल के समानुपाती होती है ($F = m \\times a$).
+3. **तृतीय नियम**: प्रत्येक क्रिया के बराबर एवं विपरीत दिशा में प्रतिक्रिया होती है।
+
+**DDCET परीक्षा रणनीति**:
+• प्रत्येक सही उत्तर पर **+2.0 अंक** मिलते हैं और गलत उत्तर पर **-0.5 अंक** कटते हैं।
+• यदि आप 2 विकल्प हटा सकते हैं, तो ही प्रश्न हल करने का प्रयास करें!`;
+    }
+    return `नमस्ते! मैं DDCET RankRise का AI शैक्षणिक मेंटॉर हूँ।
+मैं आपकी गुजरात DDCET 2027 परीक्षा की संपूर्ण तैयारी में सहायता कर सकता हूँ:
+• **विषयवार स्पष्टीकरण**: गणित, भौतिकी, रसायन विज्ञान, कंप्यूटर और सॉफ्ट स्किल्स।
+• **महत्वपूर्ण MCQ**: चारों विकल्पों और विस्तृत व्याख्या के साथ अभ्यास प्रश्न।
+• **समय प्रबंधन**: 120 मिनट में 100 प्रश्नों को हल करने की सर्वोत्तम रणनीति।
+
+आपको किस विषय या फॉर्मूले में सहायता चाहिए? निसंकोच पूछें!`;
+  }
+
+  // 1.3 Practice MCQ Generation
+  if (/generate.*mcq|give.*mcq|practice.*question|sample.*question|create.*mcq/i.test(q)) {
+    return `### DDCET Practice MCQs (AI-Generated)
+*[AI-Generated DDCET Practice MCQ — Not an official GTU paper question]*
+
+**Question 1 (Engineering Mathematics)**:
+If $A$ is a $2 \\times 2$ matrix such that $|A| = 5$, what is the determinant of $2A$?
+(A) 10
+(B) 20
+(C) 25
+(D) 40
+
+**Correct Answer**: **(B) 20**
+**Detailed Explanation**:
+For an $n \\times n$ matrix, $|k A| = k^n |A|$. Here $n = 2$ and $k = 2$, so $|2A| = 2^2 \\times |A| = 4 \\times 5 = 20$.
+- **Option A (10)** is incorrect because it mistakenly computes $k |A| = 2 \\times 5 = 10$.
+- **Option C (25)** is incorrect because it squares $|A|$ instead of $k$.
+- **Option D (40)** is incorrect because it cubes $k$ ($2^3 = 8$) as if $A$ were a $3 \\times 3$ matrix.
+
+---
+
+**Question 2 (Basics of Physics)**:
+Which of the following physical quantities has the same dimensions as Work?
+(A) Power
+(B) Momentum
+(C) Torque
+(D) Force
+
+**Correct Answer**: **(C) Torque**
+**Detailed Explanation**:
+• $\\text{Work} = \\text{Force} \\times \\text{Displacement} = [M L^2 T^{-2}]$ (Joule)
+• $\\text{Torque} = \\text{Force} \\times \\text{Perpendicular Distance} = [M L^2 T^{-2}]$ (Newton-meter)
+Both have identical dimensions $[M L^2 T^{-2}]$.
+- **Option A (Power)** has dimensions $[M L^2 T^{-3}]$.
+- **Option B (Momentum)** has dimensions $[M L T^{-1}]$.
+- **Option D (Force)** has dimensions $[M L T^{-2}]$.`;
   }
 
   // 2. DDCET 2027 Exam Pattern, Marking Scheme & Strategy
