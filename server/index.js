@@ -1211,13 +1211,74 @@ app.get('/api/questions', async (req, res) => {
         correctOptionIndex: q.answer_index !== undefined ? q.answer_index : 0,
         subject: subMap.get(String(q.subject_id)) || q.subject || 'Physics',
         chapter: chapMap.get(String(q.chapter_id)) || q.chapter || '',
-        topic: topMap.get(String(q.topic_id)) || q.topic || ''
+        topic: topMap.get(String(q.topic_id)) || q.topic || '',
+        review_status: q.review_status || 'verified',
+        needs_review: q.needs_review !== undefined ? Boolean(q.needs_review) : false,
+        review_reason: q.review_reason || '',
+        source: q.source || 'System Bank'
       };
     });
     res.json(enriched);
   } catch (err) {
     console.error('Error fetching questions:', err);
     res.json(await db.getAll('questions'));
+  }
+});
+
+app.put('/api/questions/:id', async (req, res) => {
+  try {
+    const qId = parseInt(req.params.id);
+    const existing = await db.findOne('questions', { id: qId });
+    if (!existing) {
+      return res.status(404).json({ error: 'Question not found' });
+    }
+
+    const {
+      text, options, answer_index, explanation, marks, negative_marks,
+      subject_id, chapter_id, topic_id, published, review_status, needs_review, review_reason
+    } = req.body;
+
+    const USE_PG = !!process.env.DATABASE_URL;
+    const optionsData = USE_PG && Array.isArray(options) ? JSON.stringify(options) : options;
+
+    let subjectName = existing.subject;
+    let chapterName = existing.chapter;
+    let topicName = existing.topic;
+
+    if (subject_id) {
+      const s = await db.findOne('subjects', { id: parseInt(subject_id) });
+      if (s) subjectName = s.name;
+    }
+    if (chapter_id) {
+      const c = await db.findOne('chapters', { id: parseInt(chapter_id) });
+      if (c) chapterName = c.name;
+    }
+    if (topic_id) {
+      const t = await db.findOne('topics', { id: parseInt(topic_id) });
+      if (t) topicName = t.name;
+    }
+
+    const updates = {
+      ...(text !== undefined && { text }),
+      ...(options !== undefined && { options: optionsData }),
+      ...(answer_index !== undefined && { answer_index: parseInt(answer_index) }),
+      ...(explanation !== undefined && { explanation }),
+      ...(marks !== undefined && { marks: parseFloat(marks) }),
+      ...(negative_marks !== undefined && { negative_marks: parseFloat(negative_marks) }),
+      ...(subject_id !== undefined && { subject_id: parseInt(subject_id), subject: subjectName }),
+      ...(chapter_id !== undefined && { chapter_id: parseInt(chapter_id), chapter: chapterName }),
+      ...(topic_id !== undefined && { topic_id: parseInt(topic_id), topic: topicName }),
+      ...(published !== undefined && { published: Boolean(published) }),
+      ...(review_status !== undefined && { review_status }),
+      ...(needs_review !== undefined && { needs_review: Boolean(needs_review) }),
+      ...(review_reason !== undefined && { review_reason })
+    };
+
+    const updated = await db.update('questions', qId, updates);
+    res.json(updated);
+  } catch (err) {
+    console.error('Error updating question:', err);
+    res.status(500).json({ error: 'Internal server error updating question' });
   }
 });
 

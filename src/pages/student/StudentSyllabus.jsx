@@ -3,7 +3,8 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { 
   BookOpen, ChevronRight, ChevronDown, CheckCircle, ExternalLink, 
   PenTool, Search, CheckCircle2, Circle, Sparkles, Layers, Award,
-  HelpCircle, ArrowRight, BarChart2, BookCheck, Video, FileText, Eye, Download
+  HelpCircle, ArrowRight, BarChart2, BookCheck, Video, FileText, Eye, Download,
+  ClipboardCheck, Clock
 } from 'lucide-react';
 import { API_BASE_URL } from '../../config/api';
 import { useAuth } from '../../store/AuthContext';
@@ -32,6 +33,8 @@ export default function StudentSyllabus() {
   const [searchParams] = useSearchParams();
   const [syllabus, setSyllabus] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [tests, setTests] = useState([]);
+  const [testsLoading, setTestsLoading] = useState(true);
   const [activeSection, setActiveSection] = useState('ALL'); // 'ALL' | 'BE-01' | 'BE-02'
   const [selectedSubjectId, setSelectedSubjectId] = useState('ALL'); // 'ALL' or subject.id
   const [expandedSubjects, setExpandedSubjects] = useState(new Set()); // ALL SUBJECTS COLLAPSED BY DEFAULT
@@ -111,7 +114,51 @@ export default function StudentSyllabus() {
         })
         .catch(() => {});
     }
+
+    // Fetch published tests for all subjects
+    const fetchTests = async () => {
+      try {
+        const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+        const res = await fetch(`${API_URL}/api/tests?publishedOnly=true`, { headers });
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data)) {
+            setTests(data);
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching subject tests:', err);
+      } finally {
+        setTestsLoading(false);
+      }
+    };
+    fetchTests();
   }, [token]);
+
+  // Filter tests belonging specifically to a given subject (or its chapters)
+  const getTestsForSubject = (subjectId, subjectName, subjectChapters = []) => {
+    if (!Array.isArray(tests)) return [];
+    const chapIds = new Set((subjectChapters || []).map(c => String(c.id)));
+    return tests.filter(t => {
+      // 1. Direct subject_id match
+      if (t.subject_id !== null && t.subject_id !== undefined && String(t.subject_id) === String(subjectId)) {
+        return true;
+      }
+      // 2. Chapter-assigned test where the chapter belongs to this subject
+      if (t.chapter_id !== null && t.chapter_id !== undefined && chapIds.has(String(t.chapter_id))) {
+        return true;
+      }
+      // 3. Subject name fallback match (only if test has an explicit subject or subject_name set)
+      if (subjectName && (t.subject_name || t.subject)) {
+        const sName = subjectName.toLowerCase().trim();
+        const testSubName = (t.subject_name || t.subject || '').toLowerCase().trim();
+        if (testSubName && (testSubName === sName || testSubName.includes(sName) || sName.includes(testSubName))) {
+          return true;
+        }
+      }
+      return false;
+    });
+  };
 
   const toggleSubject = (subjectId) => {
     setExpandedSubjects(prev => {
@@ -626,6 +673,7 @@ export default function StudentSyllabus() {
                   });
                 });
                 const subPercent = subjectTopicsCount > 0 ? Math.round((subjectDoneCount / subjectTopicsCount) * 100) : 0;
+                const subjectTests = getTestsForSubject(subject.id, subject.name, subject.chapters);
 
                 return (
                   <div key={subject.id} className="bg-white rounded-2xl border border-[#E2E8F0] shadow-xs overflow-hidden transition-all">
@@ -643,12 +691,16 @@ export default function StudentSyllabus() {
                           {subject.name ? subject.name[0] : 'S'}
                         </div>
                         <div>
-                          <div className="flex items-center gap-2">
+                          <div className="flex flex-wrap items-center gap-2">
                             <h3 className="text-base font-bold text-slate-900">
                               {subject.name}
                             </h3>
                             <span className="text-[11px] font-semibold text-slate-500 bg-white border border-slate-200 px-2 py-0.5 rounded">
                               {subject.chapters?.length || 0} Units
+                            </span>
+                            <span className="text-[11px] font-semibold text-[#1E3A8A] bg-blue-50 border border-blue-200 px-2 py-0.5 rounded flex items-center gap-1">
+                              <ClipboardCheck size={11} className="text-[#2563EB]" />
+                              {subjectTests.length} {subjectTests.length === 1 ? 'Test' : 'Tests'}
                             </span>
                           </div>
                           <span className="text-xs text-slate-500 mt-0.5 block">
@@ -690,10 +742,150 @@ export default function StudentSyllabus() {
                       </div>
                     </div>
 
-                    {/* Chapters List inside Subject — rendered only when student expands */}
+                    {/* Content inside Subject — rendered only when student expands */}
                     {isSubjectExpanded && (
-                      <div className="divide-y divide-slate-100">
-                        {(subject.chapters || []).map((chapter, chIdx) => {
+                      <div>
+                        {/* Dedicated Subject Tests Section */}
+                        <div className="p-4 sm:p-5 bg-gradient-to-b from-blue-50/50 via-slate-50/30 to-white border-b border-slate-200 space-y-4">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                            <div className="flex items-center gap-2.5">
+                              <div className="w-8 h-8 rounded-xl bg-[#1E3A8A] text-white flex items-center justify-center shadow-xs shrink-0">
+                                <ClipboardCheck size={16} />
+                              </div>
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <h4 className="text-sm sm:text-base font-bold text-slate-900">
+                                    {subject.name} Tests
+                                  </h4>
+                                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-[#1E3A8A] border border-blue-200">
+                                    {subjectTests.length} {subjectTests.length === 1 ? 'Test' : 'Tests'} Available
+                                  </span>
+                                </div>
+                                <p className="text-xs text-slate-500 mt-0.5">
+                                  Subject-level timed mock assessments strictly covering {subject.name}.
+                                </p>
+                              </div>
+                            </div>
+
+                            <Link
+                              to={`/student/practice?subject=${subject.id}`}
+                              onClick={(e) => e.stopPropagation()}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 transition shadow-2xs shrink-0 self-start sm:self-auto"
+                              title={`Practice all ${subject.name} questions`}
+                            >
+                              <PenTool size={12} className="text-[#2563EB]" />
+                              <span>Practice {subject.name} MCQs</span>
+                            </Link>
+                          </div>
+
+                          {/* Tests Cards Grid */}
+                          {subjectTests.length > 0 ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                              {subjectTests.map(test => {
+                                const questionCount = test.question_count || test.questions_count || test.questions?.length || 25;
+                                const duration = test.duration_minutes || test.durationMinutes || 30;
+                                const totalMarks = test.total_marks || test.totalMarks || (questionCount * 2);
+
+                                return (
+                                  <div
+                                    key={test.id}
+                                    className="bg-white rounded-xl border border-slate-200 hover:border-blue-400 p-4 shadow-2xs hover:shadow-xs transition-all flex flex-col justify-between gap-3 group"
+                                  >
+                                    <div className="space-y-2">
+                                      <div className="flex items-start justify-between gap-2">
+                                        <div className="space-y-1 min-w-0">
+                                          <div className="flex flex-wrap items-center gap-1.5">
+                                            <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded bg-blue-50 text-[#1E3A8A] border border-blue-200">
+                                              <Award size={10} className="text-[#2563EB]" />
+                                              {test.type === 'chapter_wise' ? 'Chapter Test' : 'Subject Assessment'}
+                                            </span>
+                                            {test.chapter_name && (
+                                              <span className="text-[10px] font-medium px-2 py-0.5 rounded bg-slate-100 text-slate-600 truncate max-w-[160px]">
+                                                {test.chapter_name}
+                                              </span>
+                                            )}
+                                          </div>
+                                          <h5 className="text-sm font-bold text-slate-900 group-hover:text-blue-900 transition leading-snug">
+                                            {test.title}
+                                          </h5>
+                                        </div>
+                                        <span className="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                          Live
+                                        </span>
+                                      </div>
+
+                                      {/* Test Metrics Grid */}
+                                      <div className="grid grid-cols-3 gap-2 pt-1 text-center">
+                                        <div className="bg-slate-50/80 rounded-lg p-2 border border-slate-100">
+                                          <span className="text-[10px] uppercase font-semibold text-slate-400 block">Questions</span>
+                                          <span className="text-xs font-bold text-slate-800">{questionCount} MCQs</span>
+                                        </div>
+                                        <div className="bg-slate-50/80 rounded-lg p-2 border border-slate-100">
+                                          <span className="text-[10px] uppercase font-semibold text-slate-400 block">Duration</span>
+                                          <span className="text-xs font-bold text-slate-800">{duration} mins</span>
+                                        </div>
+                                        <div className="bg-slate-50/80 rounded-lg p-2 border border-slate-100">
+                                          <span className="text-[10px] uppercase font-semibold text-slate-400 block">Max Marks</span>
+                                          <span className="text-xs font-bold text-slate-800">{totalMarks} M</span>
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    {/* Card Action Button */}
+                                    <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between gap-2">
+                                      <span className="text-[11px] text-slate-500 flex items-center gap-1 font-medium">
+                                        <Clock size={12} className="text-slate-400" />
+                                        <span>Timed Assessment</span>
+                                      </span>
+                                      <Link
+                                        to={`/student/test/${test.id}`}
+                                        onClick={(e) => e.stopPropagation()}
+                                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold text-white bg-[#1E3A8A] hover:bg-blue-800 transition shadow-2xs group-hover:shadow-xs shrink-0"
+                                      >
+                                        <span>Attempt Test</span>
+                                        <ArrowRight size={13} className="transition-transform group-hover:translate-x-0.5" />
+                                      </Link>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          ) : (
+                            <div className="p-4 rounded-xl border border-dashed border-slate-200 bg-white text-center space-y-2">
+                              <p className="text-xs font-semibold text-slate-600">
+                                No formal mock tests published yet for {subject.name}.
+                              </p>
+                              <p className="text-[11px] text-slate-400">
+                                You can practice {subject.name} questions or explore the chapter units below.
+                              </p>
+                              <Link
+                                to={`/student/practice?subject=${subject.id}`}
+                                onClick={(e) => e.stopPropagation()}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-[#1E3A8A] bg-blue-50 hover:bg-blue-100 border border-blue-200 transition"
+                              >
+                                <PenTool size={12} />
+                                <span>Practice {subject.name} MCQs</span>
+                              </Link>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Section Header for Chapters & Units */}
+                        <div className="px-4 sm:px-5 py-3 bg-slate-50/80 border-b border-slate-200 flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <BookOpen size={15} className="text-[#2563EB]" />
+                            <span className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                              {subject.name} Chapters & Units ({subject.chapters?.length || 0})
+                            </span>
+                          </div>
+                          <span className="text-[11px] text-slate-400 font-medium hidden sm:inline">
+                            Click unit to expand revision points & notes
+                          </span>
+                        </div>
+
+                        {/* Chapters List inside Subject */}
+                        <div className="divide-y divide-slate-100">
+                          {(subject.chapters || []).map((chapter, chIdx) => {
                         const isExpanded = expandedChapters.has(chapter.id);
                         
                         // Chapter progress
@@ -970,7 +1162,8 @@ export default function StudentSyllabus() {
                         );
                       })}
                     </div>
-                    )}
+                  </div>
+                )}
 
                   </div>
                 );
