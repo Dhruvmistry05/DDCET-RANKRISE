@@ -141,14 +141,14 @@ export default function PracticeLab() {
   // Compute available Topics for selected chapter
   const availableTopics = useMemo(() => {
     const map = new Map();
+    const normSub = (selectedSubject || '').toLowerCase().trim();
     const normSelCh = (selectedChapter || '').toLowerCase().replace(/&/g, 'and').trim();
 
     questions
       .filter(q => {
-        const matchSub = (q.subject || '').toLowerCase().trim() === (selectedSubject || '').toLowerCase().trim();
+        const matchSub = (q.subject || '').toLowerCase().trim() === normSub;
         const normQCh = (q.chapter || '').toLowerCase().replace(/&/g, 'and').trim();
-        const matchCh = normQCh === normSelCh || normQCh.includes(normSelCh) || normSelCh.includes(normQCh);
-        return matchSub && matchCh;
+        return matchSub && normQCh === normSelCh;
       })
       .forEach(q => {
         if (q.topic) {
@@ -191,8 +191,7 @@ export default function PracticeLab() {
       return questions.filter(q => {
         const matchSub = (q.subject || '').toLowerCase().trim() === normSub;
         const normQCh = (q.chapter || '').toLowerCase().replace(/&/g, 'and').trim();
-        const matchCh = normQCh === normSelCh || normQCh.includes(normSelCh) || normSelCh.includes(normQCh);
-        return matchSub && matchCh;
+        return matchSub && normQCh === normSelCh;
       });
     }
 
@@ -202,10 +201,8 @@ export default function PracticeLab() {
       return questions.filter(q => {
         const matchSub = (q.subject || '').toLowerCase().trim() === normSub;
         const normQCh = (q.chapter || '').toLowerCase().replace(/&/g, 'and').trim();
-        const matchCh = normQCh === normSelCh || normQCh.includes(normSelCh) || normSelCh.includes(normQCh);
         const normQTop = (q.topic || '').toLowerCase().replace(/&/g, 'and').trim();
-        const matchTop = normQTop === normSelTop || normQTop.includes(normSelTop) || normSelTop.includes(normQTop);
-        return matchSub && matchCh && matchTop;
+        return matchSub && normQCh === normSelCh && normQTop === normSelTop;
       });
     }
 
@@ -216,7 +213,7 @@ export default function PracticeLab() {
 
   const targetSessionCount = useMemo(() => {
     if (practiceMode === 'topic') {
-      return availableCount; // strictly all questions in topic (30 MCQs)
+      return availableCount;
     }
     if (sessionLength === '30') {
       return Math.min(30, availableCount);
@@ -436,7 +433,7 @@ export default function PracticeLab() {
                 </p>
               </div>
               <div className="pt-2 border-t border-slate-200 dark:border-slate-700/60 text-xs font-semibold text-blue-700 dark:text-blue-300">
-                30 MCQs per Topic
+                All Topic MCQs
               </div>
             </div>
 
@@ -574,7 +571,7 @@ export default function PracticeLab() {
                 ) : (
                   <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 text-amber-800 dark:text-amber-300 text-xs flex items-center gap-2">
                     <AlertCircle size={14} className="shrink-0" />
-                    <span>No questions found for {selectedSubject}. Please select Physics.</span>
+                    <span>No chapters found for {selectedSubject}.</span>
                   </div>
                 )}
               </div>
@@ -594,7 +591,7 @@ export default function PracticeLab() {
                   >
                     {availableTopics.map(t => (
                       <option key={t.name} value={t.name}>
-                        {t.name} (30 MCQs)
+                        {t.name} ({t.count} MCQs)
                       </option>
                     ))}
                   </select>

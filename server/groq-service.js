@@ -47,11 +47,14 @@ const FALLBACK_MODEL = 'openai/gpt-oss-120b';
 const REQUEST_TIMEOUT_MS = 20000;
 
 function getGroqApiKey() {
-  if (process.env.GROQ_API_KEY !== undefined) {
-    return process.env.GROQ_API_KEY ? process.env.GROQ_API_KEY.trim() : '';
+  if (process.env.GROQ_API_KEY && process.env.GROQ_API_KEY.trim()) {
+    return process.env.GROQ_API_KEY.trim();
   }
   loadLocalEnv();
-  return process.env.GROQ_API_KEY ? process.env.GROQ_API_KEY.trim() : '';
+  if (process.env.GROQ_API_KEY && process.env.GROQ_API_KEY.trim()) {
+    return process.env.GROQ_API_KEY.trim();
+  }
+  return '';
 }
 
 function isGroqConfigured() {

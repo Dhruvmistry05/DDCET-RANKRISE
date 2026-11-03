@@ -1205,6 +1205,9 @@ app.get('/api/questions', async (req, res) => {
       if (typeof opts === 'string') {
         try { opts = JSON.parse(opts); } catch (e) {}
       }
+      const isImported = q.source === 'DDCET Question Bank 2024' || (q.explanation && q.explanation.includes('DDCET Question Bank'));
+      const isPending = Boolean(q.needs_review || q.review_status === 'pending' || (q.explanation && q.explanation.includes('[Needs Review]')));
+
       return {
         ...q,
         options: Array.isArray(opts) ? opts : [],
@@ -1212,10 +1215,10 @@ app.get('/api/questions', async (req, res) => {
         subject: subMap.get(String(q.subject_id)) || q.subject || 'Physics',
         chapter: chapMap.get(String(q.chapter_id)) || q.chapter || '',
         topic: topMap.get(String(q.topic_id)) || q.topic || '',
-        review_status: q.review_status || 'verified',
-        needs_review: q.needs_review !== undefined ? Boolean(q.needs_review) : false,
-        review_reason: q.review_reason || '',
-        source: q.source || 'System Bank'
+        review_status: q.review_status || (isPending ? 'pending' : 'verified'),
+        needs_review: q.needs_review !== undefined ? Boolean(q.needs_review) : isPending,
+        review_reason: q.review_reason || (isPending ? 'Requires admin sub-topic confirmation' : ''),
+        source: q.source || (isImported ? 'DDCET Question Bank 2024' : 'System Bank')
       };
     });
     res.json(enriched);
@@ -1258,24 +1261,36 @@ app.put('/api/questions/:id', async (req, res) => {
       if (t) topicName = t.name;
     }
 
+    let finalExplanation = explanation !== undefined ? explanation : existing.explanation;
+    if (review_status === 'verified' && finalExplanation && finalExplanation.includes('[Needs Review]')) {
+      finalExplanation = finalExplanation.replace(/\[Needs Review\][^\n]*/g, '').trim();
+    } else if (review_status === 'pending' && finalExplanation && !finalExplanation.includes('[Needs Review]')) {
+      finalExplanation = `${finalExplanation} [Needs Review] ${review_reason || 'Requires admin sub-topic confirmation'}`.trim();
+    }
+
     const updates = {
       ...(text !== undefined && { text }),
       ...(options !== undefined && { options: optionsData }),
       ...(answer_index !== undefined && { answer_index: parseInt(answer_index) }),
-      ...(explanation !== undefined && { explanation }),
+      ...(finalExplanation !== undefined && { explanation: finalExplanation }),
       ...(marks !== undefined && { marks: parseFloat(marks) }),
       ...(negative_marks !== undefined && { negative_marks: parseFloat(negative_marks) }),
-      ...(subject_id !== undefined && { subject_id: parseInt(subject_id), subject: subjectName }),
-      ...(chapter_id !== undefined && { chapter_id: parseInt(chapter_id), chapter: chapterName }),
-      ...(topic_id !== undefined && { topic_id: parseInt(topic_id), topic: topicName }),
-      ...(published !== undefined && { published: Boolean(published) }),
-      ...(review_status !== undefined && { review_status }),
-      ...(needs_review !== undefined && { needs_review: Boolean(needs_review) }),
-      ...(review_reason !== undefined && { review_reason })
+      ...(subject_id !== undefined && { subject_id: parseInt(subject_id) }),
+      ...(chapter_id !== undefined && { chapter_id: parseInt(chapter_id) }),
+      ...(topic_id !== undefined && { topic_id: parseInt(topic_id) }),
+      ...(published !== undefined && { published: Boolean(published) })
     };
 
     const updated = await db.update('questions', qId, updates);
-    res.json(updated);
+    res.json({
+      ...(updated || existing),
+      ...updates,
+      subject: subjectName,
+      chapter: chapterName,
+      topic: topicName,
+      review_status: review_status || existing.review_status || 'verified',
+      needs_review: needs_review !== undefined ? Boolean(needs_review) : (review_status === 'pending')
+    });
   } catch (err) {
     console.error('Error updating question:', err);
     res.status(500).json({ error: 'Internal server error updating question' });
