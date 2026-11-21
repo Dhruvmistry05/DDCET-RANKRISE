@@ -4083,9 +4083,10 @@ app.post('/api/student/activity/log', optionalUser, async (req, res) => {
 // ============================================================================
 
 // Get Current Student's Study Streak Data
-app.get('/api/student/streak', requireUser, async (req, res) => {
+app.get('/api/student/streak', optionalUser, async (req, res) => {
   try {
-    const data = await streakService.getStudentStreakData(req.user.id);
+    const userId = req.user?.id || null;
+    const data = await streakService.getStudentStreakData(userId);
     res.json({ success: true, ...data });
   } catch (err) {
     console.error('Error fetching student streak:', err);
@@ -4094,10 +4095,11 @@ app.get('/api/student/streak', requireUser, async (req, res) => {
 });
 
 // Get Student's Monthly Activity Calendar
-app.get('/api/student/streak/calendar', requireUser, async (req, res) => {
+app.get('/api/student/streak/calendar', optionalUser, async (req, res) => {
   try {
+    const userId = req.user?.id || null;
     const { year, month } = req.query;
-    const data = await streakService.getStudentMonthlyCalendar(req.user.id, year, month);
+    const data = await streakService.getStudentMonthlyCalendar(userId, year, month);
     res.json({ success: true, ...data });
   } catch (err) {
     console.error('Error fetching streak calendar:', err);

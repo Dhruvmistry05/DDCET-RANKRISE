@@ -25,6 +25,7 @@ export default function StudentHome() {
   });
   const navigate = useNavigate();
   const { user, token } = useAuth();
+  const effectiveToken = token || (typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [isPrepSettingsOpen, setIsPrepSettingsOpen] = useState(false);
   const [unlockedMilestone, setUnlockedMilestone] = useState(null);
@@ -419,7 +420,7 @@ export default function StudentHome() {
       <StreakCalendarModal
         isOpen={isCalendarOpen}
         onClose={() => setIsCalendarOpen(false)}
-        token={token}
+        token={effectiveToken}
         initialStreakData={streakData || stats.streak}
       />
 

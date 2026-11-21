@@ -1,9 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { 
   X, ChevronLeft, ChevronRight, Calendar as CalendarIcon, 
   Flame, Trophy, Award, Clock, CheckCircle2, Lock, Sparkles, HelpCircle 
 } from 'lucide-react';
 import { API_BASE_URL } from '../../config/api';
+
+const DEFAULT_MILESTONES = [
+  { days: 3, id: 'streak_3', title: '3-Day Spark', icon: '🔥', description: 'Completed 3 consecutive study days! Great momentum!' },
+  { days: 7, id: 'streak_7', title: '7-Day Warrior', icon: '⚡', description: 'A full week of non-stop learning! True dedication.' },
+  { days: 14, id: 'streak_14', title: 'Fortnight Focus', icon: '🎯', description: '14 days of relentless preparation for DDCET!' },
+  { days: 30, id: 'streak_30', title: 'Monthly Master', icon: '🏆', description: '30-day streak! You are among the most disciplined students.' },
+  { days: 50, id: 'streak_50', title: '50-Day Dedication', icon: '🌟', description: '50 consecutive study days! Mastery is within reach.' },
+  { days: 100, id: 'streak_100', title: 'Centurion Scholar', icon: '👑', description: '100 days of legendary academic commitment!' }
+];
 
 export default function StreakCalendarModal({ isOpen, onClose, token, initialStreakData }) {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -14,6 +23,9 @@ export default function StreakCalendarModal({ isOpen, onClose, token, initialStr
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth() + 1; // 1-12
 
+  // Ensure auth token is reliably available even if prop is delayed
+  const effectiveToken = token || (typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null);
+
   useEffect(() => {
     if (!isOpen) return;
 
@@ -21,14 +33,14 @@ export default function StreakCalendarModal({ isOpen, onClose, token, initialStr
     const fetchCalendar = async () => {
       setLoading(true);
       try {
-        const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+        const headers = effectiveToken ? { 'Authorization': `Bearer ${effectiveToken}` } : {};
         const res = await fetch(`${API_BASE_URL}/api/student/streak/calendar?year=${year}&month=${month}`, { headers });
         if (res.ok) {
           const json = await res.json();
           if (isMounted) setCalendarData(json);
         }
       } catch (err) {
-        console.error('Error fetching calendar data:', err);
+        console.warn('Notice: using client-computed calendar structure while network resolves:', err);
       } finally {
         if (isMounted) setLoading(false);
       }
@@ -36,9 +48,7 @@ export default function StreakCalendarModal({ isOpen, onClose, token, initialStr
 
     fetchCalendar();
     return () => { isMounted = false; };
-  }, [isOpen, year, month, token]);
-
-  if (!isOpen) return null;
+  }, [isOpen, year, month, effectiveToken]);
 
   const handlePrevMonth = () => {
     setCurrentDate(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
@@ -58,11 +68,6 @@ export default function StreakCalendarModal({ isOpen, onClose, token, initialStr
   const currentStreak = calendarData?.current_streak ?? initialStreakData?.current_streak ?? 0;
   const longestStreak = calendarData?.longest_streak ?? initialStreakData?.longest_streak ?? 0;
   const totalActiveDays = calendarData?.total_active_days ?? initialStreakData?.total_active_days ?? 0;
-  const milestones = calendarData?.milestones ?? initialStreakData?.milestones ?? [];
-
-  const daysInMonth = calendarData?.days || [];
-  const firstDayOfWeek = calendarData?.first_day_of_week ?? 0; // 0 = Sun
-  const monthName = calendarData?.month_name || currentDate.toLocaleString('default', { month: 'long' });
 
   // Format seconds to human readable
   const formatTime = (secs) => {
@@ -74,6 +79,112 @@ export default function StreakCalendarModal({ isOpen, onClose, token, initialStr
     const remM = m % 60;
     return `${h}h ${remM}m`;
   };
+
+  // Determine current day string in Asia/Kolkata
+  const todayDateStr = useMemo(() => {
+    try {
+      const parts = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+      return parts;
+    } catch (_e) {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+  }, []);
+
+  // Compute month layout deterministically (never empty)
+  const { displayDays, firstDayOfWeek, monthName, monthSummary } = useMemo(() => {
+    const daysInMonthCount = new Date(year, month, 0).getDate();
+    const firstDow = new Date(year, month - 1, 1).getDay(); // 0 = Sun
+    const mName = new Intl.DateTimeFormat('en-US', { month: 'long' }).format(new Date(year, month - 1, 1));
+
+    // Map server days if provided
+    const serverDaysMap = new Map();
+    if (Array.isArray(calendarData?.days)) {
+      calendarData.days.forEach(d => {
+        if (d && d.date) serverDaysMap.set(d.date, d);
+      });
+    }
+
+    let activeCount = 0;
+    let totalQuestions = 0;
+    let totalTime = 0;
+
+    const days = Array.from({ length: daysInMonthCount }, (_, idx) => {
+      const dayNum = idx + 1;
+      const padMonth = String(month).padStart(2, '0');
+      const padDay = String(dayNum).padStart(2, '0');
+      const dateStr = `${year}-${padMonth}-${padDay}`;
+      const serverEntry = serverDaysMap.get(dateStr);
+
+      const isToday = dateStr === todayDateStr;
+      const isPast = dateStr < todayDateStr;
+      const isFuture = dateStr > todayDateStr;
+      const active = Boolean(serverEntry?.active);
+
+      const qCount = serverEntry ? (parseInt(serverEntry.total_questions) || 0) : 0;
+      const tSpent = serverEntry ? (parseInt(serverEntry.time_spent_seconds) || 0) : 0;
+      const aCount = serverEntry ? (parseInt(serverEntry.activities_count) || 1) : 0;
+
+      if (active) {
+        activeCount++;
+        totalQuestions += qCount;
+        totalTime += tSpent;
+      }
+
+      return {
+        day_number: dayNum,
+        date: dateStr,
+        active,
+        is_today: isToday,
+        is_past: isPast,
+        is_future: isFuture,
+        activities_count: active ? aCount : 0,
+        total_questions: qCount,
+        time_spent_seconds: tSpent,
+        activity_type: serverEntry?.activity_type || null
+      };
+    });
+
+    const summary = calendarData?.month_summary || {
+      active_days: activeCount,
+      total_questions: totalQuestions,
+      total_time_seconds: totalTime
+    };
+
+    return {
+      displayDays: days,
+      firstDayOfWeek: firstDow,
+      monthName: mName,
+      monthSummary: summary
+    };
+  }, [year, month, calendarData, todayDateStr]);
+
+  // Merge milestones: Always ensure all 6 milestones are displayed
+  const milestones = useMemo(() => {
+    const rawMilestones = (calendarData?.milestones && calendarData.milestones.length > 0)
+      ? calendarData.milestones
+      : ((initialStreakData?.milestones && initialStreakData.milestones.length > 0)
+          ? initialStreakData.milestones
+          : []);
+
+    const rawMap = new Map();
+    rawMilestones.forEach(m => {
+      rawMap.set(m.id, m);
+      rawMap.set(`streak_${m.days}`, m);
+    });
+
+    return DEFAULT_MILESTONES.map(def => {
+      const matched = rawMap.get(def.id) || rawMilestones.find(m => m.days === def.days);
+      const isAchieved = Boolean(matched?.achieved || (currentStreak >= def.days) || (longestStreak >= def.days));
+      return {
+        ...def,
+        achieved: isAchieved,
+        achieved_at: matched?.achieved_at || null
+      };
+    });
+  }, [calendarData, initialStreakData, currentStreak, longestStreak]);
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
@@ -180,16 +291,16 @@ export default function StreakCalendarModal({ isOpen, onClose, token, initialStr
             </div>
 
             {/* Monthly Summary Pills */}
-            {calendarData?.month_summary && (
+            {monthSummary && (
               <div className="flex items-center gap-2 text-[11px] text-slate-600 dark:text-slate-400 flex-wrap">
                 <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-medium">
-                  <strong className="text-orange-600 dark:text-orange-400">{calendarData.month_summary.active_days}</strong> active days
+                  <strong className="text-orange-600 dark:text-orange-400">{monthSummary.active_days}</strong> active days
                 </span>
                 <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-medium">
-                  <strong className="text-blue-600 dark:text-blue-400">{calendarData.month_summary.total_questions}</strong> MCQs
+                  <strong className="text-blue-600 dark:text-blue-400">{monthSummary.total_questions}</strong> MCQs
                 </span>
                 <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-medium">
-                  <strong className="text-emerald-600 dark:text-emerald-400">{formatTime(calendarData.month_summary.total_time_seconds)}</strong> study time
+                  <strong className="text-emerald-600 dark:text-emerald-400">{formatTime(monthSummary.total_time_seconds)}</strong> study time
                 </span>
               </div>
             )}
@@ -206,13 +317,15 @@ export default function StreakCalendarModal({ isOpen, onClose, token, initialStr
               ))}
             </div>
 
-            {/* Grid Days */}
-            {loading ? (
-              <div className="py-16 text-center">
-                <div className="inline-block animate-spin rounded-full h-7 w-7 border-2 border-orange-500 border-t-transparent" />
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">Loading activity calendar...</p>
-              </div>
-            ) : (
+            {/* Grid Days (Always guaranteed to render all days) */}
+            <div className="relative">
+              {loading && !calendarData && (
+                <div className="absolute top-1 right-1 z-10 flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-slate-900/80 text-white text-[10px] font-medium backdrop-blur-xs">
+                  <div className="animate-spin rounded-full h-2.5 w-2.5 border-2 border-orange-400 border-t-transparent" />
+                  <span>Syncing...</span>
+                </div>
+              )}
+
               <div className="grid grid-cols-7 gap-1 sm:gap-2">
                 {/* Empty prefix cells before 1st of month */}
                 {Array.from({ length: firstDayOfWeek }).map((_, idx) => (
@@ -220,7 +333,7 @@ export default function StreakCalendarModal({ isOpen, onClose, token, initialStr
                 ))}
 
                 {/* Days of the month */}
-                {daysInMonth.map((day) => {
+                {displayDays.map((day) => {
                   const isSelected = selectedDay?.date === day.date;
                   return (
                     <button
@@ -256,7 +369,7 @@ export default function StreakCalendarModal({ isOpen, onClose, token, initialStr
                   );
                 })}
               </div>
-            )}
+            </div>
           </div>
 
           {/* Selected Day Inspection Box */}
