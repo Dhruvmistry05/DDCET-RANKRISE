@@ -6,6 +6,8 @@ const fs = require('fs');
 const crypto = require('crypto');
 const db = require('./db-adapter'); // CHANGED to adapter
 const { askGroqMentor, isGroqConfigured } = require('./groq-service');
+const streakService = require('./streak-service');
+const preparationService = require('./preparation-service');
 
 const app = express();
 
@@ -2257,19 +2259,28 @@ const computeLeaderboardData = async () => {
   };
 };
 
-// Helper: Compute live dashboard stats for a student
-const computeStudentStats = async (userId) => {
+// Helper: Compute live dashboard stats for a student (supporting Preparation Cycles)
+const computeStudentStats = async (userId, targetCycle = null) => {
   if (!userId) {
     return {
+      cycle_number: 1,
       tests_completed: 0,
       average_score: '0%',
       practice_time: '0 hours',
       current_rank: '-',
       questions_attempted: 0,
       syllabus_progress: '0%',
-      syllabus_progress_percent: 0
+      syllabus_progress_percent: 0,
+      all_time_tests_completed: 0
     };
   }
+
+  // 1. Determine active preparation cycle for the student
+  let studentUser = null;
+  try {
+    studentUser = await db.findOne('users', { id: userId });
+  } catch (_e) {}
+  const currentCycle = targetCycle !== null ? parseInt(targetCycle) : (parseInt(studentUser?.current_cycle_number) || 1);
 
   let allAttempts = [];
   try {
@@ -2279,12 +2290,15 @@ const computeStudentStats = async (userId) => {
   }
 
   const userAttempts = allAttempts.filter(a => String(a.user_id) === String(userId));
+  // Filter attempts belonging strictly to the active preparation cycle
+  const cycleAttempts = userAttempts.filter(a => (parseInt(a.cycle_number) || 1) === currentCycle);
 
-  let totalQuestions = 0;
-  let totalTime = 0;
-  let scorePercentageSum = 0;
+  // Active cycle stats computation
+  let cycleTotalQuestions = 0;
+  let cycleTotalTime = 0;
+  let cycleScorePercentageSum = 0;
 
-  for (const a of userAttempts) {
+  for (const a of cycleAttempts) {
     let answersObj = a.answers;
     while (typeof answersObj === 'string') {
       try { answersObj = JSON.parse(answersObj); } catch (e) { break; }
@@ -2296,9 +2310,20 @@ const computeStudentStats = async (userId) => {
     const parsedScore = a.score !== undefined && a.score !== null ? parseFloat(a.score) : (parseFloat(answersObj.score) || 0);
     const parsedMax = a.max_score !== undefined && a.max_score !== null ? parseFloat(a.max_score) : (parseFloat(answersObj.max_score) || 20);
 
-    totalQuestions += qCount;
-    totalTime += parsedTime;
-    scorePercentageSum += parsedMax > 0 ? (parsedScore / parsedMax) * 100 : parsedScore;
+    cycleTotalQuestions += qCount;
+    cycleTotalTime += parsedTime;
+    cycleScorePercentageSum += parsedMax > 0 ? (parsedScore / parsedMax) * 100 : parsedScore;
+  }
+
+  // All-time question count across all historical cycles
+  let totalQuestionsAllTime = 0;
+  for (const a of userAttempts) {
+    let answersObj = a.answers;
+    while (typeof answersObj === 'string') {
+      try { answersObj = JSON.parse(answersObj); } catch (e) { break; }
+    }
+    const qCount = parseInt(a.questions_attempted) || parseInt(answersObj?.questions_attempted) || (answersObj?.answers ? Object.keys(answersObj.answers).length : 0);
+    totalQuestionsAllTime += qCount;
   }
 
   let allActivity = [];
@@ -2310,16 +2335,17 @@ const computeStudentStats = async (userId) => {
   const userActivity = allActivity.filter(act => String(act.user_id) === String(userId));
   for (const act of userActivity) {
     if (!act.attempt_id && act.type !== 'mock_test' && act.type !== 'test') {
-      totalQuestions += parseInt(act.questions_attempted) || 0;
-      totalTime += parseInt(act.time_spent_seconds) || 0;
+      cycleTotalQuestions += parseInt(act.questions_attempted) || 0;
+      cycleTotalTime += parseInt(act.time_spent_seconds) || 0;
+      totalQuestionsAllTime += parseInt(act.questions_attempted) || 0;
     }
   }
 
-  const tests_completed = userAttempts.length;
-  const average_score = tests_completed > 0 ? `${Math.round(scorePercentageSum / tests_completed)}%` : '0%';
-  const practice_time = formatPracticeTime(totalTime);
+  const tests_completed = cycleAttempts.length;
+  const average_score = tests_completed > 0 ? `${Math.round(cycleScorePercentageSum / tests_completed)}%` : '0%';
+  const practice_time = formatPracticeTime(cycleTotalTime);
 
-  // Syllabus progress
+  // Syllabus progress strictly for current preparation cycle
   let allTopics = [];
   try {
     allTopics = await db.getAll('topics');
@@ -2335,7 +2361,11 @@ const computeStudentStats = async (userId) => {
   } catch (e) {
     topicProgress = [];
   }
-  const userTopicProgress = topicProgress.filter(tp => String(tp.user_id) === String(userId) && tp.completed);
+  const userTopicProgress = topicProgress.filter(tp => 
+    String(tp.user_id) === String(userId) && 
+    (parseInt(tp.cycle_number) || 1) === currentCycle && 
+    tp.completed
+  );
   const completedTopicsCount = userTopicProgress.length;
 
   const progressPercent = totalTopicsCount > 0 ? Math.min(100, Math.round((completedTopicsCount / totalTopicsCount) * 100)) : 0;
@@ -2346,14 +2376,26 @@ const computeStudentStats = async (userId) => {
   const studentEntry = leaderboardData.leaderboard.find(e => String(e.student_id) === String(userId));
   const current_rank = studentEntry ? `#${studentEntry.rank}` : '-';
 
+  // Daily Study Streak (Permanently preserved across all cycles)
+  let streakInfo = null;
+  if (userId) {
+    try {
+      streakInfo = await streakService.getStudentStreakData(userId);
+    } catch (_streakErr) {}
+  }
+
   return {
+    cycle_number: currentCycle,
     tests_completed,
     average_score,
     practice_time,
     current_rank,
-    questions_attempted: totalQuestions,
+    questions_attempted: cycleTotalQuestions,
     syllabus_progress,
-    syllabus_progress_percent: progressPercent
+    syllabus_progress_percent: progressPercent,
+    all_time_tests_completed: userAttempts.length,
+    all_time_questions_attempted: totalQuestionsAllTime,
+    streak: streakInfo
   };
 };
 
@@ -3856,16 +3898,24 @@ app.post('/api/student/tests/submit', requireUser, async (req, res) => {
       }
     }
 
+    let studentUser = null;
+    try {
+      studentUser = await db.findOne('users', { id: userId });
+    } catch (_e) {}
+    const activeCycle = parseInt(studentUser?.current_cycle_number) || 1;
+
     const USE_PG = !!process.env.DATABASE_URL;
     const attemptRecord = {
       user_id: userId,
       test_id: numericTestId,
+      cycle_number: activeCycle,
       answers: USE_PG ? JSON.stringify(payload) : payload,
       score: payload.score,
       submitted_at: payload.submitted_at
     };
 
     if (!USE_PG) {
+      attemptRecord.cycle_number = activeCycle;
       attemptRecord.test_title = payload.test_title;
       attemptRecord.max_score = payload.max_score;
       attemptRecord.correct_count = payload.correct_count;
@@ -3892,13 +3942,29 @@ app.post('/api/student/tests/submit', requireUser, async (req, res) => {
       });
     } catch (actErr) {}
 
+    // Record study streak (consecutive days tracking in Asia/Kolkata)
+    let streakResult = null;
+    try {
+      const titleLower = (payload.test_title || '').toLowerCase();
+      const isMock = titleLower.includes('mock') || titleLower.includes('assessment') || titleLower.includes('official');
+      streakResult = await streakService.recordStudyActivity({
+        userId,
+        timeSpentSeconds: payload.time_spent_seconds,
+        questionsAttempted: payload.questions_attempted,
+        activityType: isMock ? 'mock_test' : 'practice'
+      });
+    } catch (streakErr) {
+      console.warn('[Streak Service] Failed to record streak on test submission:', streakErr.message);
+    }
+
     const updatedStats = await computeStudentStats(userId);
 
     res.status(201).json({
       success: true,
       message: 'Assessment submitted and recorded successfully.',
       attempt: newAttempt,
-      stats: updatedStats
+      stats: updatedStats,
+      streak: streakResult
     });
   } catch (err) {
     console.error('Error submitting test attempt:', err);
@@ -3906,33 +3972,51 @@ app.post('/api/student/tests/submit', requireUser, async (req, res) => {
   }
 });
 
-// 4. Student Topic Progress Check
+// 4. Student Topic Progress Check (Scoped to Active Preparation Cycle)
 app.get('/api/student/topic-progress', optionalUser, async (req, res) => {
   try {
-    if (!req.user) return res.json({ completed_topic_ids: [] });
+    if (!req.user) return res.json({ completed_topic_ids: [], current_cycle_number: 1 });
+    let studentUser = null;
+    try {
+      studentUser = await db.findOne('users', { id: req.user.id });
+    } catch (_e) {}
+    const currentCycle = parseInt(studentUser?.current_cycle_number) || 1;
+
     let progressList = [];
     try {
       progressList = await db.find('student_topic_progress', { user_id: req.user.id });
     } catch (e) {
       progressList = [];
     }
-    const completedIds = progressList.filter(p => p.completed).map(p => p.topic_id);
-    res.json({ completed_topic_ids: completedIds });
+    const completedIds = progressList
+      .filter(p => p.completed && (parseInt(p.cycle_number) || 1) === currentCycle)
+      .map(p => p.topic_id);
+    res.json({ completed_topic_ids: completedIds, current_cycle_number: currentCycle });
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch topic progress.' });
   }
 });
 
-// 5. Student Topic Progress Toggle
+// 5. Student Topic Progress Toggle (Scoped to Active Preparation Cycle)
 app.post('/api/student/topic-progress', requireUser, async (req, res) => {
   try {
     const userId = req.user.id;
     const { topic_id, completed, time_spent_seconds, questions_attempted } = req.body;
     if (!topic_id) return res.status(400).json({ error: 'topic_id is required' });
 
+    let studentUser = null;
+    try {
+      studentUser = await db.findOne('users', { id: userId });
+    } catch (_e) {}
+    const currentCycle = parseInt(studentUser?.current_cycle_number) || 1;
+
     let existing = null;
     try {
-      existing = await db.findOne('student_topic_progress', { user_id: userId, topic_id: parseInt(topic_id) });
+      existing = await db.findOne('student_topic_progress', { 
+        user_id: userId, 
+        topic_id: parseInt(topic_id),
+        cycle_number: currentCycle
+      });
     } catch (e) {}
 
     if (existing) {
@@ -3944,6 +4028,7 @@ app.post('/api/student/topic-progress', requireUser, async (req, res) => {
       await db.insert('student_topic_progress', {
         user_id: userId,
         topic_id: parseInt(topic_id),
+        cycle_number: currentCycle,
         completed: completed !== false,
         updated_at: new Date().toISOString()
       });
@@ -3990,6 +4075,119 @@ app.post('/api/student/activity/log', optionalUser, async (req, res) => {
     res.json({ success: true });
   } catch (err) {
     res.status(200).json({ success: false });
+  }
+});
+
+// ============================================================================
+// DAILY STUDY STREAKS & ACTIVITY ENGINE
+// ============================================================================
+
+// Get Current Student's Study Streak Data
+app.get('/api/student/streak', requireUser, async (req, res) => {
+  try {
+    const data = await streakService.getStudentStreakData(req.user.id);
+    res.json({ success: true, ...data });
+  } catch (err) {
+    console.error('Error fetching student streak:', err);
+    res.status(500).json({ error: 'Failed to retrieve streak data.' });
+  }
+});
+
+// Get Student's Monthly Activity Calendar
+app.get('/api/student/streak/calendar', requireUser, async (req, res) => {
+  try {
+    const { year, month } = req.query;
+    const data = await streakService.getStudentMonthlyCalendar(req.user.id, year, month);
+    res.json({ success: true, ...data });
+  } catch (err) {
+    console.error('Error fetching streak calendar:', err);
+    res.status(500).json({ error: 'Failed to retrieve monthly activity calendar.' });
+  }
+});
+
+// ============================================================================
+// DDCET PREPARATION CYCLES & RESTART SYSTEM
+// ============================================================================
+
+// 1. Get current student's preparation cycle info & restart history
+app.get('/api/student/preparation/cycle', requireUser, async (req, res) => {
+  try {
+    const data = await preparationService.getStudentCycleInfo(req.user.id);
+    res.json({ success: true, ...data });
+  } catch (err) {
+    console.error('Error fetching preparation cycle:', err);
+    res.status(500).json({ error: err.message || 'Failed to retrieve preparation cycle info.' });
+  }
+});
+
+// 2. Student self-restarts their DDCET preparation
+app.post('/api/student/preparation/restart', requireUser, async (req, res) => {
+  try {
+    const { reason } = req.body;
+    const result = await preparationService.restartPreparationCycle({
+      userId: req.user.id,
+      performedById: req.user.id,
+      performedByRole: 'student',
+      reason: reason || 'Student self-restart from preparation settings'
+    });
+
+    const updatedStats = await computeStudentStats(req.user.id);
+    res.json({
+      success: true,
+      message: 'Preparation restarted successfully. Welcome to your new preparation cycle!',
+      ...result,
+      stats: updatedStats
+    });
+  } catch (err) {
+    console.error('Error restarting student preparation:', err);
+    res.status(500).json({ error: err.message || 'Failed to restart preparation.' });
+  }
+});
+
+// 3. Admin: Get all students preparation cycle overview
+app.get('/api/admin/students/cycles', requireUser, requireAdmin, async (req, res) => {
+  try {
+    const students = await preparationService.getAllStudentsCycleOverview();
+    res.json({ success: true, students });
+  } catch (err) {
+    console.error('Error fetching students cycle overview for admin:', err);
+    res.status(500).json({ error: 'Failed to retrieve students cycle overview.' });
+  }
+});
+
+// 4. Admin: Get specific student's cycle history & logs
+app.get('/api/admin/students/:studentId/cycles', requireUser, requireAdmin, async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    const data = await preparationService.getStudentCycleInfo(studentId);
+    res.json({ success: true, ...data });
+  } catch (err) {
+    console.error('Error fetching student cycle history for admin:', err);
+    res.status(500).json({ error: 'Failed to retrieve student cycle history.' });
+  }
+});
+
+// 5. Admin: Restart a student's preparation
+app.post('/api/admin/students/:studentId/restart', requireUser, requireAdmin, async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    const { reason } = req.body;
+
+    const result = await preparationService.restartPreparationCycle({
+      userId: studentId,
+      performedById: req.user.id,
+      performedByRole: 'admin',
+      reason: reason || `Restarted by administrator (${req.user.email})`
+    });
+
+    res.json({
+      success: true,
+      message: 'Student preparation successfully restarted by administrator.',
+      ...result
+    });
+  } catch (err) {
+    console.error('Error in admin restart of student preparation:', err);
+    res.status(500).json({ error: err.message || 'Failed to restart student preparation.' });
   }
 });
 

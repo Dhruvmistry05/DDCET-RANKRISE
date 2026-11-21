@@ -26,6 +26,7 @@ import StudentAnalytics from './pages/student/StudentAnalytics';
 import AIMentor from './pages/student/AIMentor';
 import QuizGenerator from './pages/student/QuizGenerator';
 import AdminManagement from './pages/admin/AdminManagement';
+import StudentCyclesManagement from './pages/admin/StudentCyclesManagement';
 import StudentProfile from './pages/student/StudentProfile';
 import PreviousYearPractice from './pages/student/PreviousYearPractice';
 
@@ -109,6 +110,7 @@ function App() {
           <Route path="/admin/materials" element={<ProtectedRoute allowedRole="admin"><MaterialManagement /></ProtectedRoute>} />
           <Route path="/admin/resources" element={<ProtectedRoute allowedRole="admin"><ResourceManagement /></ProtectedRoute>} />
           <Route path="/admin/admins" element={<ProtectedRoute allowedRole="superadmin"><AdminManagement /></ProtectedRoute>} />
+          <Route path="/admin/students" element={<ProtectedRoute allowedRole="admin"><StudentCyclesManagement /></ProtectedRoute>} />
           
           {/* Student Personal Features - Protected via Student Login */}
           <Route path="/student" element={<ProtectedRoute allowedRole="student"><StudentHome /></ProtectedRoute>} />

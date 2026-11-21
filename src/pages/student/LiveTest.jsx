@@ -135,6 +135,9 @@ export default function LiveTest() {
         if (res.ok) {
           const data = await res.json();
           recordedRank = data.stats?.current_rank;
+          if (data?.streak?.new_milestone && typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('rankrise_streak_milestone', { detail: data.streak.new_milestone }));
+          }
           if (typeof window !== 'undefined') if (typeof window !== 'undefined') {
             try {
               localStorage.setItem('rankrise_last_activity', Date.now().toString());

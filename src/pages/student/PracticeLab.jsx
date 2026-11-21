@@ -351,6 +351,10 @@ export default function PracticeLab() {
           })
         });
         if (submitRes.ok && typeof window !== 'undefined') {
+          const submitData = await submitRes.json().catch(() => ({}));
+          if (submitData?.streak?.new_milestone) {
+            window.dispatchEvent(new CustomEvent('rankrise_streak_milestone', { detail: submitData.streak.new_milestone }));
+          }
           if (typeof window !== 'undefined') {
             try {
               localStorage.setItem('rankrise_last_activity', Date.now().toString());

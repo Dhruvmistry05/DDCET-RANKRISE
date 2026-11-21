@@ -62,7 +62,7 @@ export default function AdminDashboard() {
         {isSuperAdmin && (
           <DashboardCard title="Administrators" value={`${stats?.admins || 1} / 3 Active`} icon={ShieldCheck} to="/admin/admins" />
         )}
-        <DashboardCard title="Students" value={stats?.students} icon={Users} to="/admin" />
+        <DashboardCard title="Students" value={stats?.students} icon={Users} to="/admin/students" />
         <DashboardCard title="Assessments" value={stats?.tests} icon={FileText} to="/admin/tests" />
         <DashboardCard title="Question Bank" value={stats?.questions} icon={FileQuestion} to="/admin/questions" />
         <DashboardCard title="Subjects" value={stats?.subjects} icon={Library} to="/admin/syllabus" />

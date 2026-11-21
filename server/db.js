@@ -16,7 +16,12 @@ const defaultDb = {
   student_attempts: [],
   resources: [],
   student_topic_progress: [],
-  student_activity: []
+  student_activity: [],
+  student_study_days: [],
+  student_streaks: [],
+  student_streak_milestones: [],
+  student_preparation_cycles: [],
+  student_restart_history: []
 };
 
 let db = { ...defaultDb };

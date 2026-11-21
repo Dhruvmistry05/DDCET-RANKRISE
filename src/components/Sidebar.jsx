@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Home, BookOpen, PenTool, ClipboardCheck, History, PieChart, 
-  AlertTriangle, Book, MessageCircle, LogOut, X, Sparkles, ShieldCheck, User, Lock, Trophy
+  AlertTriangle, Book, MessageCircle, LogOut, X, Sparkles, ShieldCheck, User, Lock, Trophy, RotateCcw, Users
 } from 'lucide-react';
 import { useAuth } from '../store/AuthContext';
 
@@ -54,6 +54,7 @@ export default function Sidebar({ isOpen, onClose }) {
   const adminLinks = [
     { name: 'Dashboard', path: '/admin', icon: Home },
     ...(isSuperAdmin ? [{ name: 'Admins', path: '/admin/admins', icon: ShieldCheck }] : []),
+    { name: 'Student Cycles', path: '/admin/students', icon: RotateCcw },
     { name: 'Syllabus', path: '/admin/syllabus', icon: BookOpen },
     { name: 'Materials', path: '/admin/materials', icon: Book },
     { name: 'PDF Resources', path: '/admin/resources', icon: History },

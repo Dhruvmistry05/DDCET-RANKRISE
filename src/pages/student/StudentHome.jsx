@@ -4,9 +4,13 @@ import { getTests } from '../../store/mockData';
 import { API_BASE_URL } from '../../config/api';
 import { 
   Clock, BookOpen, Trophy, Target, TrendingUp, PlayCircle, 
-  ArrowRight, UserCircle, HelpCircle, Book, FileText, Sparkles, PenTool
+  ArrowRight, UserCircle, HelpCircle, Book, FileText, Sparkles, PenTool, RotateCcw, Layers
 } from 'lucide-react';
 import { useAuth } from '../../store/AuthContext';
+import DailyStreakCard from '../../components/streaks/DailyStreakCard';
+import StreakCalendarModal from '../../components/streaks/StreakCalendarModal';
+import MilestoneCelebrationModal from '../../components/streaks/MilestoneCelebrationModal';
+import PreparationSettingsModal from '../../components/student/PreparationSettingsModal';
 
 export default function StudentHome() {
   const [tests, setTests] = useState([]);
@@ -21,6 +25,10 @@ export default function StudentHome() {
   });
   const navigate = useNavigate();
   const { user, token } = useAuth();
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [isPrepSettingsOpen, setIsPrepSettingsOpen] = useState(false);
+  const [unlockedMilestone, setUnlockedMilestone] = useState(null);
+  const [streakData, setStreakData] = useState(null);
 
   useEffect(() => {
     const loadTests = async () => {
@@ -53,6 +61,7 @@ export default function StudentHome() {
         if (res.ok) {
           const data = await res.json();
           setStats(data);
+          if (data?.streak) setStreakData(data.streak);
         }
       } catch (err) {
         console.error('Error fetching dashboard stats:', err);
@@ -112,6 +121,14 @@ export default function StudentHome() {
             <Sparkles size={14} className="text-[#2563EB]" />
             <span>Quiz Arena</span>
           </Link>
+          <button 
+            onClick={() => setIsPrepSettingsOpen(true)}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-amber-500/30 bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 text-xs font-semibold hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors shadow-2xs cursor-pointer"
+            title="Preparation Settings & Restart Preparation"
+          >
+            <RotateCcw size={14} className="text-amber-600 dark:text-amber-400" />
+            <span>Preparation Settings</span>
+          </button>
           <Link 
             to="/student/profile" 
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#E2E8F0] dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold hover:border-blue-300 dark:hover:border-blue-700 transition-colors shadow-2xs"
@@ -129,12 +146,31 @@ export default function StudentHome() {
         </div>
       </div>
 
+      {/* Daily Study Streak Card */}
+      <DailyStreakCard
+        streak={streakData || stats.streak}
+        onOpenCalendar={() => setIsCalendarOpen(true)}
+      />
+
       {/* 6 Required Dashboard Statistics */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
-            Performance Overview
-          </h2>
+          <div className="flex items-center gap-2.5">
+            <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+              Performance Overview
+            </h2>
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-blue-100 text-blue-700 dark:bg-blue-950/80 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+              <Layers size={11} />
+              Cycle {stats.cycle_number || 1}
+            </span>
+          </div>
+          <button
+            onClick={() => setIsPrepSettingsOpen(true)}
+            className="text-xs text-amber-600 dark:text-amber-400 hover:text-amber-700 font-semibold inline-flex items-center gap-1.5 cursor-pointer"
+          >
+            <RotateCcw size={13} />
+            <span>Restart Preparation</span>
+          </button>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
@@ -378,6 +414,30 @@ export default function StudentHome() {
           })}
         </div>
       </div>
+
+      {/* Streak Calendar Modal */}
+      <StreakCalendarModal
+        isOpen={isCalendarOpen}
+        onClose={() => setIsCalendarOpen(false)}
+        token={token}
+        initialStreakData={streakData || stats.streak}
+      />
+
+      {/* Milestone Celebration Modal */}
+      <MilestoneCelebrationModal
+        milestone={unlockedMilestone}
+        onClose={() => setUnlockedMilestone(null)}
+      />
+
+      {/* Preparation Settings & Restart Modal */}
+      <PreparationSettingsModal
+        isOpen={isPrepSettingsOpen}
+        onClose={() => setIsPrepSettingsOpen(false)}
+        token={token}
+        onRestartSuccess={() => {
+          fetchStats();
+        }}
+      />
     </div>
   );
 }

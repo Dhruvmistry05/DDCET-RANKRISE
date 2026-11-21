@@ -141,6 +141,77 @@ CREATE TABLE IF NOT EXISTS student_activity (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS student_study_days (
+  id BIGSERIAL PRIMARY KEY,
+  user_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
+  study_date VARCHAR(10) NOT NULL,
+  activities_count INTEGER DEFAULT 1,
+  total_time_seconds INTEGER DEFAULT 0,
+  total_questions INTEGER DEFAULT 0,
+  last_activity_type VARCHAR DEFAULT 'practice',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT unique_user_study_date UNIQUE (user_id, study_date)
+);
+
+CREATE TABLE IF NOT EXISTS student_streaks (
+  id BIGSERIAL PRIMARY KEY,
+  user_id BIGINT UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+  current_streak INTEGER DEFAULT 0,
+  longest_streak INTEGER DEFAULT 0,
+  last_studied_date VARCHAR(10),
+  total_active_days INTEGER DEFAULT 0,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS student_streak_milestones (
+  id BIGSERIAL PRIMARY KEY,
+  user_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
+  milestone_id VARCHAR NOT NULL,
+  days INTEGER NOT NULL,
+  achieved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT unique_user_milestone UNIQUE (user_id, milestone_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_student_study_days_user_date ON student_study_days(user_id, study_date);
+
+-- Preparation Cycles & Restart System
+ALTER TABLE users ADD COLUMN IF NOT EXISTS current_cycle_number INTEGER DEFAULT 1;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS active_cycle_started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+ALTER TABLE student_attempts ADD COLUMN IF NOT EXISTS cycle_number INTEGER DEFAULT 1;
+ALTER TABLE student_topic_progress ADD COLUMN IF NOT EXISTS cycle_number INTEGER DEFAULT 1;
+
+CREATE TABLE IF NOT EXISTS student_preparation_cycles (
+  id BIGSERIAL PRIMARY KEY,
+  user_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
+  cycle_number INTEGER NOT NULL,
+  status VARCHAR DEFAULT 'active', -- 'active' or 'archived'
+  started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  ended_at TIMESTAMP,
+  restarted_by_user_id BIGINT REFERENCES users(id) ON DELETE SET NULL,
+  restarted_by_role VARCHAR DEFAULT 'student',
+  reason TEXT DEFAULT 'Initial preparation cycle',
+  snapshot_stats JSONB,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT unique_user_cycle UNIQUE (user_id, cycle_number)
+);
+
+CREATE TABLE IF NOT EXISTS student_restart_history (
+  id BIGSERIAL PRIMARY KEY,
+  student_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
+  from_cycle INTEGER NOT NULL,
+  to_cycle INTEGER NOT NULL,
+  action_performed VARCHAR NOT NULL DEFAULT 'Restart Preparation',
+  performed_by_id BIGINT REFERENCES users(id) ON DELETE SET NULL,
+  performed_by_email VARCHAR,
+  performed_by_role VARCHAR NOT NULL DEFAULT 'student',
+  reason TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_student_cycles_user ON student_preparation_cycles(user_id);
+CREATE INDEX IF NOT EXISTS idx_restart_history_student ON student_restart_history(student_id);
+
 -- Admin Security & Three-Admin Maximum Enforcement Trigger
 CREATE OR REPLACE FUNCTION enforce_admin_constraints()
 RETURNS TRIGGER AS $$

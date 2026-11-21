@@ -4,9 +4,10 @@ import { API_BASE_URL } from '../../config/api';
 import { 
   User, Mail, Phone, Calendar, BookOpen, GraduationCap, 
   CheckCircle2, ShieldCheck, Edit3, X, Save, 
-  RefreshCw, Trophy, ArrowLeft, AlertCircle
+  RefreshCw, Trophy, ArrowLeft, AlertCircle, RotateCcw, Layers
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import PreparationSettingsModal from '../../components/student/PreparationSettingsModal';
 
 export default function StudentProfile() {
   const { user, token, fetchProfile } = useAuth();
@@ -17,6 +18,7 @@ export default function StudentProfile() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  const [isPrepSettingsOpen, setIsPrepSettingsOpen] = useState(false);
 
   // Edit form state
   const [formData, setFormData] = useState({
@@ -445,6 +447,32 @@ export default function StudentProfile() {
               >
                 <span>View Full Analytics Dashboard →</span>
               </Link>
+            </div>
+
+            {/* Preparation Cycle & Reset Section */}
+            <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-xs space-y-3">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
+                  <RotateCcw size={14} className="text-amber-500" />
+                  <span>Preparation Settings</span>
+                </h2>
+                <span className="px-2 py-0.5 rounded text-[10px] font-black bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300 border border-blue-200 dark:border-blue-900">
+                  CYCLE {stats?.cycle_number || 1}
+                </span>
+              </div>
+
+              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                Start a new preparation cycle anytime. Your past attempts, scores, and streak history are permanently preserved.
+              </p>
+
+              <button
+                type="button"
+                onClick={() => setIsPrepSettingsOpen(true)}
+                className="w-full py-2.5 px-3.5 rounded-xl text-xs font-bold bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 border border-amber-200 dark:border-amber-800 transition flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+              >
+                <RotateCcw size={13} />
+                <span>Manage / Restart Preparation</span>
+              </button>
             </div>
 
             {/* Quick Actions Card */}
