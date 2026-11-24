@@ -53,7 +53,7 @@ export default function LiveTest() {
     const currentTest = testRef.current;
     const currentAnswers = answersRef.current;
     if (!currentTest || !Array.isArray(currentTest.questions) || currentTest.questions.length === 0) {
-      navigate('/student/mocks');
+      navigate('/student/mock');
       return;
     }
 
@@ -295,7 +295,7 @@ export default function LiveTest() {
           </p>
           <div className="pt-2">
             <button
-              onClick={() => navigate('/student/mocks')}
+              onClick={() => navigate('/student/mock')}
               className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm rounded-lg transition-colors cursor-pointer"
             >
               Return to Test Center

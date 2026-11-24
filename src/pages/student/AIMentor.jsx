@@ -374,6 +374,7 @@ function FormattedMessage({ text }) {
 
 export default function AIMentor() {
   const { user, token } = useAuth();
+  const effectiveToken = token || (typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null);
   const storageKey = user?.id ? `rankrise_mentor_chat_${user.id}` : 'rankrise_mentor_chat_guest';
 
   // State
@@ -481,7 +482,7 @@ Ask me any question below to get started!`
 
     try {
       const headers = { 'Content-Type': 'application/json' };
-      if (token) headers['Authorization'] = `Bearer ${token}`;
+      if (effectiveToken) headers['Authorization'] = `Bearer ${effectiveToken}`;
 
       const res = await fetch(`${API_BASE_URL}/api/student/mentor/chat`, {
         method: 'POST',

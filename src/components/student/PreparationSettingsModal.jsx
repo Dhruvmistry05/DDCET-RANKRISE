@@ -19,7 +19,8 @@ export default function PreparationSettingsModal({ isOpen, onClose, token, onRes
     setLoading(true);
     setError('');
     try {
-      const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+      const effectiveToken = token || (typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null);
+      const headers = effectiveToken ? { 'Authorization': `Bearer ${effectiveToken}` } : {};
       const res = await fetch(`${API_BASE_URL}/api/student/preparation/cycle`, { headers });
       if (res.ok) {
         const json = await res.json();
@@ -57,9 +58,10 @@ export default function PreparationSettingsModal({ isOpen, onClose, token, onRes
     setActionLoading(true);
     setError('');
     try {
+      const effectiveToken = token || (typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null);
       const headers = {
         'Content-Type': 'application/json',
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        ...(effectiveToken ? { 'Authorization': `Bearer ${effectiveToken}` } : {})
       };
       const res = await fetch(`${API_BASE_URL}/api/student/preparation/restart`, {
         method: 'POST',

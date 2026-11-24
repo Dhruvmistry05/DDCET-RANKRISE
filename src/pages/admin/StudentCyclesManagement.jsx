@@ -19,10 +19,12 @@ export default function StudentCyclesManagement() {
   const [actionLoading, setActionLoading] = useState(false);
   const [notification, setNotification] = useState({ type: '', message: '' });
 
+  const effectiveToken = token || (typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null);
+
   const fetchStudents = async () => {
     setLoading(true);
     try {
-      const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+      const headers = effectiveToken ? { 'Authorization': `Bearer ${effectiveToken}` } : {};
       const res = await fetch(`${API_BASE_URL}/api/admin/students/cycles`, { headers });
       if (res.ok) {
         const json = await res.json();
@@ -37,7 +39,7 @@ export default function StudentCyclesManagement() {
 
   useEffect(() => {
     fetchStudents();
-  }, [token]);
+  }, [effectiveToken]);
 
   const filteredStudents = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
@@ -56,7 +58,7 @@ export default function StudentCyclesManagement() {
     try {
       const headers = {
         'Content-Type': 'application/json',
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        ...(effectiveToken ? { 'Authorization': `Bearer ${effectiveToken}` } : {})
       };
       const res = await fetch(`${API_BASE_URL}/api/admin/students/${selectedStudent.id}/restart`, {
         method: 'POST',

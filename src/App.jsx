@@ -120,6 +120,7 @@ function App() {
           <Route path="/student/mistakes" element={<ProtectedRoute allowedRole="student"><MistakeBook /></ProtectedRoute>} />
           <Route path="/student/practice" element={<ProtectedRoute allowedRole="student"><PracticeLab /></ProtectedRoute>} />
           <Route path="/student/mock" element={<ProtectedRoute allowedRole="student"><MockTestCenter /></ProtectedRoute>} />
+          <Route path="/student/mocks" element={<Navigate to="/student/mock" replace />} />
           <Route path="/student/quiz" element={<ProtectedRoute allowedRole="student"><QuizGenerator /></ProtectedRoute>} />
           <Route path="/student/quiz-generator" element={<ProtectedRoute allowedRole="student"><QuizGenerator /></ProtectedRoute>} />
           <Route path="/student/analytics" element={<ProtectedRoute allowedRole="student"><StudentAnalytics /></ProtectedRoute>} />

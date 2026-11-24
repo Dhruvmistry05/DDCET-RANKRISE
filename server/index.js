@@ -549,7 +549,7 @@ app.post('/api/admin/demote-admin', requireUser, requireSuperAdmin, async (req, 
   }
 });
 
-app.post('/api/subjects', async (req, res) => {
+app.post('/api/subjects', requireUser, requireAdmin, async (req, res) => {
   const { name, display_order, published, section_code, section_name } = req.body;
   const newSubject = await db.insert('subjects', { 
     name, 
@@ -561,7 +561,7 @@ app.post('/api/subjects', async (req, res) => {
   res.json(newSubject);
 });
 
-app.put('/api/subjects/:id', async (req, res) => {
+app.put('/api/subjects/:id', requireUser, requireAdmin, async (req, res) => {
   const id = parseInt(req.params.id) || req.params.id;
   const { name, display_order, published, section_code, section_name } = req.body;
   const updates = {};
@@ -574,7 +574,7 @@ app.put('/api/subjects/:id', async (req, res) => {
   res.json(updated);
 });
 
-app.delete('/api/subjects/:id', async (req, res) => {
+app.delete('/api/subjects/:id', requireUser, requireAdmin, async (req, res) => {
   const id = parseInt(req.params.id) || req.params.id;
   const chapters = await db.find('chapters', { subject_id: id });
   if (chapters.length > 0) return res.status(400).json({ error: "Cannot delete subject: it has dependent chapters." });
@@ -594,7 +594,7 @@ app.get('/api/chapters', async (req, res) => {
   res.json(chapters);
 });
 
-app.post('/api/chapters', async (req, res) => {
+app.post('/api/chapters', requireUser, requireAdmin, async (req, res) => {
   const { subject_id, name, description, weightage, chapter_number, display_order, published } = req.body;
   const newChapter = await db.insert('chapters', { 
     subject_id: parseInt(subject_id) || subject_id, 
@@ -608,7 +608,7 @@ app.post('/api/chapters', async (req, res) => {
   res.json(newChapter);
 });
 
-app.put('/api/chapters/:id', async (req, res) => {
+app.put('/api/chapters/:id', requireUser, requireAdmin, async (req, res) => {
   const id = parseInt(req.params.id) || req.params.id;
   const { subject_id, name, description, weightage, chapter_number, display_order, published } = req.body;
   const updates = {};
@@ -623,7 +623,7 @@ app.put('/api/chapters/:id', async (req, res) => {
   res.json(updated);
 });
 
-app.delete('/api/chapters/:id', async (req, res) => {
+app.delete('/api/chapters/:id', requireUser, requireAdmin, async (req, res) => {
   const id = parseInt(req.params.id) || req.params.id;
   const topics = await db.find('topics', { chapter_id: id });
   if (topics.length > 0) return res.status(400).json({ error: "Cannot delete chapter: it has dependent topics." });
@@ -643,7 +643,7 @@ app.get('/api/topics', async (req, res) => {
   res.json(topics);
 });
 
-app.post('/api/topics', async (req, res) => {
+app.post('/api/topics', requireUser, requireAdmin, async (req, res) => {
   const { chapter_id, name, description, important_points, display_order, published } = req.body;
   const newTopic = await db.insert('topics', { 
     chapter_id: parseInt(chapter_id) || chapter_id, 
@@ -656,7 +656,7 @@ app.post('/api/topics', async (req, res) => {
   res.json(newTopic);
 });
 
-app.put('/api/topics/:id', async (req, res) => {
+app.put('/api/topics/:id', requireUser, requireAdmin, async (req, res) => {
   const id = parseInt(req.params.id) || req.params.id;
   const { chapter_id, name, description, important_points, display_order, published } = req.body;
   const updates = {};
@@ -670,7 +670,7 @@ app.put('/api/topics/:id', async (req, res) => {
   res.json(updated);
 });
 
-app.delete('/api/topics/:id', async (req, res) => {
+app.delete('/api/topics/:id', requireUser, requireAdmin, async (req, res) => {
   const id = parseInt(req.params.id) || req.params.id;
   const materials = await db.find('materials', { topic_id: id });
   const questions = await db.find('questions', { topic_id: id });
@@ -680,7 +680,7 @@ app.delete('/api/topics/:id', async (req, res) => {
 });
 
 // --- MATERIALS API ---
-app.post('/api/materials', upload.single('file'), async (req, res) => {
+app.post('/api/materials', requireUser, requireAdmin, upload.single('file'), async (req, res) => {
   const { title, type, description, reference_url, subject_id, chapter_id, topic_id, published } = req.body;
   if (!title || !title.trim()) {
     return res.status(400).json({ error: 'Document title is required.' });
@@ -725,7 +725,7 @@ app.post('/api/materials', upload.single('file'), async (req, res) => {
   res.json(newMaterial);
 });
 
-app.put('/api/materials/:id', upload.single('file'), async (req, res) => {
+app.put('/api/materials/:id', requireUser, requireAdmin, upload.single('file'), async (req, res) => {
   const id = parseInt(req.params.id);
   const existing = await db.findOne('materials', { id });
   if (!existing) return res.status(404).json({ error: 'Material not found' });
@@ -836,7 +836,7 @@ app.get('/api/materials', async (req, res) => {
   res.json(materials);
 });
 
-app.delete('/api/materials/:id', async (req, res) => {
+app.delete('/api/materials/:id', requireUser, requireAdmin, async (req, res) => {
   const id = parseInt(req.params.id);
   const material = await db.findOne('materials', { id });
   if (material && material.file_path) {
@@ -1036,7 +1036,7 @@ app.get('/api/resources/:id/download', async (req, res) => {
   return res.redirect(resource.file_path);
 });
 
-app.post('/api/resources', upload.single('file'), async (req, res) => {
+app.post('/api/resources', requireUser, requireAdmin, upload.single('file'), async (req, res) => {
   const { title, description, type, exam_year, paper_id, published, external_url, subject_id, chapter_id, topic_id, display_order } = req.body;
   if (!title || !title.trim()) {
     return res.status(400).json({ error: 'Title is required' });
@@ -1087,7 +1087,7 @@ app.post('/api/resources', upload.single('file'), async (req, res) => {
 });
 
 // Update resource metadata (without replacing file)
-app.put('/api/resources/:id', async (req, res) => {
+app.put('/api/resources/:id', requireUser, requireAdmin, async (req, res) => {
   const id = parseInt(req.params.id);
   const resource = await db.findOne('resources', { id });
   if (!resource) return res.status(404).json({ error: 'Resource not found' });
@@ -1122,7 +1122,7 @@ app.put('/api/resources/:id', async (req, res) => {
 });
 
 // Quick toggle publish/unpublish
-app.put('/api/resources/:id/publish', async (req, res) => {
+app.put('/api/resources/:id/publish', requireUser, requireAdmin, async (req, res) => {
   const id = parseInt(req.params.id);
   const resource = await db.findOne('resources', { id });
   if (!resource) return res.status(404).json({ error: 'Resource not found' });
@@ -1133,7 +1133,7 @@ app.put('/api/resources/:id/publish', async (req, res) => {
 });
 
 // Replace existing file without altering resource metadata or ID
-app.put('/api/resources/:id/replace-file', upload.single('file'), async (req, res) => {
+app.put('/api/resources/:id/replace-file', requireUser, requireAdmin, upload.single('file'), async (req, res) => {
   const id = parseInt(req.params.id);
   const resource = await db.findOne('resources', { id });
   if (!resource) return res.status(404).json({ error: 'Resource not found' });
@@ -1165,7 +1165,7 @@ app.put('/api/resources/:id/replace-file', upload.single('file'), async (req, re
 });
 
 // Coordinated resource deletion
-app.delete('/api/resources/:id', async (req, res) => {
+app.delete('/api/resources/:id', requireUser, requireAdmin, async (req, res) => {
   const id = parseInt(req.params.id);
   const resource = await db.findOne('resources', { id });
   if (!resource) return res.status(404).json({ error: 'Resource not found' });
@@ -1230,7 +1230,7 @@ app.get('/api/questions', async (req, res) => {
   }
 });
 
-app.put('/api/questions/:id', async (req, res) => {
+app.put('/api/questions/:id', requireUser, requireAdmin, async (req, res) => {
   try {
     const qId = parseInt(req.params.id);
     const existing = await db.findOne('questions', { id: qId });
@@ -1299,7 +1299,7 @@ app.put('/api/questions/:id', async (req, res) => {
   }
 });
 
-app.post('/api/questions', async (req, res) => {
+app.post('/api/questions', requireUser, requireAdmin, async (req, res) => {
   const { text, options, answer_index, explanation, marks, negative_marks, subject_id, chapter_id, topic_id, published } = req.body;
   
   const USE_PG = !!process.env.DATABASE_URL;
@@ -1317,7 +1317,7 @@ app.post('/api/questions', async (req, res) => {
   res.json(newQ);
 });
 
-app.delete('/api/questions/:id', async (req, res) => {
+app.delete('/api/questions/:id', requireUser, requireAdmin, async (req, res) => {
   await db.remove('questions', parseInt(req.params.id));
   res.json({ success: true });
 });
