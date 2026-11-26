@@ -256,3 +256,11 @@ BEFORE INSERT OR UPDATE OR DELETE ON users
 FOR EACH ROW
 EXECUTE FUNCTION enforce_admin_constraints();
 
+-- Anti-Cheating & Proctoring columns
+ALTER TABLE student_attempts ADD COLUMN IF NOT EXISTS violations_count INTEGER DEFAULT 0;
+ALTER TABLE student_attempts ADD COLUMN IF NOT EXISTS auto_submitted BOOLEAN DEFAULT FALSE;
+ALTER TABLE student_attempts ADD COLUMN IF NOT EXISTS auto_submitted_due_to_violations BOOLEAN DEFAULT FALSE;
+ALTER TABLE tests ADD COLUMN IF NOT EXISTS anti_cheating_enabled BOOLEAN DEFAULT TRUE;
+ALTER TABLE tests ADD COLUMN IF NOT EXISTS max_violations INTEGER DEFAULT 3;
+
+

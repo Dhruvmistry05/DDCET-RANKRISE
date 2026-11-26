@@ -1,5 +1,8 @@
 import { useLocation, Link } from 'react-router-dom';
-import { Trophy, Target, AlertCircle, CheckCircle, XCircle, MinusCircle, ArrowRight, Home, TrendingUp } from 'lucide-react';
+import { 
+  Trophy, Target, AlertCircle, CheckCircle, XCircle, MinusCircle, 
+  ArrowRight, Home, TrendingUp, ShieldCheck, ShieldAlert 
+} from 'lucide-react';
 
 export default function TestResult() {
   const location = useLocation();
@@ -49,6 +52,35 @@ export default function TestResult() {
             </Link>
           </div>
         </div>
+
+        {/* Anti-Cheating & Exam Integrity Verification */}
+        {result.violationsCount !== undefined && (
+          <div className={`p-3.5 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-semibold ${
+            result.autoSubmitted
+              ? 'bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-800 text-red-700 dark:text-red-300'
+              : result.violationsCount === 0
+              ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300'
+              : 'bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300'
+          }`}>
+            <div className="flex items-center gap-2.5">
+              {result.violationsCount === 0 ? (
+                <ShieldCheck size={18} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+              ) : (
+                <ShieldAlert size={18} className="text-amber-600 dark:text-amber-400 shrink-0" />
+              )}
+              <span>
+                {result.autoSubmitted
+                  ? `Assessment automatically finalized due to anti-cheating policy violation (${result.violationsCount} violations).`
+                  : result.violationsCount === 0
+                  ? 'Proctored Exam Integrity: Verified 100% clean session (0 violations detected).'
+                  : `Proctored Exam: Assessment completed with ${result.violationsCount} recorded violation notice(s).`}
+              </span>
+            </div>
+            <span className="self-start sm:self-center text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-white dark:bg-slate-800 border border-current shrink-0">
+              {result.autoSubmitted ? 'Auto-Submitted' : result.violationsCount === 0 ? 'Verified Clean' : 'Recorded'}
+            </span>
+          </div>
+        )}
 
         {/* Score Card */}
         <div className="bg-[#1E3A8A] text-white rounded-xl p-6 sm:p-8 border border-blue-900 flex flex-col items-center text-center shadow-xs">

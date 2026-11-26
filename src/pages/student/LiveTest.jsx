@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getTestById } from '../../store/mockData';
 import { API_BASE_URL } from '../../config/api';
@@ -6,6 +6,10 @@ import {
   Timer, ArrowLeft, ArrowRight, Grid, CheckCircle2, 
   AlertCircle, HelpCircle, X, ShieldAlert, Check
 } from 'lucide-react';
+import { useAntiCheating } from '../../hooks/useAntiCheating';
+import AntiCheatingModal from '../../components/common/AntiCheatingModal';
+import AntiCheatingBanner from '../../components/common/AntiCheatingBanner';
+import ScreenShieldOverlay from '../../components/common/ScreenShieldOverlay';
 
 export default function LiveTest() {
   const { testId } = useParams();
@@ -19,11 +23,13 @@ export default function LiveTest() {
   const [timeLeft, setTimeLeft] = useState(0);
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const testRef = useRef(null);
   const answersRef = useRef({});
   const timeLeftRef = useRef(0);
   const submitRef = useRef(null);
+  const isSubmittingRef = useRef(false);
 
   // Keep refs synchronized with state
   useEffect(() => {
@@ -38,18 +44,42 @@ export default function LiveTest() {
     timeLeftRef.current = timeLeft;
   }, [timeLeft]);
 
-  // Anti-cheating: Tab switch detection
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        alert("WARNING: Tab switching is strictly prohibited during the live test! This incident has been recorded.");
+  // Anti-cheating proctoring engine
+  const {
+    violationsCount,
+    violationsLog,
+    isWarningModalOpen,
+    currentWarning,
+    dismissWarningModal,
+    isScreenShieldActive,
+    isFullscreen,
+    requestFullscreen,
+    exitFullscreen,
+    clearTestCache
+  } = useAntiCheating({
+    enabled: !loading && !errorMsg && Boolean(test) && !isSubmitted,
+    testId: testId || 'live_test',
+    testTitle: test?.title || 'Live Assessment',
+    maxViolations: test?.max_violations || 3,
+    isSubmitted: isSubmitted,
+    onViolationLimitReached: (details) => {
+      if (submitRef.current) {
+        submitRef.current({ autoSubmitted: true, violationDetails: details });
       }
-    };
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
-  }, []);
+    }
+  });
 
-  const submitTest = async () => {
+  const submitTest = async (options = {}) => {
+    const { autoSubmitted = false, violationDetails = null } = options;
+    if (isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
+    setIsSubmitted(true);
+    clearTestCache();
+
+    try {
+      localStorage.removeItem(`rankrise_test_session_${testId}`);
+    } catch (_e) {}
+
     const currentTest = testRef.current;
     const currentAnswers = answersRef.current;
     if (!currentTest || !Array.isArray(currentTest.questions) || currentTest.questions.length === 0) {
@@ -109,6 +139,9 @@ export default function LiveTest() {
 
     let recordedRank = null;
     const token = localStorage.getItem('token');
+    const finalViolationsCount = violationDetails ? violationDetails.violationsCount : violationsCount;
+    const finalViolationsLog = violationDetails ? violationDetails.violationsLog : violationsLog;
+
     if (token) {
       try {
         const maxScore = currentTest.questions.reduce((sum, q) => sum + (Number(q.marks) || 2), 0);
@@ -129,7 +162,11 @@ export default function LiveTest() {
             questions_attempted: questionsAttempted,
             accuracy,
             time_spent_seconds: timeSpentSeconds,
-            answers: currentAnswers
+            answers: currentAnswers,
+            violations_count: finalViolationsCount,
+            violations_log: finalViolationsLog,
+            auto_submitted: autoSubmitted,
+            auto_submitted_due_to_violations: autoSubmitted && (finalViolationsCount >= (currentTest.max_violations || 3))
           })
         });
         if (res.ok) {
@@ -138,7 +175,7 @@ export default function LiveTest() {
           if (data?.streak?.new_milestone && typeof window !== 'undefined') {
             window.dispatchEvent(new CustomEvent('rankrise_streak_milestone', { detail: data.streak.new_milestone }));
           }
-          if (typeof window !== 'undefined') if (typeof window !== 'undefined') {
+          if (typeof window !== 'undefined') {
             try {
               localStorage.setItem('rankrise_last_activity', Date.now().toString());
               if (typeof BroadcastChannel !== 'undefined') {
@@ -158,7 +195,9 @@ export default function LiveTest() {
     const result = {
       score, correct, wrong, unattempted,
       accuracy,
-      rank: recordedRank || '#1'
+      rank: recordedRank || '#1',
+      violationsCount: finalViolationsCount,
+      autoSubmitted
     };
     
     navigate(`/student/result/${currentTest.id}`, { state: { result } });
@@ -232,8 +271,50 @@ export default function LiveTest() {
       t.durationMinutes = durationMins;
       t.duration_minutes = durationMins;
 
-      // Determine initial timeLeft
+      // Wall-clock persistent timer & answer restoration to prevent timer bypass on refresh
+      const sessionKey = `rankrise_test_session_${testId}`;
       let initialSeconds = durationMins * 60;
+      let restoredAnswers = {};
+      let restoredStatuses = {};
+
+      t.questions.forEach(q => {
+        restoredStatuses[q.id] = 'unanswered';
+      });
+
+      try {
+        const rawSession = localStorage.getItem(sessionKey);
+        if (rawSession) {
+          const parsed = JSON.parse(rawSession);
+          if (parsed && parsed.startTime) {
+            const elapsed = Math.floor((Date.now() - parsed.startTime) / 1000);
+            const remaining = (durationMins * 60) - elapsed;
+            if (remaining <= 0) {
+              setTest(t);
+              testRef.current = t;
+              setLoading(false);
+              setTimeout(() => {
+                if (submitRef.current) submitRef.current({ autoSubmitted: true });
+              }, 100);
+              return;
+            }
+            initialSeconds = remaining;
+            if (parsed.answers && typeof parsed.answers === 'object') {
+              restoredAnswers = parsed.answers;
+            }
+            if (parsed.status && typeof parsed.status === 'object') {
+              restoredStatuses = { ...restoredStatuses, ...parsed.status };
+            }
+          }
+        } else {
+          localStorage.setItem(sessionKey, JSON.stringify({
+            startTime: Date.now(),
+            durationMins,
+            answers: {},
+            status: restoredStatuses
+          }));
+        }
+      } catch (_e) {}
+
       if (isScheduledLive && endTime) {
         const remainingWindow = Math.max(0, Math.floor((new Date(endTime).getTime() - Date.now()) / 1000));
         initialSeconds = Math.min(initialSeconds, remainingWindow);
@@ -241,14 +322,11 @@ export default function LiveTest() {
 
       setTest(t);
       testRef.current = t;
+      setAnswers(restoredAnswers);
+      answersRef.current = restoredAnswers;
+      setStatus(restoredStatuses);
       setTimeLeft(initialSeconds);
       timeLeftRef.current = initialSeconds;
-
-      const initStatuses = {};
-      t.questions.forEach(q => {
-        initStatuses[q.id] = 'unanswered';
-      });
-      setStatus(initStatuses);
       setLoading(false);
 
       timer = setInterval(() => {
@@ -307,6 +385,44 @@ export default function LiveTest() {
   }
 
   const q = test.questions[currentIdx] || test.questions[0];
+
+  const saveSessionProgress = (newAnswers, newStatus) => {
+    try {
+      const sessionKey = `rankrise_test_session_${testId}`;
+      const raw = localStorage.getItem(sessionKey);
+      const existing = raw ? JSON.parse(raw) : { startTime: Date.now() };
+      localStorage.setItem(sessionKey, JSON.stringify({
+        ...existing,
+        answers: newAnswers,
+        status: newStatus
+      }));
+    } catch (_e) {}
+  };
+
+  const handleSelectOption = (qId, idx) => {
+    const nextAnswers = { ...answers, [qId]: idx };
+    const nextStatus = { ...status, [qId]: 'answered' };
+    setAnswers(nextAnswers);
+    setStatus(nextStatus);
+    answersRef.current = nextAnswers;
+    saveSessionProgress(nextAnswers, nextStatus);
+  };
+
+  const handleMarkReview = (qId) => {
+    const nextStatus = { ...status, [qId]: 'review' };
+    setStatus(nextStatus);
+    saveSessionProgress(answers, nextStatus);
+  };
+
+  const handleClearAnswer = (qId) => {
+    const nextAnswers = { ...answers };
+    delete nextAnswers[qId];
+    const nextStatus = { ...status, [qId]: 'unanswered' };
+    setAnswers(nextAnswers);
+    setStatus(nextStatus);
+    answersRef.current = nextAnswers;
+    saveSessionProgress(nextAnswers, nextStatus);
+  };
 
   const formatTime = (sec) => {
     const h = Math.floor(sec / 3600);
@@ -388,17 +504,28 @@ export default function LiveTest() {
   );
 
   return (
-    <div className="h-screen flex flex-col bg-slate-50 dark:bg-slate-900 overflow-hidden font-sans">
+    <div className="rankrise-exam-container h-screen flex flex-col bg-slate-50 dark:bg-slate-900 overflow-hidden font-sans select-none">
       
       {/* Top Test Header Bar */}
-      <header className="h-14 bg-slate-900 text-white px-4 sm:px-6 flex justify-between items-center z-20 shrink-0 border-b border-slate-800">
-        <div className="flex items-center gap-2.5 min-w-0">
+      <header className="h-14 bg-slate-900 text-white px-3 sm:px-6 flex justify-between items-center z-20 shrink-0 border-b border-slate-800 gap-2">
+        <div className="flex items-center gap-2 min-w-0">
           <span className="hidden sm:inline-block px-2 py-0.5 bg-slate-800 text-slate-300 rounded text-xs font-semibold uppercase tracking-wider border border-slate-700">
             DDCET Live
           </span>
-          <h1 className="text-sm sm:text-base font-semibold text-white truncate max-w-[160px] sm:max-w-md">
+          <h1 className="text-sm sm:text-base font-semibold text-white truncate max-w-[140px] sm:max-w-xs md:max-w-md">
             {test.title}
           </h1>
+        </div>
+
+        {/* Anti-Cheating Status Banner in Header */}
+        <div className="hidden md:flex items-center">
+          <AntiCheatingBanner
+            violationsCount={violationsCount}
+            maxViolations={test.max_violations || 3}
+            isFullscreen={isFullscreen}
+            onRequestFullscreen={requestFullscreen}
+            onExitFullscreen={exitFullscreen}
+          />
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
@@ -489,10 +616,7 @@ export default function LiveTest() {
                       name={`option-${q.id}`}
                       className="hidden"
                       checked={isSelected}
-                      onChange={() => {
-                        setAnswers(prev => ({ ...prev, [q.id]: idx }));
-                        setStatus(prev => ({ ...prev, [q.id]: 'answered' }));
-                      }}
+                      onChange={() => handleSelectOption(q.id, idx)}
                     />
                   </label>
                 );
@@ -507,20 +631,13 @@ export default function LiveTest() {
               {/* Review & Clear Actions */}
               <div className="flex gap-2">
                 <button 
-                  onClick={() => setStatus(prev => ({ ...prev, [q.id]: 'review' }))}
+                  onClick={() => handleMarkReview(q.id)}
                   className="flex-1 sm:flex-none px-3.5 py-2 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg font-medium text-xs transition-colors cursor-pointer"
                 >
                   Mark Review
                 </button>
                 <button 
-                  onClick={() => {
-                    setAnswers(prev => {
-                      const next = { ...prev };
-                      delete next[q.id];
-                      return next;
-                    });
-                    setStatus(prev => ({ ...prev, [q.id]: 'unanswered' }));
-                  }}
+                  onClick={() => handleClearAnswer(q.id)}
                   className="flex-1 sm:flex-none px-3.5 py-2 border border-[#E2E8F0] dark:border-slate-700 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg font-medium text-xs transition-colors cursor-pointer"
                 >
                   Clear Answer
@@ -622,7 +739,7 @@ export default function LiveTest() {
                 Back to Test
               </button>
               <button 
-                onClick={submitTest} 
+                onClick={() => submitTest({ autoSubmitted: false })} 
                 className="flex-1 sm:flex-none px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs sm:text-sm rounded-lg shadow-xs min-h-[40px] transition-colors cursor-pointer"
               >
                 Confirm & Submit
@@ -631,6 +748,20 @@ export default function LiveTest() {
           </div>
         </div>
       )}
+
+      {/* Screen Shield Overlay when unfocused or tab hidden */}
+      <ScreenShieldOverlay
+        isActive={isScreenShieldActive}
+        onRefocus={dismissWarningModal}
+      />
+
+      {/* Anti-Cheating Violation Warning Modal */}
+      <AntiCheatingModal
+        isOpen={isWarningModalOpen}
+        warning={currentWarning}
+        onDismiss={dismissWarningModal}
+        testTitle={test?.title}
+      />
     </div>
   );
 }

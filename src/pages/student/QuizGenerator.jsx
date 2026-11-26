@@ -8,8 +8,12 @@ import {
   Sparkles, Clock, Target, CheckCircle2, XCircle, AlertCircle, 
   ArrowRight, ArrowLeft, RotateCcw, Award, ShieldAlert, BookOpen, 
   Filter, HelpCircle, Layers, Grid, Check, Sliders, PlayCircle,
-  BarChart2, Zap, Bookmark
+  BarChart2, Zap, Bookmark, ShieldCheck
 } from 'lucide-react';
+import { useAntiCheating } from '../../hooks/useAntiCheating';
+import AntiCheatingModal from '../../components/common/AntiCheatingModal';
+import AntiCheatingBanner from '../../components/common/AntiCheatingBanner';
+import ScreenShieldOverlay from '../../components/common/ScreenShieldOverlay';
 
 export default function QuizGenerator() {
   const navigate = useNavigate();
@@ -100,19 +104,28 @@ export default function QuizGenerator() {
     return () => clearInterval(timer);
   }, [quizStarted, quizSubmitted, quizMode]);
 
-  // Anti-cheating visibility check
-  useEffect(() => {
-    if (!quizStarted || quizSubmitted || quizMode === 'practice') return;
-
-    const handleVisibility = () => {
-      if (document.hidden) {
-        alert("DDCET NOTICE: Switching tabs or leaving the examination window during a simulated test is strictly monitored.");
-      }
-    };
-
-    document.addEventListener("visibilitychange", handleVisibility);
-    return () => document.removeEventListener("visibilitychange", handleVisibility);
-  }, [quizStarted, quizSubmitted, quizMode]);
+  // Anti-cheating proctoring engine
+  const {
+    violationsCount,
+    violationsLog,
+    isWarningModalOpen,
+    currentWarning,
+    dismissWarningModal,
+    isScreenShieldActive,
+    isFullscreen,
+    requestFullscreen,
+    exitFullscreen,
+    clearTestCache
+  } = useAntiCheating({
+    enabled: quizStarted && !quizSubmitted && quizMode === 'exam',
+    testId: `gen_quiz_${sectionScope}_${questionCount}`,
+    testTitle: `AI Assessment (${questionCount} MCQs)`,
+    maxViolations: 3,
+    isSubmitted: quizSubmitted,
+    onViolationLimitReached: (details) => {
+      handleFinalSubmit({ autoSubmitted: true, violationDetails: details });
+    }
+  });
 
   // Handle Quiz Generation
   const handleGenerateQuiz = () => {
@@ -223,7 +236,9 @@ export default function QuizGenerator() {
   };
 
   // Final Submit Handler
-  const handleFinalSubmit = async () => {
+  const handleFinalSubmit = async (options = {}) => {
+    const { autoSubmitted = false, violationDetails = null } = options;
+    clearTestCache();
     setIsSubmitModalOpen(false);
 
     let correctCount = 0;
@@ -328,7 +343,11 @@ export default function QuizGenerator() {
             questions_attempted: attemptedCount,
             accuracy: accuracy,
             time_spent_seconds: Math.max(10, timeSpentSeconds),
-            answers: quizAnswers
+            answers: quizAnswers,
+            violations_count: violationDetails ? violationDetails.violationsCount : violationsCount,
+            violations_log: violationDetails ? violationDetails.violationsLog : violationsLog,
+            auto_submitted: autoSubmitted,
+            auto_submitted_due_to_violations: autoSubmitted && ((violationDetails ? violationDetails.violationsCount : violationsCount) >= 3)
           })
         });
         if (res.ok) {
@@ -337,7 +356,7 @@ export default function QuizGenerator() {
           if (data?.streak?.new_milestone && typeof window !== 'undefined') {
             window.dispatchEvent(new CustomEvent('rankrise_streak_milestone', { detail: data.streak.new_milestone }));
           }
-          if (typeof window !== 'undefined') if (typeof window !== 'undefined') {
+          if (typeof window !== 'undefined') {
             try {
               localStorage.setItem('rankrise_last_activity', Date.now().toString());
               if (typeof BroadcastChannel !== 'undefined') {
@@ -368,7 +387,9 @@ export default function QuizGenerator() {
       section2Score,
       timeSpentSeconds,
       recordedRank,
-      questionReview
+      questionReview,
+      violationsCount: violationDetails ? violationDetails.violationsCount : violationsCount,
+      autoSubmitted
     });
 
     setQuizSubmitted(true);
@@ -429,6 +450,35 @@ export default function QuizGenerator() {
             <span>Generate New Quiz</span>
           </button>
         </div>
+
+        {/* Anti-Cheating & Exam Integrity Verification (Exam Mode) */}
+        {quizMode === 'exam' && quizResults.violationsCount !== undefined && (
+          <div className={`p-3.5 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-semibold ${
+            quizResults.autoSubmitted
+              ? 'bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-800 text-red-700 dark:text-red-300'
+              : quizResults.violationsCount === 0
+              ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300'
+              : 'bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300'
+          }`}>
+            <div className="flex items-center gap-2.5">
+              {quizResults.violationsCount === 0 ? (
+                <ShieldCheck size={18} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+              ) : (
+                <ShieldAlert size={18} className="text-amber-600 dark:text-amber-400 shrink-0" />
+              )}
+              <span>
+                {quizResults.autoSubmitted
+                  ? `Assessment automatically finalized due to anti-cheating policy violation (${quizResults.violationsCount} violations).`
+                  : quizResults.violationsCount === 0
+                  ? 'Proctored Exam Integrity: Verified 100% clean session (0 violations detected).'
+                  : `Proctored Exam: Assessment completed with ${quizResults.violationsCount} recorded violation notice(s).`}
+              </span>
+            </div>
+            <span className="self-start sm:self-center text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-white dark:bg-slate-800 border border-current shrink-0">
+              {quizResults.autoSubmitted ? 'Auto-Submitted' : quizResults.violationsCount === 0 ? 'Verified Clean' : 'Recorded'}
+            </span>
+          </div>
+        )}
 
         {/* Scorecard Hero Banner */}
         <div className="bg-[#1E3A8A] text-white rounded-xl p-6 sm:p-8 border border-blue-900 shadow-xs">
@@ -682,20 +732,33 @@ export default function QuizGenerator() {
   // =========================================================================
   if (quizStarted && currentQ) {
     return (
-      <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-900 font-sans">
+      <div className={`min-h-screen flex flex-col bg-slate-50 dark:bg-slate-900 font-sans ${quizMode === 'exam' ? 'rankrise-exam-container select-none' : ''}`}>
         
         {/* Test App Bar */}
-        <header className="h-14 bg-slate-900 text-white px-4 sm:px-6 flex justify-between items-center z-20 shrink-0 border-b border-slate-800 sticky top-0">
-          <div className="flex items-center gap-2.5 min-w-0">
+        <header className="h-14 bg-slate-900 text-white px-3 sm:px-6 flex justify-between items-center z-20 shrink-0 border-b border-slate-800 sticky top-0 gap-2">
+          <div className="flex items-center gap-2 min-w-0">
             <span className="hidden sm:inline-block px-2 py-0.5 bg-[#1E3A8A] text-blue-200 rounded text-xs font-semibold uppercase tracking-wider border border-blue-700">
               DDCET 2027
             </span>
-            <h1 className="text-xs sm:text-sm font-semibold text-white truncate max-w-[160px] sm:max-w-md">
+            <h1 className="text-xs sm:text-sm font-semibold text-white truncate max-w-[140px] sm:max-w-xs md:max-w-md">
               {questionCount}-Question Generative Quiz
             </h1>
           </div>
 
-          <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
+          {/* Anti-Cheating Status Banner (Exam Mode) */}
+          {quizMode === 'exam' && (
+            <div className="hidden md:flex items-center">
+              <AntiCheatingBanner
+                violationsCount={violationsCount}
+                maxViolations={3}
+                isFullscreen={isFullscreen}
+                onRequestFullscreen={requestFullscreen}
+                onExitFullscreen={exitFullscreen}
+              />
+            </div>
+          )}
+
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             {/* Mobile Palette Button */}
             <button
               onClick={() => setIsPaletteOpen(true)}
@@ -987,19 +1050,37 @@ export default function QuizGenerator() {
               <div className="flex justify-end gap-2.5 pt-2">
                 <button
                   onClick={() => setIsSubmitModalOpen(false)}
-                  className="px-4 py-2 font-semibold text-xs text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                  className="px-4 py-2 font-semibold text-xs text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors cursor-pointer"
                 >
                   Resume Test
                 </button>
                 <button
-                  onClick={handleFinalSubmit}
-                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-lg transition-colors shadow-xs"
+                  onClick={() => handleFinalSubmit({ autoSubmitted: false })}
+                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-lg transition-colors shadow-xs cursor-pointer"
                 >
                   Confirm & Submit
                 </button>
               </div>
             </div>
           </div>
+        )}
+
+        {/* Screen Shield Overlay (Exam Mode) */}
+        {quizMode === 'exam' && (
+          <ScreenShieldOverlay
+            isActive={isScreenShieldActive}
+            onRefocus={dismissWarningModal}
+          />
+        )}
+
+        {/* Anti-Cheating Violation Warning Modal (Exam Mode) */}
+        {quizMode === 'exam' && (
+          <AntiCheatingModal
+            isOpen={isWarningModalOpen}
+            warning={currentWarning}
+            onDismiss={dismissWarningModal}
+            testTitle={`AI Assessment (${questionCount} MCQs)`}
+          />
         )}
 
       </div>

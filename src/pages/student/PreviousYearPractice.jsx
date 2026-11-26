@@ -7,8 +7,12 @@ import {
   Clock, BookOpen, CheckCircle, XCircle, ArrowLeft, ArrowRight, 
   RotateCcw, AlertCircle, FileText, Check, Award, AlertTriangle, 
   ChevronRight, BarChart2, ShieldAlert, Sparkles, Filter, Grid, 
-  X, HelpCircle, Download, ExternalLink, Calendar, Layers, Eye, RefreshCw
+  X, HelpCircle, Download, ExternalLink, Calendar, Layers, Eye, RefreshCw, ShieldCheck
 } from 'lucide-react';
+import { useAntiCheating } from '../../hooks/useAntiCheating';
+import AntiCheatingModal from '../../components/common/AntiCheatingModal';
+import AntiCheatingBanner from '../../components/common/AntiCheatingBanner';
+import ScreenShieldOverlay from '../../components/common/ScreenShieldOverlay';
 
 export default function PreviousYearPractice() {
   const [searchParams] = useSearchParams();
@@ -47,6 +51,29 @@ export default function PreviousYearPractice() {
 
   // Timer Ref
   const timerRef = useRef(null);
+
+  // Anti-Cheating Engine for Timed Exam Simulation Mode
+  const {
+    violationsCount,
+    violationsLog,
+    isWarningModalOpen,
+    currentWarning,
+    dismissWarningModal,
+    isScreenShieldActive,
+    isFullscreen,
+    requestFullscreen,
+    exitFullscreen,
+    clearTestCache
+  } = useAntiCheating({
+    enabled: isSessionActive && practiceMode === 'exam' && !isSubmitted,
+    testId: `pyq_${selectedPaperId}_${selectedSection}`,
+    testTitle: `PYQ Exam: ${currentPaperMeta?.title || 'Question Paper'}`,
+    maxViolations: 3,
+    isSubmitted: isSubmitted,
+    onViolationLimitReached: (details) => {
+      handleSubmitPractice({ autoSubmitted: true, violationDetails: details });
+    }
+  });
 
   // Load paper list from API with local fallback
   useEffect(() => {
@@ -188,7 +215,9 @@ export default function PreviousYearPractice() {
   const currentQ = activeQuestions[currentIdx] || activeQuestions[0];
 
   // Submission calculation
-  const handleSubmitPractice = async () => {
+  const handleSubmitPractice = async (options = {}) => {
+    const { autoSubmitted = false, violationDetails = null } = options;
+    clearTestCache();
     setIsSubmitModalOpen(false);
     setIsSubmitted(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -224,6 +253,7 @@ export default function PreviousYearPractice() {
     const accuracy = totalAttempted > 0 ? parseFloat(((correct / totalAttempted) * 100).toFixed(1)) : 0;
     const maxScore = activeQuestions.reduce((sum, q) => sum + Number(q.marks || 2.0), 0);
 
+    const finalViolations = violationDetails ? violationDetails.violationsCount : violationsCount;
     const stats = {
       score: netScore,
       max_score: maxScore,
@@ -235,7 +265,9 @@ export default function PreviousYearPractice() {
       time_spent_seconds: elapsedSeconds || 120,
       paper_title: currentPaperMeta.title,
       exam_code: currentPaperMeta.exam_code,
-      year: currentPaperMeta.year
+      year: currentPaperMeta.year,
+      violationsCount: finalViolations,
+      autoSubmitted
     };
     setSubmissionStats(stats);
 
@@ -277,7 +309,11 @@ export default function PreviousYearPractice() {
             questions_attempted: totalAttempted,
             accuracy: accuracy,
             time_spent_seconds: elapsedSeconds || 120,
-            answers: userAnswers
+            answers: userAnswers,
+            violations_count: finalViolations,
+            violations_log: violationDetails ? violationDetails.violationsLog : violationsLog,
+            auto_submitted: autoSubmitted,
+            auto_submitted_due_to_violations: autoSubmitted && (finalViolations >= 3)
           })
         });
         if (submitRes.ok && typeof window !== 'undefined') {
@@ -610,7 +646,7 @@ export default function PreviousYearPractice() {
       {/* VIEW 2: ACTIVE QUESTION-BY-QUESTION ARENA                                 */}
       {/* ========================================================================= */}
       {isSessionActive && !isSubmitted && currentQ && (
-        <div className="space-y-4 animate-fade-in">
+        <div className={`space-y-4 animate-fade-in ${practiceMode === 'exam' ? 'rankrise-exam-container select-none' : ''}`}>
           
           {/* Top Test Header Control Bar */}
           <div className="bg-white dark:bg-slate-800 p-3.5 sm:p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xs flex items-center justify-between gap-3">
@@ -622,6 +658,19 @@ export default function PreviousYearPractice() {
                 {currentPaperMeta.exam_code} • {currentQ.section_name}
               </h2>
             </div>
+
+            {/* Anti-Cheating Status Banner (Only in Exam Mode) */}
+            {practiceMode === 'exam' && (
+              <div className="hidden sm:flex items-center">
+                <AntiCheatingBanner
+                  violationsCount={violationsCount}
+                  maxViolations={3}
+                  isFullscreen={isFullscreen}
+                  onRequestFullscreen={requestFullscreen}
+                  onExitFullscreen={exitFullscreen}
+                />
+              </div>
+            )}
 
             <div className="flex items-center gap-2 shrink-0">
               {/* Question Palette Trigger (Mobile) */}
@@ -992,14 +1041,32 @@ export default function PreviousYearPractice() {
                   </button>
                   <button
                     type="button"
-                    onClick={handleSubmitPractice}
-                    className="px-5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition shadow-xs"
+                    onClick={() => handleSubmitPractice({ autoSubmitted: false })}
+                    className="px-5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition shadow-xs cursor-pointer"
                   >
                     Confirm & Submit
                   </button>
                 </div>
               </div>
             </div>
+          )}
+
+          {/* Exam Mode Screen Shield Overlay */}
+          {practiceMode === 'exam' && (
+            <ScreenShieldOverlay
+              isActive={isScreenShieldActive}
+              onRefocus={dismissWarningModal}
+            />
+          )}
+
+          {/* Exam Mode Anti-Cheating Violation Warning Modal */}
+          {practiceMode === 'exam' && (
+            <AntiCheatingModal
+              isOpen={isWarningModalOpen}
+              warning={currentWarning}
+              onDismiss={dismissWarningModal}
+              testTitle={`PYQ Exam: ${currentPaperMeta?.title}`}
+            />
           )}
         </div>
       )}
@@ -1009,6 +1076,35 @@ export default function PreviousYearPractice() {
       {/* ========================================================================= */}
       {isSubmitted && submissionStats && (
         <div className="space-y-6 animate-fade-in">
+          
+          {/* Exam Mode Integrity Status Badge */}
+          {practiceMode === 'exam' && submissionStats.violationsCount !== undefined && (
+            <div className={`p-3.5 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-semibold ${
+              submissionStats.autoSubmitted
+                ? 'bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-800 text-red-700 dark:text-red-300'
+                : submissionStats.violationsCount === 0
+                ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300'
+                : 'bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300'
+            }`}>
+              <div className="flex items-center gap-2.5">
+                {submissionStats.violationsCount === 0 ? (
+                  <ShieldCheck size={18} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+                ) : (
+                  <ShieldAlert size={18} className="text-amber-600 dark:text-amber-400 shrink-0" />
+                )}
+                <span>
+                  {submissionStats.autoSubmitted
+                    ? `Assessment automatically finalized due to anti-cheating policy violation (${submissionStats.violationsCount} violations).`
+                    : submissionStats.violationsCount === 0
+                    ? 'Proctored Exam Integrity: Verified 100% clean session (0 violations detected).'
+                    : `Proctored Exam: Assessment completed with ${submissionStats.violationsCount} recorded violation notice(s).`}
+                </span>
+              </div>
+              <span className="self-start sm:self-center text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-white dark:bg-slate-800 border border-current shrink-0">
+                {submissionStats.autoSubmitted ? 'Auto-Submitted' : submissionStats.violationsCount === 0 ? 'Verified Clean' : 'Recorded'}
+              </span>
+            </div>
+          )}
           
           {/* Top Return & Action Bar */}
           <div className="flex items-center justify-between">

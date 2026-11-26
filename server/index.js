@@ -3849,8 +3849,30 @@ app.post('/api/student/tests/submit', requireUser, async (req, res) => {
       questions_attempted, 
       accuracy, 
       time_spent_seconds, 
-      answers 
+      answers,
+      violations_count,
+      violations_log,
+      auto_submitted,
+      auto_submitted_due_to_violations
     } = req.body;
+
+    // Idempotent duplicate submission protection (prevents double submits within 5s)
+    if (!global.__recentSubmissions) {
+      global.__recentSubmissions = new Map();
+    }
+    const recentSubKey = `${userId}_${test_id}`;
+    const nowTs = Date.now();
+    if (global.__recentSubmissions.has(recentSubKey)) {
+      const prev = global.__recentSubmissions.get(recentSubKey);
+      if (nowTs - prev.time < 5000) {
+        return res.status(200).json({
+          success: true,
+          message: 'Assessment attempt already recorded.',
+          attempt: prev.attempt,
+          stats: prev.stats
+        });
+      }
+    }
 
     const parsedScore = parseFloat(score) || 0;
     const parsedMaxScore = parseFloat(max_score) || (parsedScore > 20 ? 100 : 20);
@@ -3884,6 +3906,10 @@ app.post('/api/student/tests/submit', requireUser, async (req, res) => {
       accuracy: parsedAcc,
       time_spent_seconds: parsedTime,
       answers: answersMap,
+      violations_count: parseInt(violations_count) || 0,
+      violations_log: Array.isArray(violations_log) ? violations_log : [],
+      auto_submitted: Boolean(auto_submitted),
+      auto_submitted_due_to_violations: Boolean(auto_submitted_due_to_violations),
       submitted_at: new Date().toISOString()
     };
 
@@ -3911,6 +3937,8 @@ app.post('/api/student/tests/submit', requireUser, async (req, res) => {
       cycle_number: activeCycle,
       answers: USE_PG ? JSON.stringify(payload) : payload,
       score: payload.score,
+      violations_count: payload.violations_count,
+      auto_submitted: payload.auto_submitted,
       submitted_at: payload.submitted_at
     };
 
@@ -3924,6 +3952,8 @@ app.post('/api/student/tests/submit', requireUser, async (req, res) => {
       attemptRecord.questions_attempted = payload.questions_attempted;
       attemptRecord.accuracy = payload.accuracy;
       attemptRecord.time_spent_seconds = payload.time_spent_seconds;
+      attemptRecord.violations_count = payload.violations_count;
+      attemptRecord.auto_submitted = payload.auto_submitted;
     }
 
     const newAttempt = await db.insert('student_attempts', attemptRecord);
@@ -3958,6 +3988,15 @@ app.post('/api/student/tests/submit', requireUser, async (req, res) => {
     }
 
     const updatedStats = await computeStudentStats(userId);
+
+    // Save recent submission to prevent duplicate records
+    if (global.__recentSubmissions) {
+      global.__recentSubmissions.set(recentSubKey, {
+        time: nowTs,
+        attempt: newAttempt,
+        stats: updatedStats
+      });
+    }
 
     res.status(201).json({
       success: true,
